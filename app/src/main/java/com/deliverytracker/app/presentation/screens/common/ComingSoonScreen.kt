@@ -10,6 +10,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.deliverytracker.app.R
 
 /**
  * Placeholder screen για οθόνες που δεν έχουν υλοποιηθεί ακόμα.
@@ -27,7 +29,7 @@ fun ComingSoonScreen(
                 title = { Text(title) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Πίσω")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
             )
@@ -51,7 +53,7 @@ fun ComingSoonScreen(
             Spacer(modifier = Modifier.height(24.dp))
             
             Text(
-                text = "Σύντομα Διαθέσιμο!",
+                text = stringResource(R.string.coming_soon_title),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -59,7 +61,7 @@ fun ComingSoonScreen(
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
-                text = "Η οθόνη \"$title\" θα είναι διαθέσιμη στην επόμενη ενημέρωση.",
+                text = stringResource(R.string.coming_soon_message, title),
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -68,7 +70,7 @@ fun ComingSoonScreen(
             Spacer(modifier = Modifier.height(32.dp))
             
             OutlinedButton(onClick = onNavigateBack) {
-                Text("Επιστροφή")
+                Text(stringResource(R.string.coming_soon_return))
             }
         }
     }

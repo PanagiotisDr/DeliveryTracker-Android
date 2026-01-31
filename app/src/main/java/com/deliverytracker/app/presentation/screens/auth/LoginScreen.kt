@@ -200,7 +200,7 @@ fun LoginScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Δεν έχεις λογαριασμό;",
+                    text = stringResource(R.string.auth_no_account),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 TextButton(onClick = onNavigateToRegister) {

@@ -53,7 +53,7 @@ fun RegisterScreen(
                 title = { Text(stringResource(R.string.auth_register)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Πίσω")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
             )
@@ -70,7 +70,7 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(32.dp))
             
             Text(
-                text = "Δημιούργησε τον λογαριασμό σου",
+                text = stringResource(R.string.auth_create_account),
                 style = MaterialTheme.typography.headlineSmall,
                 textAlign = TextAlign.Center
             )
@@ -149,7 +149,7 @@ fun RegisterScreen(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !uiState.isLoading,
                 supportingText = {
-                    Text("Τουλάχιστον 6 χαρακτήρες")
+                    Text(stringResource(R.string.auth_password_min_chars))
                 }
             )
             
@@ -232,7 +232,7 @@ fun RegisterScreen(
             
             // Info text
             Text(
-                text = "Ο πρώτος χρήστης γίνεται αυτόματα Admin",
+                text = stringResource(R.string.auth_first_user_admin),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center

@@ -25,6 +25,23 @@
     <string name="auth_confirm_password">Επιβεβαίωση Κωδικού</string>
     <string name="auth_username">Όνομα Χρήστη</string>
     <string name="auth_forgot_password">Ξέχασες τον κωδικό;</string>
+    <string name="auth_no_account">Δεν έχεις λογαριασμό;</string>
+    <string name="auth_create_account">Δημιούργησε τον λογαριασμό σου</string>
+    <string name="auth_password_min_chars">Τουλάχιστον 6 χαρακτήρες</string>
+    <string name="auth_first_user_admin">Ο πρώτος χρήστης γίνεται αυτόματα Admin</string>
+    <string name="auth_enter_pin">Εισάγετε το PIN</string>
+    <string name="auth_set_pin">Όρισε το PIN</string>
+    <string name="auth_confirm_pin">Επιβεβαίωσε το PIN</string>
+    <string name="auth_pin_description">Θα το χρησιμοποιείς για γρήγορη σύνδεση</string>
+    <string name="auth_confirm_pin_description">Εισάγετε ξανά το PIN για επιβεβαίωση</string>
+    <string name="auth_login_with_password">Σύνδεση με κωδικό</string>
+    <string name="auth_skip_pin">Παράλειψη - Όχι τώρα</string>
+    <string name="action_delete">Διαγραφή</string>
+    <string name="coming_soon_title">Σύντομα Διαθέσιμο!</string>
+    <string name="coming_soon_message">Η οθόνη \"%s\" θα είναι διαθέσιμη στην επόμενη ενημέρωση.</string>
+    <string name="coming_soon_return">Επιστροφή</string>
+
+
     
     <!-- Buttons -->
     <string name="btn_save">Αποθήκευση</string>
@@ -45,6 +62,8 @@
     <string name="shift_duration">Διάρκεια</string>
     <string name="shift_hours">Ώρες</string>
     <string name="shift_minutes">Λεπτά</string>
+    <string name="shift_hours_suffix">ω</string>
+    <string name="shift_minutes_suffix">λ</string>
     <string name="shift_notes">Σημειώσεις</string>
     
     <!-- Expense Form -->

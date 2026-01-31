@@ -22,7 +22,8 @@ data class LoginUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val isLoggedIn: Boolean = false,
-    val needsPinSetup: Boolean = false  // Αν χρειάζεται να ορίσει PIN
+    val needsPinSetup: Boolean = false,
+    val resetPasswordSent: Boolean = false  // Αν στάλθηκε email επαναφοράς κωδικού
 )
 
 /**
@@ -115,10 +116,10 @@ class LoginViewModel @Inject constructor(
                     _uiState.update { 
                         it.copy(
                             isLoading = false, 
-                            error = null
+                            error = null,
+                            resetPasswordSent = true
                         ) 
                     }
-                    // TODO: Show success snackbar
                 }
                 is Result.Error -> {
                     _uiState.update { it.copy(isLoading = false, error = result.message) }

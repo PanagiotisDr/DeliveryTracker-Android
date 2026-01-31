@@ -16,6 +16,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.res.stringResource
+import com.deliverytracker.app.R
 
 /**
  * Οθόνη ρύθμισης PIN μετά το πρώτο login.
@@ -54,7 +56,7 @@ fun PinSetupScreen(
             Spacer(modifier = Modifier.height(24.dp))
             
             Text(
-                text = if (uiState.isConfirming) "Επιβεβαίωσε το PIN" else "Όρισε το PIN",
+                text = if (uiState.isConfirming) stringResource(R.string.auth_confirm_pin) else stringResource(R.string.auth_set_pin),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
@@ -63,9 +65,9 @@ fun PinSetupScreen(
             
             Text(
                 text = if (uiState.isConfirming) 
-                    "Εισάγετε ξανά το PIN για επιβεβαίωση" 
+                    stringResource(R.string.auth_confirm_pin_description) 
                 else 
-                    "Θα το χρησιμοποιείς για γρήγορη σύνδεση",
+                    stringResource(R.string.auth_pin_description),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -104,7 +106,7 @@ fun PinSetupScreen(
             
             // Skip button
             TextButton(onClick = { viewModel.skip() }) {
-                Text("Παράλειψη - Όχι τώρα")
+                Text(stringResource(R.string.auth_skip_pin))
             }
             
             if (uiState.isLoading) {
@@ -172,7 +174,7 @@ private fun NumberPadSetup(
                         ) {
                             Icon(
                                 Icons.AutoMirrored.Filled.Backspace,
-                                contentDescription = "Διαγραφή",
+                                contentDescription = stringResource(R.string.action_delete),
                                 modifier = Modifier.size(28.dp),
                                 tint = MaterialTheme.colorScheme.onSurface
                             )

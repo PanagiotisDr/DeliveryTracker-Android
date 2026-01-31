@@ -18,6 +18,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.res.stringResource
+import com.deliverytracker.app.R
 
 /**
  * Οθόνη σύνδεσης με PIN.
@@ -56,7 +58,7 @@ fun PinLoginScreen(
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
-                text = "DeliveryTracker",
+                text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold
@@ -65,7 +67,7 @@ fun PinLoginScreen(
             Spacer(modifier = Modifier.height(32.dp))
             
             Text(
-                text = "Εισάγετε το PIN",
+                text = stringResource(R.string.auth_enter_pin),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -98,7 +100,7 @@ fun PinLoginScreen(
             
             // Σύνδεση με κωδικό
             TextButton(onClick = onUsePassword) {
-                Text("Σύνδεση με κωδικό")
+                Text(stringResource(R.string.auth_login_with_password))
             }
             
             if (uiState.isLoading) {
@@ -174,7 +176,7 @@ private fun NumberPad(
                         ) {
                             Icon(
                                 Icons.AutoMirrored.Filled.Backspace,
-                                contentDescription = "Διαγραφή",
+                                contentDescription = stringResource(R.string.action_delete),
                                 modifier = Modifier.size(28.dp),
                                 tint = MaterialTheme.colorScheme.onSurface
                             )

@@ -133,7 +133,7 @@ fun ShiftFormScreen(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true,
                         placeholder = { Text("8") },
-                        suffix = { Text("ω") }
+                        suffix = { Text(stringResource(R.string.shift_hours_suffix)) }
                     )
                     
                     OutlinedTextField(
@@ -144,7 +144,7 @@ fun ShiftFormScreen(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true,
                         placeholder = { Text("30") },
-                        suffix = { Text("λ") }
+                        suffix = { Text(stringResource(R.string.shift_minutes_suffix)) }
                     )
                 }
                 
