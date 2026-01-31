@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Χρώματα για το launcher icon -->
+<resources>
+    <!-- Background χρώμα του adaptive icon -->
+    <color name="ic_launcher_background">#2196F3</color>
+</resources>

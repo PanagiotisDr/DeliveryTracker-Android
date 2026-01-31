@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+    Backup rules για Google Cloud Backup
+    Ρυθμίσεις για το τι θα γίνει backup στο Google account
+-->
+<full-backup-content>
+    <!-- Exclude Firebase auth tokens -->
+    <exclude domain="sharedpref" path="com.google.firebase.auth.api.gms.prefs.xml" />
+</full-backup-content>

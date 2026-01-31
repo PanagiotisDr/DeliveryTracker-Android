@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+    Data extraction rules για Android 12+
+    Ρυθμίσεις για device-to-device data transfer
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <!-- Include app data -->
+        <include domain="sharedpref" path="." />
+        <exclude domain="sharedpref" path="com.google.firebase.auth.api.gms.prefs.xml" />
+    </cloud-backup>
+    <device-transfer>
+        <!-- Allow transfer of all data on device-to-device migration -->
+        <include domain="sharedpref" path="." />
+    </device-transfer>
+</data-extraction-rules>

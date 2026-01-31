@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+    English strings (fallback)
+    Αγγλικά κείμενα για fallback
+-->
+<resources>
+    <!-- App Info -->
+    <string name="app_name">DeliveryTracker</string>
+    <string name="welcome_message">Welcome to DeliveryTracker!</string>
+    
+    <!-- Navigation -->
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_shifts">Shifts</string>
+    <string name="nav_expenses">Expenses</string>
+    <string name="nav_settings">Settings</string>
+    <string name="nav_recycle_bin">Recycle Bin</string>
+    <string name="nav_statistics">Statistics</string>
+    
+    <!-- Authentication -->
+    <string name="auth_login">Login</string>
+    <string name="auth_register">Register</string>
+    <string name="auth_logout">Logout</string>
+    <string name="auth_email">Email</string>
+    <string name="auth_password">Password</string>
+    <string name="auth_confirm_password">Confirm Password</string>
+    <string name="auth_username">Username</string>
+    <string name="auth_forgot_password">Forgot password?</string>
+    
+    <!-- Buttons -->
+    <string name="btn_save">Save</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_delete">Delete</string>
+    <string name="btn_edit">Edit</string>
+    <string name="btn_add">Add</string>
+    <string name="btn_restore">Restore</string>
+    <string name="btn_confirm">Confirm</string>
+    
+    <!-- Shift Form -->
+    <string name="shift_date">Date</string>
+    <string name="shift_earnings">Platform Earnings</string>
+    <string name="shift_tips">Tips</string>
+    <string name="shift_bonus">Bonus</string>
+    <string name="shift_orders">Orders</string>
+    <string name="shift_kilometers">Kilometers</string>
+    <string name="shift_duration">Duration</string>
+    <string name="shift_hours">Hours</string>
+    <string name="shift_minutes">Minutes</string>
+    <string name="shift_notes">Notes</string>
+    
+    <!-- Expense Form -->
+    <string name="expense_date">Date</string>
+    <string name="expense_category">Category</string>
+    <string name="expense_amount">Amount</string>
+    <string name="expense_payment_method">Payment Method</string>
+    <string name="expense_notes">Notes</string>
+    
+    <!-- Expense Categories -->
+    <string name="category_fuel">Fuel</string>
+    <string name="category_maintenance">Maintenance / Service</string>
+    <string name="category_insurance">Insurance</string>
+    <string name="category_mobile">Mobile / Data</string>
+    <string name="category_equipment">Equipment</string>
+    <string name="category_kteo">KTEO (Vehicle Inspection)</string>
+    <string name="category_road_tax">Road Tax</string>
+    <string name="category_fines">Fines</string>
+    <string name="category_other">Other</string>
+    
+    <!-- Payment Methods -->
+    <string name="payment_cash">Cash</string>
+    <string name="payment_card">Card</string>
+    
+    <!-- Dashboard -->
+    <string name="dashboard_net_income">Net Income</string>
+    <string name="dashboard_gross_income">Gross Income</string>
+    <string name="dashboard_total_expenses">Total Expenses</string>
+    <string name="dashboard_net_profit">Net Profit</string>
+    <string name="dashboard_total_orders">Total Orders</string>
+    <string name="dashboard_total_km">Total Kilometers</string>
+    <string name="dashboard_hourly_rate">Hourly Rate</string>
+    <string name="dashboard_daily_goal">Daily Goal</string>
+    <string name="dashboard_monthly_goal">Monthly Goal</string>
+    <string name="dashboard_yearly_goal">Yearly Goal</string>
+    
+    <!-- Period Filters -->
+    <string name="period_today">Today</string>
+    <string name="period_this_week">This Week</string>
+    <string name="period_this_month">This Month</string>
+    <string name="period_this_year">This Year</string>
+    <string name="period_custom">Custom</string>
+    
+    <!-- Settings -->
+    <string name="settings_general">General</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_tax">Tax Settings</string>
+    <string name="settings_vat">VAT (%)</string>
+    <string name="settings_efka">Monthly EFKA (€)</string>
+    <string name="settings_goals">Goals</string>
+    <string name="settings_security">Security</string>
+    <string name="settings_pin">PIN</string>
+    <string name="settings_set_pin">Set PIN</string>
+    <string name="settings_change_pin">Change PIN</string>
+    <string name="settings_remove_pin">Remove PIN</string>
+    
+    <!-- Theme Options -->
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    
+    <!-- Messages -->
+    <string name="msg_shift_saved">Shift saved successfully!</string>
+    <string name="msg_expense_saved">Expense saved successfully!</string>
+    <string name="msg_deleted">Deleted successfully</string>
+    <string name="msg_restored">Restored successfully</string>
+    <string name="msg_goal_reached">🎉 Congratulations! You reached your goal!</string>
+    <string name="msg_goal_close">Almost there! Only %s€ remaining</string>
+    
+    <!-- Errors -->
+    <string name="error_required">This field is required</string>
+    <string name="error_invalid_email">Invalid email address</string>
+    <string name="error_password_short">Password must be at least 6 characters</string>
+    <string name="error_passwords_mismatch">Passwords do not match</string>
+    <string name="error_invalid_number">Please enter a valid number</string>
+    <string name="error_future_date">Date cannot be in the future</string>
+    <string name="error_login_failed">Login failed. Please check your credentials.</string>
+    <string name="error_network">Network error. Please try again.</string>
+    
+    <!-- PIN -->
+    <string name="pin_enter">Enter your PIN</string>
+    <string name="pin_confirm">Confirm deletion with PIN</string>
+    <string name="pin_wrong">Wrong PIN. Try again.</string>
+    <string name="pin_locked">Too many attempts. Try again in 30 seconds.</string>
+    
+    <!-- Currency -->
+    <string name="currency_symbol">€</string>
+    <string name="currency_format">%s€</string>
+</resources>

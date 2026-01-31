@@ -1,0 +1,32 @@
+# DeliveryTracker Android - Git Ignore
+
+# Gradle
+.gradle/
+build/
+!gradle-wrapper.jar
+
+# Android Studio
+.idea/
+*.iml
+local.properties
+
+# Google Services (contains API keys)
+google-services.json
+
+# Keystore
+*.jks
+*.keystore
+keystore.properties
+
+# Build outputs
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Other
+.DS_Store
+*.log
+captures/
+.externalNativeBuild/
+.cxx/
