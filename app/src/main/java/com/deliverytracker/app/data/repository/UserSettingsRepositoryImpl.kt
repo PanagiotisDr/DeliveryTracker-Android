@@ -23,6 +23,13 @@ class UserSettingsRepositoryImpl @Inject constructor(
     private val settingsCollection = firestore.collection("user_settings")
     
     override fun getUserSettings(userId: String): Flow<UserSettings?> = callbackFlow {
+        // Αποφυγή crash αν το userId είναι κενό
+        if (userId.isBlank()) {
+            trySend(null)
+            awaitClose { }
+            return@callbackFlow
+        }
+        
         val listener = settingsCollection.document(userId)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
