@@ -152,6 +152,25 @@ class ShiftRepositoryImpl @Inject constructor(
         awaitClose { listener.remove() }
     }
     
+    override fun getDeletedShifts(userId: String): Flow<List<Shift>> = callbackFlow {
+        val listener = shiftsCollection
+            .whereEqualTo("userId", userId)
+            .whereEqualTo("isDeleted", true)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+                
+                val shifts = snapshot?.documents?.mapNotNull { it.toShift() }
+                    ?.sortedByDescending { it.deletedAt }
+                    ?: emptyList()
+                trySend(shifts)
+            }
+        
+        awaitClose { listener.remove() }
+    }
+    
     // ============ Helper Functions ============
     
     private fun com.google.firebase.firestore.DocumentSnapshot.toShift(): Shift? {

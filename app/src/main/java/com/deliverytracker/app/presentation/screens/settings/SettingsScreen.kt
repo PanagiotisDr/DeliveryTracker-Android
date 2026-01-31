@@ -12,14 +12,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.deliverytracker.app.R
 import com.deliverytracker.app.domain.model.ThemeMode
 
 /**
  * Οθόνη Ρυθμίσεων.
+ * Χρησιμοποιεί stringResource για localization.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,11 +32,12 @@ fun SettingsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val savedMessage = stringResource(R.string.msg_settings_saved)
     
     // Snackbar για μηνύματα
     LaunchedEffect(uiState.isSaved, uiState.error) {
         if (uiState.isSaved) {
-            snackbarHostState.showSnackbar("Οι ρυθμίσεις αποθηκεύτηκαν!")
+            snackbarHostState.showSnackbar(savedMessage)
             viewModel.clearMessages()
         }
         uiState.error?.let {
@@ -45,10 +49,13 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("⚙️ Ρυθμίσεις") },
+                title = { Text("⚙️ ${stringResource(R.string.nav_settings)}") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Πίσω")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack, 
+                            contentDescription = stringResource(R.string.back)
+                        )
                     }
                 },
                 actions = {
@@ -56,7 +63,10 @@ fun SettingsScreen(
                         onClick = { viewModel.saveSettings() },
                         enabled = !uiState.isLoading
                     ) {
-                        Icon(Icons.Default.Save, "Αποθήκευση")
+                        Icon(
+                            Icons.Default.Save, 
+                            contentDescription = stringResource(R.string.btn_save)
+                        )
                     }
                 }
             )
@@ -100,7 +110,7 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.width(16.dp))
                         Column {
                             Text(
-                                text = uiState.username.ifEmpty { "Χρήστης" },
+                                text = uiState.username.ifEmpty { stringResource(R.string.settings_user) },
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Text(
@@ -110,7 +120,7 @@ fun SettingsScreen(
                             )
                             if (uiState.hasPin) {
                                 Text(
-                                    text = "🔒 PIN ενεργό",
+                                    text = "🔒 ${stringResource(R.string.settings_pin_active)}",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.primary
                                 )
@@ -123,7 +133,7 @@ fun SettingsScreen(
                 
                 // ============ Στόχοι ============
                 Text(
-                    text = "🎯 Στόχοι Εισοδήματος",
+                    text = "🎯 ${stringResource(R.string.settings_goals)}",
                     style = MaterialTheme.typography.titleMedium
                 )
                 
@@ -134,21 +144,21 @@ fun SettingsScreen(
                     OutlinedTextField(
                         value = uiState.dailyGoal,
                         onValueChange = { viewModel.updateDailyGoal(it) },
-                        label = { Text("Ημερήσιος") },
+                        label = { Text(stringResource(R.string.settings_goal_daily)) },
                         modifier = Modifier.weight(1f),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         singleLine = true,
-                        suffix = { Text("€") }
+                        suffix = { Text(stringResource(R.string.currency_symbol)) }
                     )
                     
                     OutlinedTextField(
                         value = uiState.weeklyGoal,
                         onValueChange = { viewModel.updateWeeklyGoal(it) },
-                        label = { Text("Εβδομαδ.") },
+                        label = { Text(stringResource(R.string.settings_goal_weekly)) },
                         modifier = Modifier.weight(1f),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         singleLine = true,
-                        suffix = { Text("€") }
+                        suffix = { Text(stringResource(R.string.currency_symbol)) }
                     )
                 }
                 
@@ -159,21 +169,21 @@ fun SettingsScreen(
                     OutlinedTextField(
                         value = uiState.monthlyGoal,
                         onValueChange = { viewModel.updateMonthlyGoal(it) },
-                        label = { Text("Μηνιαίος") },
+                        label = { Text(stringResource(R.string.settings_goal_monthly)) },
                         modifier = Modifier.weight(1f),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         singleLine = true,
-                        suffix = { Text("€") }
+                        suffix = { Text(stringResource(R.string.currency_symbol)) }
                     )
                     
                     OutlinedTextField(
                         value = uiState.yearlyGoal,
                         onValueChange = { viewModel.updateYearlyGoal(it) },
-                        label = { Text("Ετήσιος") },
+                        label = { Text(stringResource(R.string.settings_goal_yearly)) },
                         modifier = Modifier.weight(1f),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         singleLine = true,
-                        suffix = { Text("€") }
+                        suffix = { Text(stringResource(R.string.currency_symbol)) }
                     )
                 }
                 
@@ -181,7 +191,7 @@ fun SettingsScreen(
                 
                 // ============ Φορολογικά ============
                 Text(
-                    text = "💼 Φορολογικές Ρυθμίσεις",
+                    text = "💼 ${stringResource(R.string.settings_tax)}",
                     style = MaterialTheme.typography.titleMedium
                 )
                 
@@ -192,7 +202,7 @@ fun SettingsScreen(
                     OutlinedTextField(
                         value = uiState.vatRate,
                         onValueChange = { viewModel.updateVatRate(it) },
-                        label = { Text("ΦΠΑ") },
+                        label = { Text(stringResource(R.string.settings_vat)) },
                         modifier = Modifier.weight(1f),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true,
@@ -203,11 +213,11 @@ fun SettingsScreen(
                     OutlinedTextField(
                         value = uiState.monthlyEfka,
                         onValueChange = { viewModel.updateMonthlyEfka(it) },
-                        label = { Text("ΕΦΚΑ/μήνα") },
+                        label = { Text(stringResource(R.string.settings_efka)) },
                         modifier = Modifier.weight(1f),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         singleLine = true,
-                        suffix = { Text("€") }
+                        suffix = { Text(stringResource(R.string.currency_symbol)) }
                     )
                 }
                 
@@ -219,7 +229,7 @@ fun SettingsScreen(
                     )
                 ) {
                     Text(
-                        text = "💡 Το ΦΠΑ υπολογίζεται επί των εσόδων (όχι tips). Η εισφορά ΕΦΚΑ αφαιρείται από τα μηνιαία κέρδη στα στατιστικά.",
+                        text = "💡 ${stringResource(R.string.settings_tax_hint)}",
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.padding(12.dp)
                     )
@@ -229,7 +239,7 @@ fun SettingsScreen(
                 
                 // ============ Θέμα ============
                 Text(
-                    text = "🎨 Θέμα Εμφάνισης",
+                    text = "🎨 ${stringResource(R.string.settings_theme)}",
                     style = MaterialTheme.typography.titleMedium
                 )
                 
@@ -252,9 +262,9 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
                             text = when (theme) {
-                                ThemeMode.SYSTEM -> "🌓 Αυτόματο (Σύστημα)"
-                                ThemeMode.LIGHT -> "☀️ Φωτεινό"
-                                ThemeMode.DARK -> "🌙 Σκοτεινό"
+                                ThemeMode.SYSTEM -> "🌓 ${stringResource(R.string.theme_system)}"
+                                ThemeMode.LIGHT -> "☀️ ${stringResource(R.string.theme_light)}"
+                                ThemeMode.DARK -> "🌙 ${stringResource(R.string.theme_dark)}"
                             }
                         )
                     }
@@ -270,7 +280,7 @@ fun SettingsScreen(
                 ) {
                     Icon(Icons.Default.Save, null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Αποθήκευση Ρυθμίσεων")
+                    Text(stringResource(R.string.btn_save_settings))
                 }
                 
                 Spacer(modifier = Modifier.height(32.dp))

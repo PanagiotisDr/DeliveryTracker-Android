@@ -2,6 +2,7 @@ package com.deliverytracker.app.data.repository
 
 import com.deliverytracker.app.domain.model.Expense
 import com.deliverytracker.app.domain.model.ExpenseCategory
+import com.deliverytracker.app.domain.model.PaymentMethod
 import com.deliverytracker.app.domain.model.Result
 import com.deliverytracker.app.domain.repository.ExpenseRepository
 import com.google.firebase.firestore.FirebaseFirestore
@@ -174,6 +175,25 @@ class ExpenseRepositoryImpl @Inject constructor(
         awaitClose { listener.remove() }
     }
     
+    override fun getDeletedExpenses(userId: String): Flow<List<Expense>> = callbackFlow {
+        val listener = expensesCollection
+            .whereEqualTo("userId", userId)
+            .whereEqualTo("isDeleted", true)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+                
+                val expenses = snapshot?.documents?.mapNotNull { it.toExpense() }
+                    ?.sortedByDescending { it.deletedAt }
+                    ?: emptyList()
+                trySend(expenses)
+            }
+        
+        awaitClose { listener.remove() }
+    }
+    
     // ============ Helper Functions ============
     
     private fun com.google.firebase.firestore.DocumentSnapshot.toExpense(): Expense? {
@@ -187,8 +207,13 @@ class ExpenseRepositoryImpl @Inject constructor(
                 } catch (e: Exception) {
                     ExpenseCategory.OTHER
                 },
-                description = getString("description") ?: "",
                 date = getLong("date") ?: System.currentTimeMillis(),
+                paymentMethod = try {
+                    PaymentMethod.valueOf(getString("paymentMethod") ?: "CASH")
+                } catch (e: Exception) {
+                    PaymentMethod.CASH
+                },
+                notes = getString("notes") ?: "",
                 shiftId = getString("shiftId"),
                 receiptUrl = getString("receiptUrl"),
                 isDeleted = getBoolean("isDeleted") ?: false,
@@ -205,8 +230,9 @@ class ExpenseRepositoryImpl @Inject constructor(
         "userId" to userId,
         "amount" to amount,
         "category" to category.name,
-        "description" to description,
         "date" to date,
+        "paymentMethod" to paymentMethod.name,
+        "notes" to notes,
         "shiftId" to shiftId,
         "receiptUrl" to receiptUrl,
         "isDeleted" to isDeleted,

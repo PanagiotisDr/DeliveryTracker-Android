@@ -11,12 +11,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.deliverytracker.app.R
 
 /**
  * Οθόνη προσθήκης/επεξεργασίας βάρδιας.
+ * Χρησιμοποιεί stringResource για localization.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,11 +49,19 @@ fun ShiftFormScreen(
         topBar = {
             TopAppBar(
                 title = { 
-                    Text(if (viewModel.isEditMode) "Επεξεργασία Βάρδιας" else "Νέα Βάρδια") 
+                    Text(
+                        if (viewModel.isEditMode) 
+                            stringResource(R.string.edit_shift)
+                        else 
+                            stringResource(R.string.new_shift)
+                    ) 
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Πίσω")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack, 
+                            contentDescription = stringResource(R.string.back)
+                        )
                     }
                 },
                 actions = {
@@ -58,7 +69,10 @@ fun ShiftFormScreen(
                         onClick = { viewModel.saveShift() },
                         enabled = !uiState.isLoading
                     ) {
-                        Icon(Icons.Default.Check, "Αποθήκευση")
+                        Icon(
+                            Icons.Default.Check, 
+                            contentDescription = stringResource(R.string.btn_save)
+                        )
                     }
                 }
             )
@@ -85,14 +99,14 @@ fun ShiftFormScreen(
             ) {
                 // Ημερομηνία
                 Text(
-                    text = "📅 Ημερομηνία",
+                    text = "📅 ${stringResource(R.string.shift_date)}",
                     style = MaterialTheme.typography.titleMedium
                 )
                 
                 OutlinedTextField(
                     value = uiState.dateText,
                     onValueChange = { viewModel.updateDate(it) },
-                    label = { Text("Ημερομηνία (ΗΗ/ΜΜ/ΕΕΕΕ)") },
+                    label = { Text(stringResource(R.string.date_format_hint)) },
                     modifier = Modifier.fillMaxWidth(),
                     leadingIcon = { Icon(Icons.Default.CalendarToday, null) },
                     singleLine = true
@@ -102,7 +116,7 @@ fun ShiftFormScreen(
                 
                 // Ώρες εργασίας
                 Text(
-                    text = "⏱️ Διάρκεια Εργασίας",
+                    text = "⏱️ ${stringResource(R.string.shift_duration)}",
                     style = MaterialTheme.typography.titleMedium
                 )
                 
@@ -114,7 +128,7 @@ fun ShiftFormScreen(
                     OutlinedTextField(
                         value = uiState.workedHours,
                         onValueChange = { viewModel.updateWorkedHours(it) },
-                        label = { Text("Ώρες") },
+                        label = { Text(stringResource(R.string.shift_hours)) },
                         modifier = Modifier.weight(1f),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true,
@@ -125,7 +139,7 @@ fun ShiftFormScreen(
                     OutlinedTextField(
                         value = uiState.workedMinutes,
                         onValueChange = { viewModel.updateWorkedMinutes(it) },
-                        label = { Text("Λεπτά") },
+                        label = { Text(stringResource(R.string.shift_minutes)) },
                         modifier = Modifier.weight(1f),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true,
@@ -138,7 +152,7 @@ fun ShiftFormScreen(
                 
                 // Έσοδα
                 Text(
-                    text = "💰 Έσοδα",
+                    text = "💰 ${stringResource(R.string.stats_income)}",
                     style = MaterialTheme.typography.titleMedium
                 )
                 
@@ -149,23 +163,23 @@ fun ShiftFormScreen(
                     OutlinedTextField(
                         value = uiState.grossIncome,
                         onValueChange = { viewModel.updateGrossIncome(it) },
-                        label = { Text("Μικτά") },
+                        label = { Text(stringResource(R.string.stats_gross)) },
                         modifier = Modifier.weight(1f),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         singleLine = true,
                         placeholder = { Text("0,00") },
-                        suffix = { Text("€") }
+                        suffix = { Text(stringResource(R.string.currency_symbol)) }
                     )
                     
                     OutlinedTextField(
                         value = uiState.tips,
                         onValueChange = { viewModel.updateTips(it) },
-                        label = { Text("Tips") },
+                        label = { Text(stringResource(R.string.shift_tips)) },
                         modifier = Modifier.weight(1f),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         singleLine = true,
                         placeholder = { Text("0,00") },
-                        suffix = { Text("€") }
+                        suffix = { Text(stringResource(R.string.currency_symbol)) }
                     )
                 }
                 
@@ -173,12 +187,12 @@ fun ShiftFormScreen(
                 OutlinedTextField(
                     value = uiState.bonus,
                     onValueChange = { viewModel.updateBonus(it) },
-                    label = { Text("Bonus (Peak, Βροχή κτλ)") },
+                    label = { Text(stringResource(R.string.shift_bonus)) },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     singleLine = true,
                     placeholder = { Text("0,00") },
-                    suffix = { Text("€") },
+                    suffix = { Text(stringResource(R.string.currency_symbol)) },
                     leadingIcon = { Icon(Icons.Default.Star, null) }
                 )
                 
@@ -186,7 +200,7 @@ fun ShiftFormScreen(
                 
                 // Έξοδα
                 Text(
-                    text = "📊 Έξοδα",
+                    text = "📊 ${stringResource(R.string.nav_expenses)}",
                     style = MaterialTheme.typography.titleMedium
                 )
                 
@@ -197,23 +211,23 @@ fun ShiftFormScreen(
                     OutlinedTextField(
                         value = uiState.fuelCost,
                         onValueChange = { viewModel.updateFuelCost(it) },
-                        label = { Text("Καύσιμα") },
+                        label = { Text(stringResource(R.string.category_fuel)) },
                         modifier = Modifier.weight(1f),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         singleLine = true,
                         placeholder = { Text("0,00") },
-                        suffix = { Text("€") }
+                        suffix = { Text(stringResource(R.string.currency_symbol)) }
                     )
                     
                     OutlinedTextField(
                         value = uiState.otherExpenses,
                         onValueChange = { viewModel.updateOtherExpenses(it) },
-                        label = { Text("Άλλα") },
+                        label = { Text(stringResource(R.string.category_other)) },
                         modifier = Modifier.weight(1f),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         singleLine = true,
                         placeholder = { Text("0,00") },
-                        suffix = { Text("€") }
+                        suffix = { Text(stringResource(R.string.currency_symbol)) }
                     )
                 }
                 
@@ -221,7 +235,7 @@ fun ShiftFormScreen(
                 
                 // Επιπλέον στοιχεία
                 Text(
-                    text = "📝 Λεπτομέρειες",
+                    text = "📝 ${stringResource(R.string.shift_notes)}",
                     style = MaterialTheme.typography.titleMedium
                 )
                 
@@ -232,7 +246,7 @@ fun ShiftFormScreen(
                     OutlinedTextField(
                         value = uiState.ordersCount,
                         onValueChange = { viewModel.updateOrdersCount(it) },
-                        label = { Text("Παραγγελίες") },
+                        label = { Text(stringResource(R.string.shift_orders)) },
                         modifier = Modifier.weight(1f),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true,
@@ -242,7 +256,7 @@ fun ShiftFormScreen(
                     OutlinedTextField(
                         value = uiState.kilometers,
                         onValueChange = { viewModel.updateKilometers(it) },
-                        label = { Text("Χιλιόμετρα") },
+                        label = { Text(stringResource(R.string.shift_kilometers)) },
                         modifier = Modifier.weight(1f),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         singleLine = true,
@@ -254,7 +268,7 @@ fun ShiftFormScreen(
                 OutlinedTextField(
                     value = uiState.notes,
                     onValueChange = { viewModel.updateNotes(it) },
-                    label = { Text("Σημειώσεις") },
+                    label = { Text(stringResource(R.string.notes_optional)) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(min = 100.dp),
@@ -272,7 +286,12 @@ fun ShiftFormScreen(
                 ) {
                     Icon(Icons.Default.Save, null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(if (viewModel.isEditMode) "Ενημέρωση" else "Αποθήκευση")
+                    Text(
+                        if (viewModel.isEditMode) 
+                            stringResource(R.string.update)
+                        else 
+                            stringResource(R.string.btn_save)
+                    )
                 }
             }
         }

@@ -55,4 +55,9 @@ interface ShiftRepository {
         startDate: Long,
         endDate: Long
     ): Flow<List<Shift>>
+    
+    /**
+     * Επιστρέφει τις διαγραμμένες βάρδιες.
+     */
+    fun getDeletedShifts(userId: String): Flow<List<Shift>>
 }

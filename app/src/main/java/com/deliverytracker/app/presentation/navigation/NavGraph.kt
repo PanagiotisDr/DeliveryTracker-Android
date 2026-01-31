@@ -157,18 +157,37 @@ fun NavGraph(
             )
         }
         
-        // ============ Placeholder Screens ============
+        // ============ Expense Screens ============
         
         composable(Screen.ExpenseList.route) {
-            ComingSoonScreen(
-                title = "Έξοδα",
+            com.deliverytracker.app.presentation.screens.expenses.ExpenseListScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToAddExpense = {
+                    navController.navigate(Screen.ExpenseForm.createRoute())
+                },
+                onNavigateToEditExpense = { expenseId ->
+                    navController.navigate(Screen.ExpenseForm.createRoute(expenseId))
+                }
+            )
+        }
+        
+        composable(
+            route = Screen.ExpenseForm.route,
+            arguments = listOf(
+                androidx.navigation.navArgument("expenseId") {
+                    type = androidx.navigation.NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) {
+            com.deliverytracker.app.presentation.screens.expenses.ExpenseFormScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }
         
         composable(Screen.Statistics.route) {
-            ComingSoonScreen(
-                title = "Στατιστικά",
+            com.deliverytracker.app.presentation.screens.statistics.StatisticsScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }
@@ -180,8 +199,7 @@ fun NavGraph(
         }
         
         composable(Screen.RecycleBin.route) {
-            ComingSoonScreen(
-                title = "Κάδος Ανακύκλωσης",
+            com.deliverytracker.app.presentation.screens.recyclebin.RecycleBinScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }

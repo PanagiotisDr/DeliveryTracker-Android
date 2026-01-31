@@ -10,16 +10,19 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.deliverytracker.app.R
 import com.deliverytracker.app.domain.model.Shift
 import java.text.SimpleDateFormat
 import java.util.*
 
 /**
  * Οθόνη λίστας βαρδιών.
+ * Χρησιμοποιεί stringResource για localization.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,10 +50,13 @@ fun ShiftListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Βάρδιες") },
+                title = { Text(stringResource(R.string.nav_shifts)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Πίσω")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack, 
+                            contentDescription = stringResource(R.string.back)
+                        )
                     }
                 }
             )
@@ -60,7 +66,10 @@ fun ShiftListScreen(
                 onClick = onNavigateToAddShift,
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
-                Icon(Icons.Default.Add, "Προσθήκη βάρδιας")
+                Icon(
+                    Icons.Default.Add, 
+                    contentDescription = stringResource(R.string.new_shift)
+                )
             }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -116,7 +125,7 @@ private fun EmptyShiftsContent(
         Spacer(modifier = Modifier.height(16.dp))
         
         Text(
-            text = "Δεν έχεις καταχωρήσει βάρδιες",
+            text = stringResource(R.string.empty_shifts),
             style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center
         )
@@ -124,7 +133,7 @@ private fun EmptyShiftsContent(
         Spacer(modifier = Modifier.height(8.dp))
         
         Text(
-            text = "Πάτα το κουμπί + για να προσθέσεις την πρώτη σου βάρδια!",
+            text = stringResource(R.string.empty_shifts_hint),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -135,7 +144,7 @@ private fun EmptyShiftsContent(
         Button(onClick = onAddClick) {
             Icon(Icons.Default.Add, null)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Νέα Βάρδια")
+            Text(stringResource(R.string.new_shift))
         }
     }
 }
@@ -179,8 +188,8 @@ private fun ShiftCard(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Διαγραφή Βάρδιας") },
-            text = { Text("Είσαι σίγουρος ότι θέλεις να διαγράψεις αυτή τη βάρδια;") },
+            title = { Text(stringResource(R.string.dialog_delete_shift_title)) },
+            text = { Text(stringResource(R.string.dialog_delete_shift_message)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -188,12 +197,15 @@ private fun ShiftCard(
                         onDeleteClick()
                     }
                 ) {
-                    Text("Διαγραφή", color = MaterialTheme.colorScheme.error)
+                    Text(
+                        text = stringResource(R.string.btn_delete), 
+                        color = MaterialTheme.colorScheme.error
+                    )
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Ακύρωση")
+                    Text(stringResource(R.string.btn_cancel))
                 }
             }
         )
@@ -235,14 +247,14 @@ private fun ShiftCard(
                     IconButton(onClick = onEditClick) {
                         Icon(
                             Icons.Default.Edit,
-                            "Επεξεργασία",
+                            contentDescription = stringResource(R.string.btn_edit),
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
                     IconButton(onClick = { showDeleteDialog = true }) {
                         Icon(
                             Icons.Default.Delete,
-                            "Διαγραφή",
+                            contentDescription = stringResource(R.string.btn_delete),
                             tint = MaterialTheme.colorScheme.error
                         )
                     }
@@ -257,21 +269,21 @@ private fun ShiftCard(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 StatItem(
-                    label = "Καθαρά",
+                    label = stringResource(R.string.dashboard_net),
                     value = "%.2f€".format(shift.netIncome),
                     color = if (shift.netIncome >= 0) MaterialTheme.colorScheme.primary 
                            else MaterialTheme.colorScheme.error
                 )
                 StatItem(
-                    label = "Ώρες",
+                    label = stringResource(R.string.dashboard_hours),
                     value = "%.1f".format(shift.hoursWorked)
                 )
                 StatItem(
-                    label = "Παραγγελίες",
+                    label = stringResource(R.string.dashboard_orders),
                     value = shift.ordersCount.toString()
                 )
                 StatItem(
-                    label = "€/Ώρα",
+                    label = stringResource(R.string.stats_per_hour),
                     value = "%.2f".format(shift.incomePerHour)
                 )
             }

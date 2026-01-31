@@ -18,6 +18,7 @@ import java.text.DecimalFormat
 
 /**
  * Dashboard screen - Η κύρια οθόνη της εφαρμογής.
+ * Χρησιμοποιεί stringResource για localization.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,7 +51,10 @@ fun DashboardScreen(
                 onClick = onNavigateToShifts,
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Νέα Βάρδια")
+                Icon(
+                    Icons.Default.Add, 
+                    contentDescription = stringResource(R.string.new_shift)
+                )
             }
         }
     ) { paddingValues ->
@@ -63,7 +67,7 @@ fun DashboardScreen(
             // Welcome Message
             uiState.username?.let { username ->
                 Text(
-                    text = "Καλωσήρθες, $username! 👋",
+                    text = stringResource(R.string.dashboard_welcome, username),
                     style = MaterialTheme.typography.headlineSmall
                 )
                 Spacer(modifier = Modifier.height(16.dp))
@@ -80,7 +84,7 @@ fun DashboardScreen(
                     modifier = Modifier.padding(16.dp)
                 ) {
                     Text(
-                        text = "📅 Σήμερα",
+                        text = stringResource(R.string.dashboard_today),
                         style = MaterialTheme.typography.titleMedium
                     )
                     Spacer(modifier = Modifier.height(12.dp))
@@ -92,23 +96,23 @@ fun DashboardScreen(
                         StatItem(
                             emoji = "💰",
                             value = "${decimalFormat.format(uiState.todayNetIncome)}€",
-                            label = "Καθαρά"
+                            label = stringResource(R.string.dashboard_net)
                         )
                         StatItem(
                             emoji = "📦",
                             value = uiState.todayOrders.toString(),
-                            label = "Παραγγελίες"
+                            label = stringResource(R.string.dashboard_orders)
                         )
                         StatItem(
                             emoji = "⏱",
                             value = String.format("%.1fω", uiState.todayHours),
-                            label = "Ώρες"
+                            label = stringResource(R.string.dashboard_hours)
                         )
                         if (uiState.todayBonus > 0) {
                             StatItem(
                                 emoji = "⭐",
                                 value = "${decimalFormat.format(uiState.todayBonus)}€",
-                                label = "Bonus"
+                                label = stringResource(R.string.dashboard_bonus)
                             )
                         }
                     }
@@ -120,7 +124,7 @@ fun DashboardScreen(
                             progress = uiState.dailyProgress,
                             current = uiState.todayNetIncome,
                             goal = uiState.dailyGoal!!,
-                            label = "Ημερήσιος Στόχος"
+                            label = stringResource(R.string.dashboard_daily_goal)
                         )
                     }
                 }
@@ -136,7 +140,7 @@ fun DashboardScreen(
                     modifier = Modifier.padding(16.dp)
                 ) {
                     Text(
-                        text = "📊 Αυτόν τον μήνα",
+                        text = stringResource(R.string.dashboard_this_month),
                         style = MaterialTheme.typography.titleMedium
                     )
                     Spacer(modifier = Modifier.height(12.dp))
@@ -148,17 +152,17 @@ fun DashboardScreen(
                         StatItem(
                             emoji = "💵",
                             value = "${decimalFormat.format(uiState.monthNetIncome)}€",
-                            label = "Καθαρά"
+                            label = stringResource(R.string.dashboard_net)
                         )
                         StatItem(
                             emoji = "📦",
                             value = uiState.monthOrders.toString(),
-                            label = "Παραγγελίες"
+                            label = stringResource(R.string.dashboard_orders)
                         )
                         StatItem(
                             emoji = "📋",
                             value = uiState.monthShifts.toString(),
-                            label = "Βάρδιες"
+                            label = stringResource(R.string.dashboard_shifts)
                         )
                     }
                     
@@ -169,7 +173,7 @@ fun DashboardScreen(
                             progress = uiState.monthlyProgress,
                             current = uiState.monthNetIncome,
                             goal = uiState.monthlyGoal!!,
-                            label = "Μηνιαίος Στόχος"
+                            label = stringResource(R.string.dashboard_monthly_goal)
                         )
                     }
                 }
@@ -290,7 +294,7 @@ private fun GoalProgressBar(
         )
         if (progress >= 1f) {
             Text(
-                text = "🎉 Μπράβο! Πέτυχες τον στόχο!",
+                text = stringResource(R.string.dashboard_goal_reached),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.tertiary
             )

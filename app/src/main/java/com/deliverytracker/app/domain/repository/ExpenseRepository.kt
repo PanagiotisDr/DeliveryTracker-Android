@@ -62,4 +62,9 @@ interface ExpenseRepository {
         userId: String,
         category: ExpenseCategory
     ): Flow<List<Expense>>
+    
+    /**
+     * Επιστρέφει τα διαγραμμένα έξοδα.
+     */
+    fun getDeletedExpenses(userId: String): Flow<List<Expense>>
 }

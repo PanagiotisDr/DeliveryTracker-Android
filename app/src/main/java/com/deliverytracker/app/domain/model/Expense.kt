@@ -3,14 +3,24 @@ package com.deliverytracker.app.domain.model
 /**
  * Κατηγορίες εξόδων.
  */
-enum class ExpenseCategory {
-    FUEL,           // Καύσιμα
-    MAINTENANCE,    // Συντήρηση οχήματος
-    INSURANCE,      // Ασφάλεια
-    PHONE,          // Τηλέφωνο/Data
-    EQUIPMENT,      // Εξοπλισμός (θερμοσάκος κλπ)
-    TAX,            // Φόροι/ΕΦΚΑ
-    OTHER           // Άλλα
+enum class ExpenseCategory(val emoji: String, val displayName: String) {
+    FUEL("⛽", "Καύσιμα"),
+    MAINTENANCE("🔧", "Συντήρηση"),
+    INSURANCE("🛡️", "Ασφάλεια"),
+    PHONE("📱", "Τηλέφωνο/Data"),
+    EQUIPMENT("🎒", "Εξοπλισμός"),
+    TAX("📋", "Φόροι/ΕΦΚΑ"),
+    KTEO("🚗", "ΚΤΕΟ"),
+    ROAD_TAX("📄", "Τέλη Κυκλοφορίας"),
+    FINES("⚠️", "Πρόστιμα"),
+    OTHER("💰", "Άλλα")
+}
+
+/**
+ * Μέθοδος πληρωμής.
+ */
+enum class PaymentMethod {
+    CASH, CARD
 }
 
 /**
@@ -23,10 +33,11 @@ data class Expense(
     // Στοιχεία εξόδου
     val amount: Double = 0.0,
     val category: ExpenseCategory = ExpenseCategory.OTHER,
-    val description: String = "",
     val date: Long = System.currentTimeMillis(),
+    val paymentMethod: PaymentMethod = PaymentMethod.CASH,
+    val notes: String = "",
     
-    // Αν συνδέεται με βάρδια
+    // Αν συνδέεται με βάρδια (προαιρετικό)
     val shiftId: String? = null,
     
     // Απόδειξη (προαιρετικό)
@@ -39,32 +50,5 @@ data class Expense(
     // Timestamps
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
-) {
-    /**
-     * Επιστρέφει το emoji για την κατηγορία.
-     */
-    val categoryEmoji: String
-        get() = when (category) {
-            ExpenseCategory.FUEL -> "⛽"
-            ExpenseCategory.MAINTENANCE -> "🔧"
-            ExpenseCategory.INSURANCE -> "🛡️"
-            ExpenseCategory.PHONE -> "📱"
-            ExpenseCategory.EQUIPMENT -> "🎒"
-            ExpenseCategory.TAX -> "📋"
-            ExpenseCategory.OTHER -> "💰"
-        }
-    
-    /**
-     * Επιστρέφει το label για την κατηγορία.
-     */
-    val categoryLabel: String
-        get() = when (category) {
-            ExpenseCategory.FUEL -> "Καύσιμα"
-            ExpenseCategory.MAINTENANCE -> "Συντήρηση"
-            ExpenseCategory.INSURANCE -> "Ασφάλεια"
-            ExpenseCategory.PHONE -> "Τηλέφωνο"
-            ExpenseCategory.EQUIPMENT -> "Εξοπλισμός"
-            ExpenseCategory.TAX -> "Φόροι/ΕΦΚΑ"
-            ExpenseCategory.OTHER -> "Άλλα"
-        }
-}
+)
+

@@ -134,4 +134,90 @@
     <!-- Currency -->
     <string name="currency_symbol">€</string>
     <string name="currency_format">%s€</string>
+    
+    <!-- Common UI -->
+    <string name="back">Πίσω</string>
+    <string name="new_expense">Νέο Έξοδο</string>
+    <string name="edit_expense">Επεξεργασία Εξόδου</string>
+    <string name="new_shift">Νέα Βάρδια</string>
+    <string name="edit_shift">Επεξεργασία Βάρδιας</string>
+    <string name="date_format_hint">ΗΗ/ΜΜ/ΕΕΕΕ</string>
+    <string name="notes_optional">Σημειώσεις (προαιρετικό)</string>
+    <string name="update">Ενημέρωση</string>
+    
+    <!-- Empty States -->
+    <string name="empty_expenses">Δεν υπάρχουν έξοδα ακόμα</string>
+    <string name="empty_expenses_hint">Πάτα + για να προσθέσεις</string>
+    <string name="empty_shifts">Δεν υπάρχουν βάρδιες ακόμα</string>
+    <string name="empty_shifts_hint">Πάτα + για να προσθέσεις</string>
+    <string name="empty_recycle_bin">Ο κάδος είναι άδειος</string>
+    <string name="empty_recycle_bin_hint">Τα διαγραμμένα αντικείμενα\nεμφανίζονται εδώ για 30 ημέρες</string>
+    <string name="no_expenses_data">Δεν υπάρχουν έξοδα</string>
+    
+    <!-- Dialogs -->
+    <string name="dialog_delete_expense_title">Διαγραφή Εξόδου</string>
+    <string name="dialog_delete_expense_message">Θέλεις σίγουρα να διαγράψεις αυτό το έξοδο;</string>
+    <string name="dialog_delete_shift_title">Διαγραφή Βάρδιας</string>
+    <string name="dialog_delete_shift_message">Θέλεις σίγουρα να διαγράψεις αυτή τη βάρδια;</string>
+    <string name="dialog_permanent_delete_title">Οριστική Διαγραφή</string>
+    <string name="dialog_permanent_delete_message">Αυτό το αντικείμενο θα διαγραφεί οριστικά. Είσαι σίγουρος;</string>
+    
+    <!-- Statistics -->
+    <string name="stats_income">💰 Έσοδα</string>
+    <string name="stats_gross">📦 Μικτά</string>
+    <string name="stats_tips">💵 Tips</string>
+    <string name="stats_bonus">⭐ Bonus</string>
+    <string name="stats_net">✅ Καθαρά</string>
+    <string name="stats_expenses">💸 Έξοδα</string>
+    <string name="stats_total_expenses">Σύνολο Εξόδων</string>
+    <string name="stats_net_profit">🎯 Καθαρό Κέρδος</string>
+    <string name="stats_numbers">📈 Αριθμοί</string>
+    <string name="stats_shifts">Βάρδιες</string>
+    <string name="stats_orders">Παραγγελίες</string>
+    <string name="stats_hours">Ώρες</string>
+    <string name="stats_km">Χλμ</string>
+    <string name="stats_averages">📊 Μέσοι Όροι</string>
+    <string name="stats_per_hour">€/ώρα</string>
+    <string name="stats_per_order">€/παραγγελία</string>
+    <string name="stats_per_km">€/χλμ</string>
+    <string name="stats_orders_per_shift">Παραγγελίες/βάρδια</string>
+    <string name="stats_best_day">🏆 Καλύτερη Ημέρα</string>
+    
+    <!-- Period Filters -->
+    <string name="period_all">Όλα</string>
+    <string name="period_week">Εβδομάδα</string>
+    <string name="period_month">Μήνας</string>
+    <string name="period_year">Έτος</string>
+    
+    <!-- Recycle Bin -->
+    <string name="recycle_bin_title">🗑️ Κάδος Ανακύκλωσης</string>
+    <string name="recycle_bin_shifts">📋 Βάρδιες (%d)</string>
+    <string name="recycle_bin_expenses">💰 Έξοδα (%d)</string>
+    <string name="action_restore">Επαναφορά</string>
+    <string name="action_permanent_delete">Οριστική Διαγραφή</string>
+    
+    <!-- Dashboard Additional -->
+    <string name="dashboard_welcome">Καλωσήρθες, %s! 👋</string>
+    <string name="dashboard_today">📅 Σήμερα</string>
+    <string name="dashboard_this_month">📊 Αυτόν τον μήνα</string>
+    <string name="dashboard_net">Καθαρά</string>
+    <string name="dashboard_orders">Παραγγελίες</string>
+    <string name="dashboard_hours">Ώρες</string>
+    <string name="dashboard_bonus">Bonus</string>
+    <string name="dashboard_shifts">Βάρδιες</string>
+    <string name="dashboard_goal_reached">🎉 Μπράβο! Πέτυχες τον στόχο!</string>
+    
+    <!-- Settings Additional -->
+    <string name="settings_user">Χρήστης</string>
+    <string name="settings_pin_active">PIN ενεργό</string>
+    <string name="settings_goal_daily">Ημερήσιος</string>
+    <string name="settings_goal_weekly">Εβδομαδ.</string>
+    <string name="settings_goal_monthly">Μηνιαίος</string>
+    <string name="settings_goal_yearly">Ετήσιος</string>
+    <string name="settings_tax_hint">Το ΦΠΑ υπολογίζεται επί των εσόδων (όχι tips). Η εισφορά ΕΦΚΑ αφαιρείται από τα μηνιαία κέρδη στα στατιστικά.</string>
+    <string name="btn_save_settings">Αποθήκευση Ρυθμίσεων</string>
+    <string name="msg_settings_saved">Οι ρυθμίσεις αποθηκεύτηκαν!</string>
 </resources>
+
+
+

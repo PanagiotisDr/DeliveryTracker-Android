@@ -12,6 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.rememberNavController
 import com.deliverytracker.app.domain.model.ThemeMode
 import com.deliverytracker.app.domain.repository.AuthRepository
@@ -36,6 +37,9 @@ class MainActivity : ComponentActivity() {
     lateinit var userSettingsRepository: UserSettingsRepository
     
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Εγκατάσταση Splash Screen πριν το super.onCreate()
+        installSplashScreen()
+        
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         

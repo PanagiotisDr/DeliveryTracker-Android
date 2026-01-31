@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Χρώματα για το DeliveryTracker -->
+<resources>
+    <!-- Splash Screen -->
+    <color name="splash_background">#1976D2</color>
+    
+    <!-- Primary Colors -->
+    <color name="primary">#1976D2</color>
+    <color name="primary_variant">#1565C0</color>
+    <color name="on_primary">#FFFFFF</color>
+    
+    <!-- Secondary Colors -->
+    <color name="secondary">#42A5F5</color>
+    <color name="on_secondary">#000000</color>
+</resources>

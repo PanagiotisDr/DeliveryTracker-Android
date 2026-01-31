@@ -87,6 +87,9 @@ dependencies {
 
     // DataStore - Για τοπικές ρυθμίσεις
     implementation(libs.datastore.preferences)
+    
+    // Splash Screen API
+    implementation("androidx.core:core-splashscreen:1.0.1")
 
     // Testing
     testImplementation(libs.junit)
