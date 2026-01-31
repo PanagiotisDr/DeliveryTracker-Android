@@ -1,8 +1,8 @@
 package com.deliverytracker.app.presentation.screens.shifts
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -14,12 +14,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.deliverytracker.app.presentation.components.ValidatedTextField
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.deliverytracker.app.R
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * Οθόνη προσθήκης/επεξεργασίας βάρδιας.
- * Χρησιμοποιεί stringResource για localization.
+ * Βελτιωμένη έκδοση με Date Picker, υποχρεωτικά πεδία (*), και αυστηρό validation.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,6 +33,18 @@ fun ShiftFormScreen(
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     
+    // State για Date Picker
+    var showDatePicker by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = System.currentTimeMillis(),
+        // Περιορισμός: μόνο μέχρι σήμερα (όχι μελλοντικές ημερομηνίες)
+        selectableDates = object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                return utcTimeMillis <= System.currentTimeMillis()
+            }
+        }
+    )
+    
     // Αν αποθηκεύτηκε, επιστροφή
     LaunchedEffect(uiState.isSaved) {
         if (uiState.isSaved) {
@@ -37,11 +52,47 @@ fun ShiftFormScreen(
         }
     }
     
-    // Εμφάνιση error
+    // Εμφάνιση error με localized message
+    val errorMessages = mapOf(
+        "error_zero_income" to stringResource(R.string.error_zero_income),
+        "error_zero_duration" to stringResource(R.string.error_zero_duration),
+        "error_over_24_hours" to stringResource(R.string.error_over_24_hours),
+        "error_future_date" to stringResource(R.string.error_future_date),
+        "error_zero_orders_with_km" to stringResource(R.string.error_zero_orders_with_km),
+        "error_zero_orders" to stringResource(R.string.error_zero_orders),
+        "error_zero_km" to stringResource(R.string.error_zero_km)
+    )
+    
     LaunchedEffect(uiState.error) {
-        uiState.error?.let {
-            snackbarHostState.showSnackbar(it)
+        uiState.error?.let { errorKey ->
+            val message = errorMessages[errorKey] ?: errorKey
+            snackbarHostState.showSnackbar(message)
             viewModel.clearError()
+        }
+    }
+    
+    // Date Picker Dialog
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                        viewModel.updateDate(dateFormat.format(Date(millis)))
+                    }
+                    showDatePicker = false
+                }) {
+                    Text(stringResource(R.string.btn_ok))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text(stringResource(R.string.btn_cancel))
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
         }
     }
     
@@ -97,7 +148,7 @@ fun ShiftFormScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Ημερομηνία
+                // Ημερομηνία - με Date Picker
                 Text(
                     text = "📅 ${stringResource(R.string.shift_date)}",
                     style = MaterialTheme.typography.titleMedium
@@ -105,16 +156,32 @@ fun ShiftFormScreen(
                 
                 OutlinedTextField(
                     value = uiState.dateText,
-                    onValueChange = { viewModel.updateDate(it) },
+                    onValueChange = { /* Read-only, Date Picker */ },
                     label = { Text(stringResource(R.string.date_format_hint)) },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showDatePicker = true },
                     leadingIcon = { Icon(Icons.Default.CalendarToday, null) },
-                    singleLine = true
+                    trailingIcon = {
+                        IconButton(onClick = { showDatePicker = true }) {
+                            Icon(Icons.Default.EditCalendar, contentDescription = null)
+                        }
+                    },
+                    singleLine = true,
+                    readOnly = true,
+                    enabled = false,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                        disabledBorderColor = MaterialTheme.colorScheme.outline,
+                        disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 )
                 
                 HorizontalDivider()
                 
-                // Ώρες εργασίας
+                // Ώρες εργασίας - ΥΠΟΧΡΕΩΤΙΚΟ
                 Text(
                     text = "⏱️ ${stringResource(R.string.shift_duration)}",
                     style = MaterialTheme.typography.titleMedium
@@ -125,32 +192,32 @@ fun ShiftFormScreen(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    OutlinedTextField(
+                    // Ώρες με validation feedback
+                    ValidatedTextField(
                         value = uiState.workedHours,
                         onValueChange = { viewModel.updateWorkedHours(it) },
-                        label = { Text(stringResource(R.string.shift_hours)) },
+                        label = stringResource(R.string.shift_hours),
+                        isValid = uiState.workedHours.isNotBlank() && uiState.workedHours.toIntOrNull() != null,
                         modifier = Modifier.weight(1f),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
-                        placeholder = { Text("8") },
-                        suffix = { Text(stringResource(R.string.shift_hours_suffix)) }
+                        suffix = { Text(stringResource(R.string.shift_hours_suffix)) },
+                        keyboardType = KeyboardType.Number
                     )
                     
-                    OutlinedTextField(
+                    // Λεπτά με validation feedback
+                    ValidatedTextField(
                         value = uiState.workedMinutes,
                         onValueChange = { viewModel.updateWorkedMinutes(it) },
-                        label = { Text(stringResource(R.string.shift_minutes)) },
+                        label = stringResource(R.string.shift_minutes),
+                        isValid = uiState.workedMinutes.isNotBlank() && uiState.workedMinutes.toIntOrNull() != null,
                         modifier = Modifier.weight(1f),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
-                        placeholder = { Text("30") },
-                        suffix = { Text(stringResource(R.string.shift_minutes_suffix)) }
+                        suffix = { Text(stringResource(R.string.shift_minutes_suffix)) },
+                        keyboardType = KeyboardType.Number
                     )
                 }
                 
                 HorizontalDivider()
                 
-                // Έσοδα
+                // Έσοδα - ΥΠΟΧΡΕΩΤΙΚΟ
                 Text(
                     text = "💰 ${stringResource(R.string.stats_income)}",
                     style = MaterialTheme.typography.titleMedium
@@ -160,47 +227,49 @@ fun ShiftFormScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    OutlinedTextField(
+                    // Εσοδα - με validation feedback
+                    ValidatedTextField(
                         value = uiState.grossIncome,
                         onValueChange = { viewModel.updateGrossIncome(it) },
-                        label = { Text(stringResource(R.string.stats_gross)) },
+                        label = stringResource(R.string.stats_gross),
+                        isValid = uiState.grossIncome.isNotBlank() && 
+                            uiState.grossIncome.replace(",", ".").toDoubleOrNull()?.let { it > 0 } == true,
                         modifier = Modifier.weight(1f),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        singleLine = true,
-                        placeholder = { Text("0,00") },
-                        suffix = { Text(stringResource(R.string.currency_symbol)) }
+                        suffix = { Text(stringResource(R.string.currency_symbol)) },
+                        keyboardType = KeyboardType.Decimal
                     )
                     
-                    OutlinedTextField(
+                    // Tips - προαιρετικό, πράσινο όταν έχει τιμή
+                    ValidatedTextField(
                         value = uiState.tips,
                         onValueChange = { viewModel.updateTips(it) },
-                        label = { Text(stringResource(R.string.shift_tips)) },
+                        label = stringResource(R.string.shift_tips),
+                        isValid = uiState.tips.isNotBlank() && 
+                            uiState.tips.replace(",", ".").toDoubleOrNull()?.let { it > 0 } == true,
                         modifier = Modifier.weight(1f),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        singleLine = true,
-                        placeholder = { Text("0,00") },
-                        suffix = { Text(stringResource(R.string.currency_symbol)) }
+                        suffix = { Text(stringResource(R.string.currency_symbol)) },
+                        keyboardType = KeyboardType.Decimal
                     )
                 }
                 
-                // Bonus field
-                OutlinedTextField(
+                // Bonus field - προαιρετικό, πράσινο όταν έχει τιμή
+                ValidatedTextField(
                     value = uiState.bonus,
                     onValueChange = { viewModel.updateBonus(it) },
-                    label = { Text(stringResource(R.string.shift_bonus)) },
+                    label = stringResource(R.string.shift_bonus),
+                    isValid = uiState.bonus.isNotBlank() && 
+                        uiState.bonus.replace(",", ".").toDoubleOrNull()?.let { it > 0 } == true,
                     modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    singleLine = true,
-                    placeholder = { Text("0,00") },
                     suffix = { Text(stringResource(R.string.currency_symbol)) },
-                    leadingIcon = { Icon(Icons.Default.Star, null) }
+                    leadingIcon = { Icon(Icons.Default.Star, null) },
+                    keyboardType = KeyboardType.Decimal
                 )
                 
                 HorizontalDivider()
                 
-                // Έξοδα
+                // Στατιστικά - ΥΠΟΧΡΕΩΤΙΚΑ
                 Text(
-                    text = "📊 ${stringResource(R.string.nav_expenses)}",
+                    text = "📊 ${stringResource(R.string.nav_statistics)}",
                     style = MaterialTheme.typography.titleMedium
                 )
                 
@@ -208,62 +277,37 @@ fun ShiftFormScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    OutlinedTextField(
-                        value = uiState.fuelCost,
-                        onValueChange = { viewModel.updateFuelCost(it) },
-                        label = { Text(stringResource(R.string.category_fuel)) },
+                    // Παραγγελίες - με validation feedback
+                    ValidatedTextField(
+                        value = uiState.ordersCount,
+                        onValueChange = { viewModel.updateOrdersCount(it) },
+                        label = stringResource(R.string.shift_orders),
+                        isValid = uiState.ordersCount.isNotBlank() && uiState.ordersCount.toIntOrNull()?.let { it > 0 } == true,
                         modifier = Modifier.weight(1f),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        singleLine = true,
-                        placeholder = { Text("0,00") },
-                        suffix = { Text(stringResource(R.string.currency_symbol)) }
+                        leadingIcon = { Icon(Icons.Default.ShoppingCart, null) },
+                        keyboardType = KeyboardType.Number
                     )
                     
-                    OutlinedTextField(
-                        value = uiState.otherExpenses,
-                        onValueChange = { viewModel.updateOtherExpenses(it) },
-                        label = { Text(stringResource(R.string.category_other)) },
+                    // Χιλιόμετρα - με validation feedback
+                    ValidatedTextField(
+                        value = uiState.kilometers,
+                        onValueChange = { viewModel.updateKilometers(it) },
+                        label = stringResource(R.string.shift_kilometers),
+                        isValid = uiState.kilometers.isNotBlank() && 
+                            uiState.kilometers.replace(",", ".").toDoubleOrNull()?.let { it > 0 } == true,
                         modifier = Modifier.weight(1f),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        singleLine = true,
-                        placeholder = { Text("0,00") },
-                        suffix = { Text(stringResource(R.string.currency_symbol)) }
+                        suffix = { Text("km") },
+                        keyboardType = KeyboardType.Decimal
                     )
                 }
                 
                 HorizontalDivider()
                 
-                // Επιπλέον στοιχεία
+                // Σημειώσεις - ΠΡΟΑΙΡΕΤΙΚΟ
                 Text(
                     text = "📝 ${stringResource(R.string.shift_notes)}",
                     style = MaterialTheme.typography.titleMedium
                 )
-                
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    OutlinedTextField(
-                        value = uiState.ordersCount,
-                        onValueChange = { viewModel.updateOrdersCount(it) },
-                        label = { Text(stringResource(R.string.shift_orders)) },
-                        modifier = Modifier.weight(1f),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
-                        leadingIcon = { Icon(Icons.Default.ShoppingCart, null) }
-                    )
-                    
-                    OutlinedTextField(
-                        value = uiState.kilometers,
-                        onValueChange = { viewModel.updateKilometers(it) },
-                        label = { Text(stringResource(R.string.shift_kilometers)) },
-                        modifier = Modifier.weight(1f),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        singleLine = true,
-                        placeholder = { Text("0,0") },
-                        suffix = { Text("km") }
-                    )
-                }
                 
                 OutlinedTextField(
                     value = uiState.notes,
@@ -297,3 +341,4 @@ fun ShiftFormScreen(
         }
     }
 }
+

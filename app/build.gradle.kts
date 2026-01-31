@@ -1,9 +1,12 @@
 // Module-level build configuration για την Android εφαρμογή
 // Περιλαμβάνει Compose, Hilt, Firebase integration
+// AGP 9.0 compatible - χρήση built-in Kotlin support
+
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
+    // Σημείωση: Το kotlin.android δεν χρειάζεται πλέον στο AGP 9.0
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
@@ -45,13 +48,16 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+}
+
+// Νέο Kotlin compiler options DSL
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
     }
 }
 
@@ -76,11 +82,10 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
 
-    // Firebase - Χρησιμοποιούμε BOM για version management
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.auth.ktx)
-    implementation(libs.firebase.firestore.ktx)
-    implementation(libs.firebase.analytics.ktx)
+    // Firebase - ΧΩΡΙΣ -ktx suffix (deprecated στις νέες εκδόσεις)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.analytics)
 
     // Vico Charts - Για γραφήματα στατιστικών
     implementation(libs.vico.compose.m3)

@@ -44,6 +44,7 @@
 
     
     <!-- Buttons -->
+    <string name="btn_ok">OK</string>
     <string name="btn_save">Αποθήκευση</string>
     <string name="btn_cancel">Ακύρωση</string>
     <string name="btn_delete">Διαγραφή</string>
@@ -141,7 +142,13 @@
     <string name="error_passwords_mismatch">Οι κωδικοί δεν ταιριάζουν</string>
     <string name="error_invalid_number">Παρακαλώ εισάγετε έναν έγκυρο αριθμό</string>
     <string name="error_future_date">Η ημερομηνία δεν μπορεί να είναι στο μέλλον</string>
-    <string name="error_login_failed">Αποτυχία σύνδεσης. Ελέγξτε τα στοιχεία σας.</string>
+    <string name="error_zero_income">Δεν μπορείς να καταχωρήσεις βάρδια με μηδενικά έσοδα</string>
+    <string name="error_zero_duration">Η βάρδια πρέπει να έχει διάρκεια αν έχει έσοδα</string>
+    <string name="error_over_24_hours">Η διάρκεια δεν μπορεί να υπερβαίνει τις 24 ώρες</string>
+    <string name="error_zero_orders_with_km">Δεν μπορείς να έχεις χιλιόμετρα χωρίς παραγγελίες</string>
+    <string name="error_zero_orders">Εισάγετε αριθμό παραγγελιών</string>
+    <string name="error_zero_km">Εισάγετε χιλιόμετρα</string>
+    <string name="error_zero_amount">Το ποσό δεν μπορεί να είναι μηδέν</string>
     <string name="error_network">Σφάλμα δικτύου. Δοκιμάστε ξανά.</string>
     
     <!-- PIN -->
@@ -236,6 +243,25 @@
     <string name="settings_tax_hint">Το ΦΠΑ υπολογίζεται επί των εσόδων (όχι tips). Η εισφορά ΕΦΚΑ αφαιρείται από τα μηνιαία κέρδη στα στατιστικά.</string>
     <string name="btn_save_settings">Αποθήκευση Ρυθμίσεων</string>
     <string name="msg_settings_saved">Οι ρυθμίσεις αποθηκεύτηκαν!</string>
+    
+    <!-- Export -->
+    <string name="export_title">Εξαγωγή Δεδομένων</string>
+    <string name="export_period">Περίοδος</string>
+    <string name="export_period_hint">Προεπιλογή: Τρέχων μήνας</string>
+    <string name="export_options_title">Επιλογές Εξαγωγής</string>
+    <string name="export_shifts_csv">Βάρδιες (CSV)</string>
+    <string name="export_shifts_csv_desc">Εξαγωγή βαρδιών σε αρχείο CSV</string>
+    <string name="export_expenses_csv">Έξοδα (CSV)</string>
+    <string name="export_expenses_csv_desc">Εξαγωγή εξόδων σε αρχείο CSV</string>
+    <string name="export_report">Συνοπτική Αναφορά</string>
+    <string name="export_report_desc">Δημιουργία αναφοράς με σύνολα και στατιστικά</string>
+    
+    <!-- Backup -->
+    <string name="backup_title">Αντίγραφα Ασφαλείας</string>
+    <string name="backup_create">Δημιουργία Backup</string>
+    <string name="backup_create_desc">Εξαγωγή όλων των δεδομένων σε JSON</string>
+    <string name="backup_restore">Επαναφορά Backup</string>
+    <string name="backup_restore_desc">Εισαγωγή δεδομένων από backup αρχείο</string>
 </resources>
 
 

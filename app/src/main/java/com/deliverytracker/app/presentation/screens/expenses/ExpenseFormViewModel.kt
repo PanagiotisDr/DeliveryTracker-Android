@@ -160,9 +160,20 @@ class ExpenseFormViewModel @Inject constructor(
             
             _uiState.update { it.copy(isLoading = true) }
             
-            // Parse date
+            // Parse date - Ορίζουμε ώρα 12:00 noon για αποφυγή timezone bugs
             val date = try {
-                dateFormat.parse(state.dateText)?.time ?: System.currentTimeMillis()
+                val parsedDate = dateFormat.parse(state.dateText)
+                if (parsedDate != null) {
+                    val cal = Calendar.getInstance()
+                    cal.time = parsedDate
+                    cal.set(Calendar.HOUR_OF_DAY, 12)
+                    cal.set(Calendar.MINUTE, 0)
+                    cal.set(Calendar.SECOND, 0)
+                    cal.set(Calendar.MILLISECOND, 0)
+                    cal.timeInMillis
+                } else {
+                    System.currentTimeMillis()
+                }
             } catch (e: Exception) {
                 System.currentTimeMillis()
             }

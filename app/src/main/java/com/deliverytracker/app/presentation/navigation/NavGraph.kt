@@ -203,5 +203,11 @@ fun NavGraph(
                 onNavigateBack = { navController.popBackStack() }
             )
         }
+        
+        composable(Screen.Export.route) {
+            com.deliverytracker.app.presentation.screens.export.ExportScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
     }
 }

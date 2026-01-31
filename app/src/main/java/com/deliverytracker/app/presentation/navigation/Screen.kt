@@ -26,4 +26,5 @@ sealed class Screen(val route: String) {
     data object Statistics : Screen("statistics")
     data object Settings : Screen("settings")
     data object RecycleBin : Screen("recycle_bin")
+    data object Export : Screen("export")
 }

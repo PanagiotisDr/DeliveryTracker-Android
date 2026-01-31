@@ -63,8 +63,6 @@ class ShiftFormViewModel @Inject constructor(
                             grossIncome = if (shift.grossIncome > 0) shift.grossIncome.toString().replace(".", ",") else "",
                             tips = if (shift.tips > 0) shift.tips.toString().replace(".", ",") else "",
                             bonus = if (shift.bonus > 0) shift.bonus.toString().replace(".", ",") else "",
-                            fuelCost = if (shift.fuelCost > 0) shift.fuelCost.toString().replace(".", ",") else "",
-                            otherExpenses = if (shift.otherExpenses > 0) shift.otherExpenses.toString().replace(".", ",") else "",
                             ordersCount = if (shift.ordersCount > 0) shift.ordersCount.toString() else "",
                             kilometers = if (shift.kilometers > 0) shift.kilometers.toString().replace(".", ",") else "",
                             notes = shift.notes,
@@ -106,43 +104,38 @@ class ShiftFormViewModel @Inject constructor(
      * Κανονικοποιεί decimal input - δέχεται τελεία ή κόμμα.
      */
     private fun normalizeDecimal(value: String): String {
-        // Επιτρέπουμε αριθμούς, τελεία ή κόμμα
         return value.replace(".", ",")
     }
     
-    private fun isValidDecimal(value: String): Boolean {
+    /**
+     * Ελέγχει αν είναι έγκυρο decimal με max δεκαδικά ψηφία.
+     * @param maxDecimals Μέγιστος αριθμός δεκαδικών ψηφίων (2 για €, 1 για km)
+     */
+    private fun isValidDecimal(value: String, maxDecimals: Int = 2): Boolean {
         if (value.isEmpty()) return true
-        // Επιτρέπουμε αριθμούς με μία τελεία ή κόμμα
-        return value.matches(Regex("^\\d*[.,]?\\d*$"))
+        // Regex: αριθμοί με μία τελεία/κόμμα και max X δεκαδικά
+        val pattern = "^\\d*[.,]?\\d{0,$maxDecimals}$"
+        return value.matches(Regex(pattern))
     }
     
     fun updateGrossIncome(value: String) {
-        if (isValidDecimal(value)) {
+        // Max 2 δεκαδικά για ευρώ
+        if (isValidDecimal(value, 2)) {
             _uiState.update { it.copy(grossIncome = normalizeDecimal(value)) }
         }
     }
     
     fun updateTips(value: String) {
-        if (isValidDecimal(value)) {
+        // Max 2 δεκαδικά για ευρώ
+        if (isValidDecimal(value, 2)) {
             _uiState.update { it.copy(tips = normalizeDecimal(value)) }
         }
     }
     
     fun updateBonus(value: String) {
-        if (isValidDecimal(value)) {
+        // Max 2 δεκαδικά για ευρώ
+        if (isValidDecimal(value, 2)) {
             _uiState.update { it.copy(bonus = normalizeDecimal(value)) }
-        }
-    }
-    
-    fun updateFuelCost(value: String) {
-        if (isValidDecimal(value)) {
-            _uiState.update { it.copy(fuelCost = normalizeDecimal(value)) }
-        }
-    }
-    
-    fun updateOtherExpenses(value: String) {
-        if (isValidDecimal(value)) {
-            _uiState.update { it.copy(otherExpenses = normalizeDecimal(value)) }
         }
     }
     
@@ -157,7 +150,8 @@ class ShiftFormViewModel @Inject constructor(
     }
     
     fun updateKilometers(value: String) {
-        if (isValidDecimal(value)) {
+        // Max 1 δεκαδικό για χιλιόμετρα
+        if (isValidDecimal(value, 1)) {
             _uiState.update { it.copy(kilometers = normalizeDecimal(value)) }
         }
     }
@@ -170,22 +164,93 @@ class ShiftFormViewModel @Inject constructor(
     }
     
     /**
-     * Αποθηκεύει τη βάρδια.
+     * Αποθηκεύει τη βάρδια με αυστηρό validation.
      */
     fun saveShift() {
         viewModelScope.launch {
             val state = _uiState.value
             
-            // Validation
-            if (state.workedHours.isEmpty() && state.workedMinutes.isEmpty()) {
-                _uiState.update { it.copy(error = "Συμπλήρωσε τις ώρες εργασίας") }
+            // ========== STRICT VALIDATION ==========
+            
+            // 1. Έλεγχος μηδενικών εσόδων
+            val grossIncome = parseDecimal(state.grossIncome)
+            val tips = parseDecimal(state.tips)
+            val bonus = parseDecimal(state.bonus)
+            val totalIncome = grossIncome + tips + bonus
+            
+            if (totalIncome <= 0) {
+                _uiState.update { it.copy(error = "error_zero_income") }
                 return@launch
             }
             
-            if (state.grossIncome.isEmpty()) {
-                _uiState.update { it.copy(error = "Συμπλήρωσε τα μικτά έσοδα") }
+            // 2. Έλεγχος διάρκειας - αν έχουμε έσοδα, πρέπει να έχουμε διάρκεια
+            val hours = state.workedHours.toIntOrNull() ?: 0
+            val minutes = state.workedMinutes.toIntOrNull() ?: 0
+            val totalMinutes = hours * 60 + minutes
+            
+            if (totalMinutes == 0 && totalIncome > 0) {
+                _uiState.update { it.copy(error = "error_zero_duration") }
                 return@launch
             }
+            
+            // 3. Έλεγχος μέγιστης διάρκειας (24 ώρες = 1440 λεπτά)
+            if (totalMinutes > 1440) {
+                _uiState.update { it.copy(error = "error_over_24_hours") }
+                return@launch
+            }
+            
+            // 4. Έλεγχος μελλοντικής ημερομηνίας
+            val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            // Σημαντικό: Ορίζουμε ρητά το timezone για να αποφύγουμε offset bugs
+            dateFormat.timeZone = java.util.TimeZone.getDefault()
+            
+            val shiftDate = try {
+                // Parse την ημερομηνία και στη συνέχεια ορίζουμε ώρα στις 12:00 noon
+                // για να αποφύγουμε day boundary bugs με timezones
+                val parsedDate = dateFormat.parse(state.dateText)
+                if (parsedDate != null) {
+                    val cal = Calendar.getInstance()
+                    cal.time = parsedDate
+                    cal.set(Calendar.HOUR_OF_DAY, 12)
+                    cal.set(Calendar.MINUTE, 0)
+                    cal.set(Calendar.SECOND, 0)
+                    cal.set(Calendar.MILLISECOND, 0)
+                    cal.timeInMillis
+                } else {
+                    System.currentTimeMillis()
+                }
+            } catch (e: Exception) {
+                System.currentTimeMillis()
+            }
+            
+            val todayStart = Calendar.getInstance().apply {
+                set(Calendar.HOUR_OF_DAY, 23)
+                set(Calendar.MINUTE, 59)
+                set(Calendar.SECOND, 59)
+            }.timeInMillis
+            
+            if (shiftDate > todayStart) {
+                _uiState.update { it.copy(error = "error_future_date") }
+                return@launch
+            }
+            
+            // 5. Παραγγελίες υποχρεωτικές αν υπάρχουν έσοδα
+            val ordersCount = state.ordersCount.toIntOrNull() ?: 0
+            
+            if (ordersCount == 0 && totalIncome > 0) {
+                _uiState.update { it.copy(error = "error_zero_orders") }
+                return@launch
+            }
+            
+            // 6. Χιλιόμετρα υποχρεωτικά αν υπάρχουν παραγγελίες
+            val kilometers = parseDecimal(state.kilometers)
+            
+            if (kilometers <= 0 && ordersCount > 0) {
+                _uiState.update { it.copy(error = "error_zero_km") }
+                return@launch
+            }
+            
+            // ========== END VALIDATION ==========
             
             // Παίρνουμε το userId απευθείας από το FirebaseAuth
             val userId = FirebaseAuth.getInstance().currentUser?.uid
@@ -196,27 +261,17 @@ class ShiftFormViewModel @Inject constructor(
             
             _uiState.update { it.copy(isLoading = true) }
             
-            // Parse date
-            val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-            val date = try {
-                dateFormat.parse(state.dateText)?.time ?: System.currentTimeMillis()
-            } catch (e: Exception) {
-                System.currentTimeMillis()
-            }
-            
             val shift = Shift(
                 id = state.existingShift?.id ?: "",
                 userId = userId,
-                date = date,
-                workedHours = state.workedHours.toIntOrNull() ?: 0,
-                workedMinutes = state.workedMinutes.toIntOrNull() ?: 0,
-                grossIncome = parseDecimal(state.grossIncome),
-                tips = parseDecimal(state.tips),
-                bonus = parseDecimal(state.bonus),
-                fuelCost = parseDecimal(state.fuelCost),
-                otherExpenses = parseDecimal(state.otherExpenses),
-                ordersCount = state.ordersCount.toIntOrNull() ?: 0,
-                kilometers = parseDecimal(state.kilometers),
+                date = shiftDate,
+                workedHours = hours,
+                workedMinutes = minutes,
+                grossIncome = grossIncome,
+                tips = tips,
+                bonus = bonus,
+                ordersCount = ordersCount,
+                kilometers = kilometers,
                 notes = state.notes,
                 createdAt = state.existingShift?.createdAt ?: System.currentTimeMillis()
             )
@@ -262,11 +317,9 @@ data class ShiftFormUiState(
     val workedMinutes: String = "",
     val grossIncome: String = "",
     val tips: String = "",
-    val bonus: String = "",           // Νέο field
-    val fuelCost: String = "",
-    val otherExpenses: String = "",
+    val bonus: String = "",
     val ordersCount: String = "",
-    val kilometers: String = "",      // Νέο field
+    val kilometers: String = "",
     val notes: String = "",
     
     // Για edit mode

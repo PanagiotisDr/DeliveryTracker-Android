@@ -3,6 +3,9 @@ package com.deliverytracker.app.domain.model
 /**
  * Domain model για μια βάρδια εργασίας.
  * Περιέχει όλα τα στοιχεία που καταγράφει ο διανομέας.
+ * 
+ * ΣΗΜΑΝΤΙΚΟ: Τα έξοδα (καύσιμα, συντήρηση κτλ) καταχωρούνται ξεχωριστά
+ * μέσω του Expense entity για καλύτερη οργάνωση και κατηγοριοποίηση.
  */
 data class Shift(
     val id: String = "",
@@ -13,16 +16,14 @@ data class Shift(
     val workedHours: Int = 0,      // Ώρες εργασίας
     val workedMinutes: Int = 0,    // Λεπτά εργασίας
     
-    // Οικονομικά στοιχεία
+    // Οικονομικά στοιχεία (μόνο έσοδα - τα έξοδα είναι στο Expense)
     val grossIncome: Double = 0.0,      // Μικτά έσοδα (πλατφόρμα)
     val tips: Double = 0.0,             // Φιλοδωρήματα
-    val bonus: Double = 0.0,            // Bonus πλατφόρμας (peak hours, βροχή κτλ) ⭐ ΝΕΟ
-    val fuelCost: Double = 0.0,         // Κόστος καυσίμων
-    val otherExpenses: Double = 0.0,    // Άλλα έξοδα
+    val bonus: Double = 0.0,            // Bonus πλατφόρμας (peak hours, βροχή κτλ)
     
     // Στατιστικά
     val ordersCount: Int = 0,           // Αριθμός παραγγελιών
-    val kilometers: Double = 0.0,       // Χιλιόμετρα που διανύθηκαν ⭐ ΝΕΟ (απλοποιημένο)
+    val kilometers: Double = 0.0,       // Χιλιόμετρα που διανύθηκαν
     val kilometersStart: Double? = null, // Χιλιόμετρα - αρχή (legacy)
     val kilometersEnd: Double? = null,   // Χιλιόμετρα - τέλος (legacy)
     
@@ -39,22 +40,16 @@ data class Shift(
 ) {
     /**
      * Υπολογισμός καθαρών εσόδων.
-     * Μικτά + Tips + Bonus - Καύσιμα - Άλλα έξοδα
+     * Μικτά + Tips + Bonus (τα έξοδα υπολογίζονται ξεχωριστά από το Expense entity)
      */
     val netIncome: Double
-        get() = grossIncome + tips + bonus - fuelCost - otherExpenses
+        get() = grossIncome + tips + bonus
     
     /**
      * Υπολογισμός συνολικών εσόδων (μικτά + tips + bonus).
      */
     val totalIncome: Double
         get() = grossIncome + tips + bonus
-    
-    /**
-     * Υπολογισμός συνολικών εξόδων.
-     */
-    val totalExpenses: Double
-        get() = fuelCost + otherExpenses
     
     /**
      * Υπολογισμός χιλιομέτρων (νέο field ή legacy).

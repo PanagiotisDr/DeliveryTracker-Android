@@ -1,9 +1,9 @@
 package com.deliverytracker.app.presentation.screens.expenses
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -20,6 +20,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.deliverytracker.app.R
 import com.deliverytracker.app.domain.model.ExpenseCategory
 import com.deliverytracker.app.domain.model.PaymentMethod
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * Οθόνη προσθήκης/επεξεργασίας εξόδου.
@@ -34,6 +36,18 @@ fun ExpenseFormScreen(
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     
+    // State για Date Picker
+    var showDatePicker by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = System.currentTimeMillis(),
+        // Περιορισμός: μόνο μέχρι σήμερα
+        selectableDates = object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                return utcTimeMillis <= System.currentTimeMillis()
+            }
+        }
+    )
+    
     // Αν αποθηκεύτηκε, επιστροφή
     LaunchedEffect(uiState.isSaved) {
         if (uiState.isSaved) {
@@ -46,6 +60,31 @@ fun ExpenseFormScreen(
         uiState.error?.let {
             snackbarHostState.showSnackbar(it)
             viewModel.clearError()
+        }
+    }
+    
+    // Date Picker Dialog
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                        viewModel.updateDate(dateFormat.format(Date(millis)))
+                    }
+                    showDatePicker = false
+                }) {
+                    Text(stringResource(R.string.btn_ok))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text(stringResource(R.string.btn_cancel))
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
         }
     }
     
@@ -101,7 +140,7 @@ fun ExpenseFormScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Ημερομηνία
+                // Ημερομηνία - με Date Picker
                 Text(
                     text = "📅 ${stringResource(R.string.expense_date)}",
                     style = MaterialTheme.typography.titleMedium
@@ -109,11 +148,27 @@ fun ExpenseFormScreen(
                 
                 OutlinedTextField(
                     value = uiState.dateText,
-                    onValueChange = { viewModel.updateDate(it) },
+                    onValueChange = { /* Read-only, Date Picker */ },
                     label = { Text(stringResource(R.string.date_format_hint)) },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showDatePicker = true },
                     leadingIcon = { Icon(Icons.Default.CalendarToday, null) },
-                    singleLine = true
+                    trailingIcon = {
+                        IconButton(onClick = { showDatePicker = true }) {
+                            Icon(Icons.Default.EditCalendar, contentDescription = null)
+                        }
+                    },
+                    singleLine = true,
+                    readOnly = true,
+                    enabled = false,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                        disabledBorderColor = MaterialTheme.colorScheme.outline,
+                        disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 )
                 
                 HorizontalDivider()
@@ -152,7 +207,7 @@ fun ExpenseFormScreen(
                     onValueChange = { viewModel.updateAmount(it) },
                     label = { Text(stringResource(R.string.expense_amount)) },
                     modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     singleLine = true,
                     placeholder = { Text("0,00") },
                     suffix = { Text(stringResource(R.string.currency_symbol)) },

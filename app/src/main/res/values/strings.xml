@@ -44,6 +44,7 @@
 
     
     <!-- Buttons -->
+    <string name="btn_ok">OK</string>
     <string name="btn_save">Save</string>
     <string name="btn_cancel">Cancel</string>
     <string name="btn_delete">Delete</string>
@@ -141,7 +142,13 @@
     <string name="error_passwords_mismatch">Passwords do not match</string>
     <string name="error_invalid_number">Please enter a valid number</string>
     <string name="error_future_date">Date cannot be in the future</string>
-    <string name="error_login_failed">Login failed. Please check your credentials.</string>
+    <string name="error_zero_income">Cannot save shift with zero earnings</string>
+    <string name="error_zero_duration">Shift must have duration if there are earnings</string>
+    <string name="error_over_24_hours">Duration cannot exceed 24 hours</string>
+    <string name="error_zero_orders_with_km">Cannot have kilometers without orders</string>
+    <string name="error_zero_orders">Please enter number of orders</string>
+    <string name="error_zero_km">Please enter kilometers</string>
+    <string name="error_zero_amount">Amount cannot be zero</string>
     <string name="error_network">Network error. Please try again.</string>
     
     <!-- PIN -->
@@ -236,6 +243,25 @@
     <string name="settings_tax_hint">VAT is calculated on earnings (not tips). EFKA contribution is deducted from monthly profits in statistics.</string>
     <string name="btn_save_settings">Save Settings</string>
     <string name="msg_settings_saved">Settings saved!</string>
+    
+    <!-- Export -->
+    <string name="export_title">Export Data</string>
+    <string name="export_period">Period</string>
+    <string name="export_period_hint">Default: Current month</string>
+    <string name="export_options_title">Export Options</string>
+    <string name="export_shifts_csv">Shifts (CSV)</string>
+    <string name="export_shifts_csv_desc">Export your shifts to a CSV file</string>
+    <string name="export_expenses_csv">Expenses (CSV)</string>
+    <string name="export_expenses_csv_desc">Export your expenses to a CSV file</string>
+    <string name="export_report">Summary Report</string>
+    <string name="export_report_desc">Generate a text report with totals and statistics</string>
+    
+    <!-- Backup -->
+    <string name="backup_title">Backup &amp; Restore</string>
+    <string name="backup_create">Create Backup</string>
+    <string name="backup_create_desc">Export all your data to a JSON file</string>
+    <string name="backup_restore">Restore Backup</string>
+    <string name="backup_restore_desc">Import data from a backup file</string>
 </resources>
 
 
