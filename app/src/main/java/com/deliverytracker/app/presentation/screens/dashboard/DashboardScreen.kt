@@ -1,32 +1,35 @@
 package com.deliverytracker.app.presentation.screens.dashboard
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.deliverytracker.app.R
+import com.deliverytracker.app.presentation.components.*
 import com.deliverytracker.app.presentation.theme.*
-import java.text.DecimalFormat
 
 /**
- * 🏠 Dashboard Screen - Google Pay Style
- * Clean white, big hero number, rounded cards με soft shadows.
+ * 🏠 Dashboard Screen - Premium Redesign 2026
+ * 
+ * Features:
+ * - Gradient hero section with animated counter
+ * - Glass morphism stat cards
+ * - Progress ring for goals
+ * - Shimmer loading states
+ * 
+ * @author DeliveryTracker Team
+ * @version 2.0.0
  */
 @Composable
 fun DashboardScreen(
@@ -37,53 +40,61 @@ fun DashboardScreen(
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val decimalFormat = remember { DecimalFormat("#,##0.00") }
     val scrollState = rememberScrollState()
     
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(DarkSurfaces.Background)
             .verticalScroll(scrollState)
     ) {
-        // ============ HERO SECTION - Big Number ============
-        GPay_HeroCard(
+        // ════════════════════════════════════════════════════════════
+        // HERO SECTION - Gradient background με animated counter
+        // ════════════════════════════════════════════════════════════
+        PremiumHeroSection(
             amount = uiState.todayNetIncome,
             label = stringResource(R.string.hero_today_earnings),
             progress = uiState.dailyProgress,
-            goal = uiState.dailyGoal,
-            decimalFormat = decimalFormat
+            goal = uiState.dailyGoal
         )
         
         Spacer(modifier = Modifier.height(Spacing.xl))
         
-        // ============ ΣΗΜΕΡΙΝΑ STATS ============
+        // ════════════════════════════════════════════════════════════
+        // TODAY'S STATS - Glass cards
+        // ════════════════════════════════════════════════════════════
         Column(
-            modifier = Modifier.padding(horizontal = Spacing.lg)
+            modifier = Modifier.padding(horizontal = Spacing.screenHorizontal)
         ) {
+            // Section header
             Text(
                 text = stringResource(R.string.dashboard_today),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = DarkText.Secondary
             )
             
             Spacer(modifier = Modifier.height(Spacing.md))
             
+            // Stats row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.md)
             ) {
-                GPay_StatCard(
-                    value = uiState.todayOrders.toString(),
+                // Orders card
+                GlassStatCard(
+                    value = uiState.todayOrders,
                     label = stringResource(R.string.dashboard_orders),
                     emoji = "📦",
                     modifier = Modifier.weight(1f)
                 )
-                GPay_StatCard(
-                    value = String.format("%.1f", uiState.todayHours),
+                
+                // Hours card
+                GlassStatCard(
+                    value = uiState.todayHours,
                     label = stringResource(R.string.dashboard_hours),
                     emoji = "⏱️",
+                    isDecimal = true,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -91,54 +102,61 @@ fun DashboardScreen(
         
         Spacer(modifier = Modifier.height(Spacing.xl))
         
-        // ============ ΜΗΝΙΑΙΑ STATS ============
+        // ════════════════════════════════════════════════════════════
+        // MONTHLY SUMMARY - Card with progress ring
+        // ════════════════════════════════════════════════════════════
         Column(
-            modifier = Modifier.padding(horizontal = Spacing.lg)
+            modifier = Modifier.padding(horizontal = Spacing.screenHorizontal)
         ) {
             Text(
                 text = stringResource(R.string.dashboard_this_month),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = DarkText.Secondary
             )
             
             Spacer(modifier = Modifier.height(Spacing.md))
             
-            GPay_MonthCard(
+            MonthSummaryCard(
                 netIncome = uiState.monthNetIncome,
                 orders = uiState.monthOrders,
                 shifts = uiState.monthShifts,
                 goal = uiState.monthlyGoal,
-                progress = uiState.monthlyProgress,
-                decimalFormat = decimalFormat
+                progress = uiState.monthlyProgress
             )
         }
         
-        Spacer(modifier = Modifier.height(Spacing.xxl))
+        // Bottom padding for nav bar
+        Spacer(modifier = Modifier.height(Spacing.massive))
     }
 }
 
+// ════════════════════════════════════════════════════════════════════════════
+// PREMIUM HERO SECTION
+// ════════════════════════════════════════════════════════════════════════════
+
 /**
- * 🎯 Hero Card - Big center number με progress ring
+ * Hero section with gradient background and animated counter
  */
 @Composable
-private fun GPay_HeroCard(
+private fun PremiumHeroSection(
     amount: Double,
     label: String,
     progress: Float,
-    goal: Double?,
-    decimalFormat: DecimalFormat
+    goal: Double?
 ) {
-    val animatedProgress by animateFloatAsState(
-        targetValue = progress.coerceIn(0f, 1f),
-        label = "progress"
-    )
-    
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.primary)
-            .padding(vertical = Spacing.xxl, horizontal = Spacing.lg),
+            .background(
+                brush = Brush.linearGradient(
+                    colors = Gradients.EarningsVibrant
+                )
+            )
+            .padding(
+                horizontal = Spacing.lg,
+                vertical = Spacing.xxl
+            ),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -146,81 +164,101 @@ private fun GPay_HeroCard(
         ) {
             // Label
             Text(
-                text = label,
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.White.copy(alpha = 0.8f)
+                text = label.uppercase(),
+                style = MaterialTheme.typography.labelMedium,
+                color = Color.White.copy(alpha = 0.8f),
+                letterSpacing = 2.sp
             )
             
             Spacer(modifier = Modifier.height(Spacing.sm))
             
-            // Big Amount
-            Text(
-                text = "${decimalFormat.format(amount)}€",
-                style = MaterialTheme.typography.displayLarge.copy(
-                    fontSize = 48.sp,
-                    fontWeight = FontWeight.Bold
+            // Animated amount - THE BIG NUMBER
+            AnimatedCurrency(
+                targetValue = amount,
+                valueStyle = CustomTextStyles.HeroNumber.copy(
+                    color = Color.White
+                ),
+                symbolStyle = MaterialTheme.typography.headlineLarge.copy(
+                    color = Color.White.copy(alpha = 0.9f),
+                    fontWeight = FontWeight.Normal
                 ),
                 color = Color.White
             )
             
-            // Goal Progress (if exists)
+            // Goal progress (if set)
             if (goal != null && goal > 0) {
                 Spacer(modifier = Modifier.height(Spacing.lg))
                 
-                // Progress Bar
+                // Progress bar
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(0.7f)
-                        .height(8.dp)
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(Color.White.copy(alpha = 0.3f))
+                        .fillMaxWidth(0.75f)
+                        .height(Dimensions.progressHeightDefault)
+                        .background(
+                            color = Color.White.copy(alpha = 0.3f),
+                            shape = Shapes.Full
+                        )
                 ) {
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth(animatedProgress)
+                            .fillMaxWidth(progress.coerceIn(0f, 1f))
                             .fillMaxHeight()
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(Color.White)
+                            .background(
+                                color = Color.White,
+                                shape = Shapes.Full
+                            )
                     )
                 }
                 
                 Spacer(modifier = Modifier.height(Spacing.xs))
                 
-                Text(
-                    text = "${(progress * 100).toInt()}% του στόχου (${decimalFormat.format(goal)}€)",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.7f)
-                )
+                // Progress text
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    AnimatedPercentage(
+                        targetValue = progress,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = Color.White
+                    )
+                    Text(
+                        text = " ${stringResource(R.string.dashboard_daily_goal).lowercase()}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.White.copy(alpha = 0.7f)
+                    )
+                }
             }
         }
     }
 }
 
+// ════════════════════════════════════════════════════════════════════════════
+// GLASS STAT CARD
+// ════════════════════════════════════════════════════════════════════════════
+
 /**
- * 📊 Simple Stat Card - Clean white με soft shadow
+ * Glass morphism stat card with animated value
  */
 @Composable
-private fun GPay_StatCard(
-    value: String,
+private fun GlassStatCard(
+    value: Number,
     label: String,
     emoji: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isDecimal: Boolean = false
 ) {
-    Surface(
-        modifier = modifier
-            .shadow(
-                elevation = 2.dp,
-                shape = RoundedCornerShape(Spacing.radiusLg),
-                ambientColor = GPay_ShadowColor,
-                spotColor = GPay_ShadowColor
-            ),
-        shape = RoundedCornerShape(Spacing.radiusLg),
-        color = MaterialTheme.colorScheme.surface
+    GlassCard(
+        modifier = modifier,
+        backgroundColor = DarkSurfaces.SurfaceContainer.copy(alpha = 0.8f),
+        borderColor = DarkBorders.Glass,
+        glowEnabled = false,
+        contentPadding = PaddingValues(Spacing.lg)
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(Spacing.lg),
+            modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Emoji
@@ -231,138 +269,137 @@ private fun GPay_StatCard(
             
             Spacer(modifier = Modifier.height(Spacing.sm))
             
-            // Value
-            Text(
-                text = value,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            // Animated value
+            if (isDecimal) {
+                AnimatedCounter(
+                    targetValue = value.toDouble(),
+                    style = CustomTextStyles.MediumNumber,
+                    color = DarkText.Primary,
+                    decimalPlaces = 1
+                )
+            } else {
+                AnimatedIntCounter(
+                    targetValue = value.toInt(),
+                    style = CustomTextStyles.MediumNumber,
+                    color = DarkText.Primary
+                )
+            }
             
             // Label
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = DarkText.Secondary
+            )
+        }
+    }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// MONTH SUMMARY CARD
+// ════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Monthly summary with progress ring
+ */
+@Composable
+private fun MonthSummaryCard(
+    netIncome: Double,
+    orders: Int,
+    shifts: Int,
+    goal: Double?,
+    progress: Float
+) {
+    GlassCard(
+        backgroundColor = DarkSurfaces.SurfaceContainer.copy(alpha = 0.9f),
+        borderColor = DarkBorders.Glass,
+        contentPadding = PaddingValues(Spacing.lg)
+    ) {
+        // Top row: Net income + Progress ring
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Net income
+            Column {
+                Text(
+                    text = stringResource(R.string.dashboard_net),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = DarkText.Secondary
+                )
+                
+                AnimatedCurrency(
+                    targetValue = netIncome,
+                    valueStyle = CustomTextStyles.LargeNumber.copy(
+                        color = if (netIncome >= 0) SemanticColors.Success 
+                               else SemanticColors.Error
+                    ),
+                    symbolStyle = MaterialTheme.typography.titleMedium.copy(
+                        color = if (netIncome >= 0) SemanticColors.Success.copy(alpha = 0.8f)
+                               else SemanticColors.Error.copy(alpha = 0.8f)
+                    )
+                )
+            }
+            
+            // Progress ring (if goal set)
+            if (goal != null && goal > 0) {
+                ProgressRingWithLabel(
+                    progress = progress,
+                    size = Dimensions.progressCircularMd,
+                    strokeWidth = Dimensions.progressHeightDefault
+                )
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(Spacing.lg))
+        
+        HorizontalDivider(
+            color = DarkBorders.Subtle,
+            thickness = Dimensions.borderHairline
+        )
+        
+        Spacer(modifier = Modifier.height(Spacing.lg))
+        
+        // Bottom row: Orders & Shifts
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            MiniStat(
+                value = orders,
+                label = stringResource(R.string.dashboard_orders)
+            )
+            
+            MiniStat(
+                value = shifts,
+                label = stringResource(R.string.dashboard_shifts)
             )
         }
     }
 }
 
 /**
- * 📅 Month Summary Card
+ * Mini stat for inside cards
  */
 @Composable
-private fun GPay_MonthCard(
-    netIncome: Double,
-    orders: Int,
-    shifts: Int,
-    goal: Double?,
-    progress: Float,
-    decimalFormat: DecimalFormat
-) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(
-                elevation = 4.dp,
-                shape = RoundedCornerShape(Spacing.radiusLg),
-                ambientColor = GPay_ShadowColor,
-                spotColor = GPay_ShadowColor
-            ),
-        shape = RoundedCornerShape(Spacing.radiusLg),
-        color = MaterialTheme.colorScheme.surface
-    ) {
-        Column(
-            modifier = Modifier.padding(Spacing.lg)
-        ) {
-            // Κύρια τιμή
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(
-                        text = stringResource(R.string.dashboard_net),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = "${decimalFormat.format(netIncome)}€",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = if (netIncome >= 0) GPay_Success 
-                               else MaterialTheme.colorScheme.error
-                    )
-                }
-                
-                // Circular progress if goal
-                if (goal != null && goal > 0) {
-                    Box(
-                        modifier = Modifier
-                            .size(56.dp)
-                            .background(
-                                color = GPay_SuccessLight,
-                                shape = CircleShape
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "${(progress * 100).toInt()}%",
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = GPay_Success
-                        )
-                    }
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(Spacing.lg))
-            
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-            
-            Spacer(modifier = Modifier.height(Spacing.lg))
-            
-            // Secondary stats
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                GPay_MiniStat(
-                    value = orders.toString(),
-                    label = stringResource(R.string.dashboard_orders)
-                )
-                GPay_MiniStat(
-                    value = shifts.toString(),
-                    label = stringResource(R.string.dashboard_shifts)
-                )
-            }
-        }
-    }
-}
-
-/**
- * Mini stat για μέσα σε cards
- */
-@Composable
-private fun GPay_MiniStat(
-    value: String,
+private fun MiniStat(
+    value: Int,
     label: String
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = value,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
+        AnimatedIntCounter(
+            targetValue = value,
+            style = CustomTextStyles.SmallNumber,
+            color = DarkText.Primary
         )
+        
         Text(
             text = label,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = DarkText.Secondary
         )
     }
 }

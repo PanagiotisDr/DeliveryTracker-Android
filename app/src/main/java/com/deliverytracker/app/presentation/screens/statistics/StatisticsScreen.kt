@@ -3,7 +3,6 @@ package com.deliverytracker.app.presentation.screens.statistics
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -11,21 +10,31 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.deliverytracker.app.R
+import com.deliverytracker.app.presentation.components.*
 import com.deliverytracker.app.presentation.theme.*
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
 /**
- * 📊 Statistics Screen - Google Pay Style
- * Clean cards με summary data.
+ * 📊 Statistics Screen - Premium Redesign 2026
+ * 
+ * Features:
+ * - Glass morphism cards
+ * - Animated counters
+ * - Gradient highlights
+ * - Premium typography
+ * 
+ * @author DeliveryTracker Team
+ * @version 2.0.0
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,23 +52,25 @@ fun StatisticsScreen(
                 title = { 
                     Text(
                         text = stringResource(R.string.nav_statistics),
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
+                        color = DarkText.Primary
                     ) 
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack, 
-                            contentDescription = stringResource(R.string.back)
+                            contentDescription = stringResource(R.string.back),
+                            tint = DarkText.Primary
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = DarkSurfaces.Background
                 )
             )
         },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = DarkSurfaces.Background
     ) { paddingValues ->
         if (uiState.isLoading) {
             Box(
@@ -68,7 +79,10 @@ fun StatisticsScreen(
                     .padding(paddingValues),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                CircularProgressIndicator(
+                    color = BrandColors.Primary,
+                    strokeWidth = Dimensions.progressHeightDefault
+                )
             }
         } else {
             Column(
@@ -79,40 +93,54 @@ fun StatisticsScreen(
                     .padding(Spacing.lg),
                 verticalArrangement = Arrangement.spacedBy(Spacing.lg)
             ) {
-                // ============ ΕΣΟΔΑ ============
-                GPay_SummaryCard(
+                // ════════════════════════════════════════════════════════════
+                // NET PROFIT HERO CARD
+                // ════════════════════════════════════════════════════════════
+                val profit = uiState.netIncome - uiState.totalExpenses
+                val isProfit = profit >= 0
+                
+                ProfitHeroCard(
+                    profit = profit,
+                    isPositive = isProfit
+                )
+                
+                // ════════════════════════════════════════════════════════════
+                // INCOME BREAKDOWN
+                // ════════════════════════════════════════════════════════════
+                StatsSummaryCard(
                     title = stringResource(R.string.stats_income),
                     emoji = "💰"
                 ) {
-                    GPay_StatRow(stringResource(R.string.stats_gross), "${decimalFormat.format(uiState.grossIncome)}€")
-                    GPay_StatRow(stringResource(R.string.stats_tips), "${decimalFormat.format(uiState.tips)}€")
-                    GPay_StatRow(stringResource(R.string.stats_bonus), "${decimalFormat.format(uiState.bonus)}€")
+                    StatRow(
+                        label = stringResource(R.string.stats_gross),
+                        value = uiState.grossIncome
+                    )
+                    StatRow(
+                        label = stringResource(R.string.stats_tips),
+                        value = uiState.tips
+                    )
+                    StatRow(
+                        label = stringResource(R.string.stats_bonus),
+                        value = uiState.bonus
+                    )
+                    
                     HorizontalDivider(
                         modifier = Modifier.padding(vertical = Spacing.sm),
-                        color = MaterialTheme.colorScheme.outlineVariant
+                        color = DarkBorders.Subtle
                     )
-                    GPay_StatRow(
+                    
+                    StatRow(
                         label = stringResource(R.string.stats_net),
-                        value = "${decimalFormat.format(uiState.netIncome)}€",
-                        valueColor = GPay_Success,
+                        value = uiState.netIncome,
+                        valueColor = SemanticColors.Success,
                         isBold = true
                     )
                 }
                 
-                // ============ ΚΑΘΑΡΟ ΚΕΡΔΟΣ ============
-                val profit = uiState.netIncome - uiState.totalExpenses
-                val isProfit = profit >= 0
-                
-                GPay_HighlightCard(
-                    title = stringResource(R.string.stats_net_profit),
-                    value = "${decimalFormat.format(profit)}€",
-                    emoji = if (isProfit) "📈" else "📉",
-                    backgroundColor = if (isProfit) GPay_SuccessLight else GPay_ErrorLight,
-                    valueColor = if (isProfit) GPay_Success else GPay_Error
-                )
-                
-                // ============ ΑΡΙΘΜΟΙ ============
-                GPay_SummaryCard(
+                // ════════════════════════════════════════════════════════════
+                // KEY NUMBERS
+                // ════════════════════════════════════════════════════════════
+                StatsSummaryCard(
                     title = stringResource(R.string.stats_numbers),
                     emoji = "📊"
                 ) {
@@ -120,39 +148,69 @@ fun StatisticsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        GPay_NumberStat(uiState.totalShifts.toString(), stringResource(R.string.stats_shifts))
-                        GPay_NumberStat(uiState.totalOrders.toString(), stringResource(R.string.stats_orders))
+                        NumberStat(
+                            value = uiState.totalShifts,
+                            label = stringResource(R.string.stats_shifts)
+                        )
+                        NumberStat(
+                            value = uiState.totalOrders,
+                            label = stringResource(R.string.stats_orders)
+                        )
                     }
+                    
                     Spacer(modifier = Modifier.height(Spacing.md))
+                    
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        GPay_NumberStat(String.format("%.1fh", uiState.totalHours), stringResource(R.string.stats_hours))
-                        GPay_NumberStat(String.format("%.0f", uiState.totalKilometers), stringResource(R.string.stats_km))
+                        NumberStatDecimal(
+                            value = uiState.totalHours,
+                            label = stringResource(R.string.stats_hours),
+                            suffix = "h"
+                        )
+                        NumberStatDecimal(
+                            value = uiState.totalKilometers,
+                            label = stringResource(R.string.stats_km),
+                            suffix = ""
+                        )
                     }
                 }
                 
-                // ============ ΜΕΣΟΙ ΟΡΟΙ ============
-                GPay_SummaryCard(
+                // ════════════════════════════════════════════════════════════
+                // AVERAGES
+                // ════════════════════════════════════════════════════════════
+                StatsSummaryCard(
                     title = stringResource(R.string.stats_averages),
                     emoji = "📈"
                 ) {
-                    GPay_StatRow(stringResource(R.string.stats_per_hour), "${decimalFormat.format(uiState.avgIncomePerHour)}€")
-                    GPay_StatRow(stringResource(R.string.stats_per_order), "${decimalFormat.format(uiState.avgIncomePerOrder)}€")
-                    GPay_StatRow(stringResource(R.string.stats_per_km), "${decimalFormat.format(uiState.avgIncomePerKm)}€")
-                    GPay_StatRow(stringResource(R.string.stats_orders_per_shift), String.format("%.1f", uiState.avgOrdersPerShift))
+                    StatRow(
+                        label = stringResource(R.string.stats_per_hour),
+                        value = uiState.avgIncomePerHour,
+                        valueColor = BrandColors.Primary
+                    )
+                    StatRow(
+                        label = stringResource(R.string.stats_per_order),
+                        value = uiState.avgIncomePerOrder
+                    )
+                    StatRow(
+                        label = stringResource(R.string.stats_per_km),
+                        value = uiState.avgIncomePerKm
+                    )
+                    StatRow(
+                        label = stringResource(R.string.stats_orders_per_shift),
+                        value = uiState.avgOrdersPerShift,
+                        isCurrency = false
+                    )
                 }
                 
-                // ============ ΚΑΛΥΤΕΡΗ ΜΕΡΑ ============
+                // ════════════════════════════════════════════════════════════
+                // BEST DAY
+                // ════════════════════════════════════════════════════════════
                 if (uiState.bestDayDate != null) {
-                    GPay_HighlightCard(
-                        title = stringResource(R.string.stats_best_day),
-                        value = "${decimalFormat.format(uiState.bestDayIncome)}€",
-                        subtitle = dateFormat.format(Date(uiState.bestDayDate!!)),
-                        emoji = "🏆",
-                        backgroundColor = GPay_WarningLight,
-                        valueColor = GPay_Warning
+                    BestDayCard(
+                        income = uiState.bestDayIncome,
+                        date = dateFormat.format(Date(uiState.bestDayDate!!))
                     )
                 }
                 
@@ -162,86 +220,75 @@ fun StatisticsScreen(
     }
 }
 
-/**
- * Summary Card wrapper με τίτλο
- */
-@Composable
-private fun GPay_SummaryCard(
-    title: String,
-    emoji: String,
-    content: @Composable ColumnScope.() -> Unit
-) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(
-                elevation = 2.dp,
-                shape = RoundedCornerShape(Spacing.radiusLg),
-                ambientColor = GPay_ShadowColor,
-                spotColor = GPay_ShadowColor
-            ),
-        shape = RoundedCornerShape(Spacing.radiusLg),
-        color = MaterialTheme.colorScheme.surface
-    ) {
-        Column(modifier = Modifier.padding(Spacing.lg)) {
-            Text(
-                text = "$emoji $title",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(Spacing.md))
-            content()
-        }
-    }
-}
+// ════════════════════════════════════════════════════════════════════════════
+// PRIVATE COMPONENTS
+// ════════════════════════════════════════════════════════════════════════════
 
 /**
- * Highlight Card για σημαντικά νούμερα
+ * Hero card for net profit
  */
 @Composable
-private fun GPay_HighlightCard(
-    title: String,
-    value: String,
-    emoji: String,
-    backgroundColor: Color,
-    valueColor: Color,
-    subtitle: String? = null
+private fun ProfitHeroCard(
+    profit: Double,
+    isPositive: Boolean
 ) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(
-                elevation = 2.dp,
-                shape = RoundedCornerShape(Spacing.radiusLg),
-                ambientColor = GPay_ShadowColor,
-                spotColor = GPay_ShadowColor
-            ),
-        shape = RoundedCornerShape(Spacing.radiusLg),
-        color = backgroundColor
+    val gradientColors = if (isPositive) {
+        listOf(
+            SemanticColors.Success.copy(alpha = 0.15f),
+            SemanticColors.Success.copy(alpha = 0.05f)
+        )
+    } else {
+        listOf(
+            SemanticColors.Error.copy(alpha = 0.15f),
+            SemanticColors.Error.copy(alpha = 0.05f)
+        )
+    }
+    
+    GlassCard(
+        backgroundColor = DarkSurfaces.SurfaceContainer,
+        borderColor = if (isPositive) SemanticColors.Success.copy(alpha = 0.3f)
+                     else SemanticColors.Error.copy(alpha = 0.3f),
+        contentPadding = PaddingValues(Spacing.xl)
     ) {
-        Column(
-            modifier = Modifier.padding(Spacing.lg),
-            horizontalAlignment = Alignment.CenterHorizontally
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.verticalGradient(gradientColors),
+                    shape = Shapes.Medium
+                )
+                .padding(Spacing.lg)
         ) {
-            Text(
-                text = "$emoji $title",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = valueColor
-            )
-            Spacer(modifier = Modifier.height(Spacing.sm))
-            Text(
-                text = value,
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
-                color = valueColor
-            )
-            if (subtitle != null) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = valueColor.copy(alpha = 0.7f)
+                    text = if (isPositive) "📈" else "📉",
+                    style = MaterialTheme.typography.displaySmall
+                )
+                
+                Spacer(modifier = Modifier.height(Spacing.sm))
+                
+                Text(
+                    text = stringResource(R.string.stats_net_profit).uppercase(),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = DarkText.Secondary,
+                    letterSpacing = 2.sp
+                )
+                
+                Spacer(modifier = Modifier.height(Spacing.xs))
+                
+                AnimatedCurrency(
+                    targetValue = profit,
+                    valueStyle = CustomTextStyles.HeroNumber.copy(
+                        color = if (isPositive) SemanticColors.Success 
+                               else SemanticColors.Error
+                    ),
+                    symbolStyle = MaterialTheme.typography.headlineLarge.copy(
+                        color = if (isPositive) SemanticColors.Success.copy(alpha = 0.8f)
+                               else SemanticColors.Error.copy(alpha = 0.8f)
+                    )
                 )
             }
         }
@@ -249,58 +296,202 @@ private fun GPay_HighlightCard(
 }
 
 /**
- * Stat row με label και value
+ * Summary card with glass effect
  */
 @Composable
-private fun GPay_StatRow(
+private fun StatsSummaryCard(
+    title: String,
+    emoji: String,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    GlassCard(
+        backgroundColor = DarkSurfaces.SurfaceContainer,
+        borderColor = DarkBorders.Glass,
+        contentPadding = PaddingValues(Spacing.lg)
+    ) {
+        Text(
+            text = "$emoji $title",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = DarkText.Primary
+        )
+        Spacer(modifier = Modifier.height(Spacing.md))
+        content()
+    }
+}
+
+/**
+ * Stat row with animated value
+ */
+@Composable
+private fun StatRow(
     label: String,
-    value: String,
-    valueColor: Color = MaterialTheme.colorScheme.onSurface,
-    isBold: Boolean = false
+    value: Double,
+    valueColor: Color = DarkText.Primary,
+    isBold: Boolean = false,
+    isCurrency: Boolean = true
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = Spacing.xs),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = DarkText.Secondary
         )
-        Text(
-            text = value,
-            style = if (isBold) MaterialTheme.typography.titleMedium 
-                   else MaterialTheme.typography.bodyMedium,
-            fontWeight = if (isBold) FontWeight.Bold else FontWeight.Normal,
-            color = valueColor
-        )
+        
+        if (isCurrency) {
+            AnimatedCurrency(
+                targetValue = value,
+                valueStyle = (if (isBold) CustomTextStyles.SmallNumber 
+                             else MaterialTheme.typography.bodyMedium).copy(
+                    fontWeight = if (isBold) FontWeight.Bold else FontWeight.Normal,
+                    color = valueColor
+                ),
+                symbolStyle = MaterialTheme.typography.bodySmall.copy(
+                    color = valueColor.copy(alpha = 0.8f)
+                )
+            )
+        } else {
+            AnimatedCounter(
+                targetValue = value,
+                style = if (isBold) CustomTextStyles.SmallNumber 
+                       else MaterialTheme.typography.bodyMedium,
+                color = valueColor,
+                decimalPlaces = 1
+            )
+        }
     }
 }
 
 /**
- * Number stat για grid display
+ * Number stat for grid display
  */
 @Composable
-private fun GPay_NumberStat(
-    value: String,
+private fun NumberStat(
+    value: Int,
     label: String
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.width(80.dp)
     ) {
-        Text(
-            text = value,
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
+        AnimatedIntCounter(
+            targetValue = value,
+            style = CustomTextStyles.MediumNumber,
+            color = DarkText.Primary
         )
         Text(
             text = label,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = DarkText.Secondary
         )
+    }
+}
+
+/**
+ * Decimal number stat for grid display
+ */
+@Composable
+private fun NumberStatDecimal(
+    value: Double,
+    label: String,
+    suffix: String
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.width(80.dp)
+    ) {
+        Row(verticalAlignment = Alignment.Bottom) {
+            AnimatedCounter(
+                targetValue = value,
+                style = CustomTextStyles.MediumNumber,
+                color = DarkText.Primary,
+                decimalPlaces = if (suffix == "h") 1 else 0
+            )
+            if (suffix.isNotEmpty()) {
+                Text(
+                    text = suffix,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = DarkText.Secondary
+                )
+            }
+        }
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = DarkText.Secondary
+        )
+    }
+}
+
+/**
+ * Best day highlight card
+ */
+@Composable
+private fun BestDayCard(
+    income: Double,
+    date: String
+) {
+    GlassCard(
+        backgroundColor = DarkSurfaces.SurfaceContainer,
+        borderColor = SemanticColors.Warning.copy(alpha = 0.3f),
+        contentPadding = PaddingValues(Spacing.lg)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            SemanticColors.Warning.copy(alpha = 0.15f),
+                            SemanticColors.Warning.copy(alpha = 0.05f)
+                        )
+                    ),
+                    shape = Shapes.Medium
+                )
+                .padding(Spacing.lg)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "🏆",
+                    style = MaterialTheme.typography.displaySmall
+                )
+                
+                Spacer(modifier = Modifier.height(Spacing.sm))
+                
+                Text(
+                    text = stringResource(R.string.stats_best_day).uppercase(),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = SemanticColors.Warning,
+                    letterSpacing = 2.sp
+                )
+                
+                Spacer(modifier = Modifier.height(Spacing.xs))
+                
+                AnimatedCurrency(
+                    targetValue = income,
+                    valueStyle = CustomTextStyles.LargeNumber.copy(
+                        color = SemanticColors.Warning
+                    ),
+                    symbolStyle = MaterialTheme.typography.titleMedium.copy(
+                        color = SemanticColors.Warning.copy(alpha = 0.8f)
+                    )
+                )
+                
+                Text(
+                    text = date,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = SemanticColors.Warning.copy(alpha = 0.7f)
+                )
+            }
+        }
     }
 }

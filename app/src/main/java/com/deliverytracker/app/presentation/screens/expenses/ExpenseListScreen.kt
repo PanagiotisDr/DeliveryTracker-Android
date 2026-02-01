@@ -1,11 +1,11 @@
 package com.deliverytracker.app.presentation.screens.expenses
 
+import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -13,23 +13,29 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.deliverytracker.app.R
 import com.deliverytracker.app.domain.model.Expense
-import com.deliverytracker.app.presentation.components.ConfirmDeleteDialog
-import com.deliverytracker.app.presentation.components.EmptyState
+import com.deliverytracker.app.presentation.components.*
 import com.deliverytracker.app.presentation.theme.*
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
 /**
- * 💰 Expense List Screen - Google Pay Style
- * Clean white cards με category color accents.
+ * 💰 Expense List Screen - Premium Redesign 2026
+ * 
+ * Features:
+ * - Glass morphism cards with category color accents
+ * - Shimmer loading
+ * - Animated list items
+ * - Category color indicators
+ * 
+ * @author DeliveryTracker Team
+ * @version 2.0.0
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,37 +67,31 @@ fun ExpenseListScreen(
                 title = { 
                     Text(
                         text = stringResource(R.string.nav_expenses),
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
+                        color = DarkText.Primary
                     ) 
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack, 
-                            contentDescription = stringResource(R.string.back)
+                            contentDescription = stringResource(R.string.back),
+                            tint = DarkText.Primary
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = DarkSurfaces.Background
                 )
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = onNavigateToAddExpense,
-                containerColor = MaterialTheme.colorScheme.primary,
-                shape = RoundedCornerShape(Spacing.radiusMd)
-            ) {
-                Icon(
-                    Icons.Default.Add, 
-                    contentDescription = stringResource(R.string.new_expense),
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
-            }
+            QuickAddFAB(
+                onClick = onNavigateToAddExpense
+            )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = DarkSurfaces.Background
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -99,12 +99,15 @@ fun ExpenseListScreen(
                 .padding(paddingValues)
         ) {
             when {
+                // Loading with shimmer
                 uiState.isLoading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        color = MaterialTheme.colorScheme.primary
+                    ShimmerList(
+                        modifier = Modifier.padding(Spacing.lg),
+                        itemCount = 5
                     )
                 }
+                
+                // Empty state
                 uiState.expenses.isEmpty() -> {
                     EmptyState(
                         emoji = "💰",
@@ -114,7 +117,11 @@ fun ExpenseListScreen(
                     ) {
                         Button(
                             onClick = onNavigateToAddExpense,
-                            shape = RoundedCornerShape(Spacing.radiusFull)
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = BrandColors.Primary,
+                                contentColor = DarkText.OnPrimary
+                            ),
+                            shape = Shapes.Full
                         ) {
                             Icon(Icons.Default.Add, contentDescription = null)
                             Spacer(modifier = Modifier.width(Spacing.sm))
@@ -122,6 +129,8 @@ fun ExpenseListScreen(
                         }
                     }
                 }
+                
+                // Content
                 else -> {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
@@ -131,14 +140,33 @@ fun ExpenseListScreen(
                         itemsIndexed(
                             items = uiState.expenses,
                             key = { _, expense -> expense.id }
-                        ) { _, expense ->
-                            GPay_ExpenseCard(
-                                expense = expense,
-                                dateFormat = dateFormat,
-                                decimalFormat = decimalFormat,
-                                onEdit = { onNavigateToEditExpense(expense.id) },
-                                onDelete = { viewModel.deleteExpense(expense.id) }
-                            )
+                        ) { index, expense ->
+                            AnimatedVisibility(
+                                visible = true,
+                                enter = fadeIn(
+                                    animationSpec = Motion.entranceTween(
+                                        delayMs = staggerDelay(index)
+                                    )
+                                ) + slideInVertically(
+                                    animationSpec = Motion.entranceTween(
+                                        delayMs = staggerDelay(index)
+                                    ),
+                                    initialOffsetY = { it / 4 }
+                                )
+                            ) {
+                                PremiumExpenseCard(
+                                    expense = expense,
+                                    dateFormat = dateFormat,
+                                    decimalFormat = decimalFormat,
+                                    onEdit = { onNavigateToEditExpense(expense.id) },
+                                    onDelete = { viewModel.deleteExpense(expense.id) }
+                                )
+                            }
+                        }
+                        
+                        // Bottom spacing for FAB
+                        item {
+                            Spacer(modifier = Modifier.height(Spacing.massive))
                         }
                     }
                 }
@@ -148,11 +176,10 @@ fun ExpenseListScreen(
 }
 
 /**
- * 💳 Google Pay Style Expense Card
- * Clean white με category emoji και color accent.
+ * Premium Expense Card with category accent
  */
 @Composable
-private fun GPay_ExpenseCard(
+private fun PremiumExpenseCard(
     expense: Expense,
     dateFormat: SimpleDateFormat,
     decimalFormat: DecimalFormat,
@@ -174,28 +201,19 @@ private fun GPay_ExpenseCard(
         )
     }
     
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(
-                elevation = 2.dp,
-                shape = RoundedCornerShape(Spacing.radiusLg),
-                ambientColor = GPay_ShadowColor,
-                spotColor = GPay_ShadowColor
-            ),
-        shape = RoundedCornerShape(Spacing.radiusLg),
-        color = MaterialTheme.colorScheme.surface
+    GlassCard(
+        backgroundColor = DarkSurfaces.SurfaceContainer,
+        borderColor = categoryColor.copy(alpha = 0.4f),
+        contentPadding = PaddingValues(Spacing.md)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(Spacing.lg),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Category Emoji με color background
+            // Category icon with colored background
             Box(
                 modifier = Modifier
-                    .size(48.dp)
+                    .size(Dimensions.iconHuge)
                     .background(
                         color = categoryColor.copy(alpha = 0.15f),
                         shape = CircleShape
@@ -216,29 +234,29 @@ private fun GPay_ExpenseCard(
                     text = expense.category.displayName,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = DarkText.Primary
                 )
                 Text(
                     text = dateFormat.format(Date(expense.date)),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = DarkText.Secondary
                 )
                 if (expense.notes.isNotEmpty()) {
                     Text(
                         text = expense.notes,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = DarkText.Tertiary,
                         maxLines = 1
                     )
                 }
             }
             
-            // Amount
+            // Amount (red for expense)
             Text(
                 text = "-${decimalFormat.format(expense.amount)}€",
-                style = MaterialTheme.typography.titleMedium,
+                style = CustomTextStyles.SmallNumber,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.error
+                color = SemanticColors.Error
             )
             
             Spacer(modifier = Modifier.width(Spacing.sm))
@@ -247,24 +265,24 @@ private fun GPay_ExpenseCard(
             Column {
                 IconButton(
                     onClick = onEdit,
-                    modifier = Modifier.size(32.dp)
+                    modifier = Modifier.size(Dimensions.touchTargetMin)
                 ) {
                     Icon(
                         Icons.Default.Edit,
                         contentDescription = stringResource(R.string.btn_edit),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(18.dp)
+                        tint = DarkText.Secondary,
+                        modifier = Modifier.size(Dimensions.iconSm)
                     )
                 }
                 IconButton(
                     onClick = { showDeleteDialog = true },
-                    modifier = Modifier.size(32.dp)
+                    modifier = Modifier.size(Dimensions.touchTargetMin)
                 ) {
                     Icon(
                         Icons.Default.Delete,
                         contentDescription = stringResource(R.string.btn_delete),
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(18.dp)
+                        tint = SemanticColors.Error,
+                        modifier = Modifier.size(Dimensions.iconSm)
                     )
                 }
             }

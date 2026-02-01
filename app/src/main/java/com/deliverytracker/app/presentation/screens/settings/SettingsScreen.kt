@@ -16,7 +16,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -24,11 +25,20 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.deliverytracker.app.R
 import com.deliverytracker.app.domain.model.ThemeMode
+import com.deliverytracker.app.presentation.components.*
 import com.deliverytracker.app.presentation.theme.*
 
 /**
- * ⚙️ Settings Screen - Google Pay Style
- * Clean white cards με grouped sections.
+ * ⚙️ Settings Screen - Premium Redesign 2026
+ * 
+ * Features:
+ * - Glass morphism cards
+ * - Organized sections
+ * - Premium form styling
+ * - Gradient save button
+ * 
+ * @author DeliveryTracker Team
+ * @version 2.0.0
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,14 +67,16 @@ fun SettingsScreen(
                 title = { 
                     Text(
                         text = stringResource(R.string.nav_settings),
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
+                        color = DarkText.Primary
                     ) 
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack, 
-                            contentDescription = stringResource(R.string.back)
+                            contentDescription = stringResource(R.string.back),
+                            tint = DarkText.Primary
                         )
                     }
                 },
@@ -75,18 +87,18 @@ fun SettingsScreen(
                     ) {
                         Text(
                             text = stringResource(R.string.btn_save),
-                            color = MaterialTheme.colorScheme.primary,
+                            color = BrandColors.Primary,
                             fontWeight = FontWeight.SemiBold
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = DarkSurfaces.Background
                 )
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = DarkSurfaces.Background
     ) { paddingValues ->
         if (uiState.isLoading) {
             Box(
@@ -95,7 +107,10 @@ fun SettingsScreen(
                     .padding(paddingValues),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                CircularProgressIndicator(
+                    color = BrandColors.Primary,
+                    strokeWidth = Dimensions.progressHeightDefault
+                )
             }
         } else {
             Column(
@@ -106,18 +121,22 @@ fun SettingsScreen(
                     .padding(Spacing.lg),
                 verticalArrangement = Arrangement.spacedBy(Spacing.lg)
             ) {
-                // ============ PROFILE CARD ============
-                GPay_SettingsCard {
+                // ════════════════════════════════════════════════════════════
+                // PROFILE CARD
+                // ════════════════════════════════════════════════════════════
+                SettingsCard {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Avatar
+                        // Gradient avatar
                         Box(
                             modifier = Modifier
-                                .size(56.dp)
+                                .size(Dimensions.iconXl)
                                 .background(
-                                    color = MaterialTheme.colorScheme.primary,
+                                    brush = Brush.linearGradient(
+                                        colors = Gradients.EarningsVibrant
+                                    ),
                                     shape = CircleShape
                                 ),
                             contentAlignment = Alignment.Center
@@ -125,7 +144,7 @@ fun SettingsScreen(
                             Text(
                                 text = uiState.username.take(1).uppercase().ifEmpty { "?" },
                                 style = MaterialTheme.typography.headlineSmall,
-                                color = MaterialTheme.colorScheme.onPrimary,
+                                color = DarkText.OnPrimary,
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -136,12 +155,13 @@ fun SettingsScreen(
                             Text(
                                 text = uiState.username.ifEmpty { stringResource(R.string.settings_user) },
                                 style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold
+                                fontWeight = FontWeight.SemiBold,
+                                color = DarkText.Primary
                             )
                             Text(
                                 text = uiState.email,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = DarkText.Secondary
                             )
                         }
                         
@@ -149,15 +169,17 @@ fun SettingsScreen(
                             Icon(
                                 Icons.Default.Lock,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(20.dp)
+                                tint = BrandColors.Primary,
+                                modifier = Modifier.size(Dimensions.iconSm)
                             )
                         }
                     }
                 }
                 
-                // ============ ΣΤΟΧΟΙ ============
-                GPay_SettingsCard(
+                // ════════════════════════════════════════════════════════════
+                // ΣΤΟΧΟΙ (GOALS)
+                // ════════════════════════════════════════════════════════════
+                SettingsCard(
                     title = stringResource(R.string.settings_goals),
                     icon = Icons.Default.Flag
                 ) {
@@ -165,14 +187,14 @@ fun SettingsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(Spacing.md)
                     ) {
-                        GPay_OutlinedField(
+                        PremiumOutlinedField(
                             value = uiState.dailyGoal,
                             onValueChange = { viewModel.updateDailyGoal(it) },
                             label = stringResource(R.string.settings_goal_daily),
                             suffix = "€",
                             modifier = Modifier.weight(1f)
                         )
-                        GPay_OutlinedField(
+                        PremiumOutlinedField(
                             value = uiState.weeklyGoal,
                             onValueChange = { viewModel.updateWeeklyGoal(it) },
                             label = stringResource(R.string.settings_goal_weekly),
@@ -187,14 +209,14 @@ fun SettingsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(Spacing.md)
                     ) {
-                        GPay_OutlinedField(
+                        PremiumOutlinedField(
                             value = uiState.monthlyGoal,
                             onValueChange = { viewModel.updateMonthlyGoal(it) },
                             label = stringResource(R.string.settings_goal_monthly),
                             suffix = "€",
                             modifier = Modifier.weight(1f)
                         )
-                        GPay_OutlinedField(
+                        PremiumOutlinedField(
                             value = uiState.yearlyGoal,
                             onValueChange = { viewModel.updateYearlyGoal(it) },
                             label = stringResource(R.string.settings_goal_yearly),
@@ -204,8 +226,10 @@ fun SettingsScreen(
                     }
                 }
                 
-                // ============ ΦΟΡΟΛΟΓΙΚΑ ============
-                GPay_SettingsCard(
+                // ════════════════════════════════════════════════════════════
+                // ΦΟΡΟΛΟΓΙΚΑ (TAX)
+                // ════════════════════════════════════════════════════════════
+                SettingsCard(
                     title = stringResource(R.string.settings_tax),
                     icon = Icons.Default.AccountBalance
                 ) {
@@ -213,14 +237,14 @@ fun SettingsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(Spacing.md)
                     ) {
-                        GPay_OutlinedField(
+                        PremiumOutlinedField(
                             value = uiState.vatRate,
                             onValueChange = { viewModel.updateVatRate(it) },
                             label = stringResource(R.string.settings_vat),
                             suffix = "%",
                             modifier = Modifier.weight(1f)
                         )
-                        GPay_OutlinedField(
+                        PremiumOutlinedField(
                             value = uiState.monthlyEfka,
                             onValueChange = { viewModel.updateMonthlyEfka(it) },
                             label = stringResource(R.string.settings_efka),
@@ -233,8 +257,8 @@ fun SettingsScreen(
                     
                     // Info hint
                     Surface(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = RoundedCornerShape(Spacing.radiusSm)
+                        color = BrandColors.Primary.copy(alpha = 0.1f),
+                        shape = Shapes.Medium
                     ) {
                         Row(
                             modifier = Modifier.padding(Spacing.md),
@@ -243,26 +267,28 @@ fun SettingsScreen(
                             Icon(
                                 Icons.Default.Info,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(18.dp)
+                                tint = BrandColors.Primary,
+                                modifier = Modifier.size(Dimensions.iconSm)
                             )
                             Spacer(modifier = Modifier.width(Spacing.sm))
                             Text(
                                 text = stringResource(R.string.settings_tax_hint),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = DarkText.Secondary
                             )
                         }
                     }
                 }
                 
-                // ============ ΘΕΜΑ ============
-                GPay_SettingsCard(
+                // ════════════════════════════════════════════════════════════
+                // ΘΕΜΑ (THEME)
+                // ════════════════════════════════════════════════════════════
+                SettingsCard(
                     title = stringResource(R.string.settings_theme),
                     icon = Icons.Default.Palette
                 ) {
                     ThemeMode.entries.forEach { theme ->
-                        GPay_ThemeOption(
+                        ThemeOption(
                             theme = theme,
                             isSelected = uiState.theme == theme,
                             onClick = { viewModel.updateTheme(theme) }
@@ -270,13 +296,19 @@ fun SettingsScreen(
                     }
                 }
                 
-                // ============ SAVE BUTTON ============
+                // ════════════════════════════════════════════════════════════
+                // SAVE BUTTON
+                // ════════════════════════════════════════════════════════════
                 Button(
                     onClick = { viewModel.saveSettings() },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(52.dp),
-                    shape = RoundedCornerShape(Spacing.radiusFull),
+                        .height(Dimensions.buttonHeightLg),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = BrandColors.Primary,
+                        contentColor = DarkText.OnPrimary
+                    ),
+                    shape = Shapes.Full,
                     enabled = !uiState.isLoading
                 ) {
                     Text(
@@ -291,58 +323,53 @@ fun SettingsScreen(
     }
 }
 
+// ════════════════════════════════════════════════════════════════════════════
+// PRIVATE COMPONENTS
+// ════════════════════════════════════════════════════════════════════════════
+
 /**
- * Settings Card wrapper
+ * Settings card with glass effect
  */
 @Composable
-private fun GPay_SettingsCard(
+private fun SettingsCard(
     title: String? = null,
-    icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
+    icon: ImageVector? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(
-                elevation = 2.dp,
-                shape = RoundedCornerShape(Spacing.radiusLg),
-                ambientColor = GPay_ShadowColor,
-                spotColor = GPay_ShadowColor
-            ),
-        shape = RoundedCornerShape(Spacing.radiusLg),
-        color = MaterialTheme.colorScheme.surface
+    GlassCard(
+        backgroundColor = DarkSurfaces.SurfaceContainer,
+        borderColor = DarkBorders.Glass,
+        contentPadding = PaddingValues(Spacing.lg)
     ) {
-        Column(modifier = Modifier.padding(Spacing.lg)) {
-            if (title != null) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (icon != null) {
-                        Icon(
-                            icon,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(Spacing.sm))
-                    }
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface
+        if (title != null) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (icon != null) {
+                    Icon(
+                        icon,
+                        contentDescription = null,
+                        tint = BrandColors.Primary,
+                        modifier = Modifier.size(Dimensions.iconSm)
                     )
+                    Spacer(modifier = Modifier.width(Spacing.sm))
                 }
-                Spacer(modifier = Modifier.height(Spacing.lg))
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = DarkText.Primary
+                )
             }
-            content()
+            Spacer(modifier = Modifier.height(Spacing.lg))
         }
+        content()
     }
 }
 
 /**
- * Outlined TextField με Google Pay style
+ * Premium outlined text field
  */
 @Composable
-private fun GPay_OutlinedField(
+private fun PremiumOutlinedField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
@@ -352,12 +379,30 @@ private fun GPay_OutlinedField(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(label) },
+        label = { 
+            Text(
+                text = label,
+                color = DarkText.Secondary
+            ) 
+        },
         modifier = modifier,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
         singleLine = true,
-        suffix = { Text(suffix) },
-        shape = RoundedCornerShape(Spacing.radiusMd)
+        suffix = { 
+            Text(
+                text = suffix,
+                color = DarkText.Secondary
+            ) 
+        },
+        shape = Shapes.Medium,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = BrandColors.Primary,
+            unfocusedBorderColor = DarkBorders.Subtle,
+            focusedLabelColor = BrandColors.Primary,
+            cursorColor = BrandColors.Primary,
+            focusedTextColor = DarkText.Primary,
+            unfocusedTextColor = DarkText.Primary
+        )
     )
 }
 
@@ -365,7 +410,7 @@ private fun GPay_OutlinedField(
  * Theme option row
  */
 @Composable
-private fun GPay_ThemeOption(
+private fun ThemeOption(
     theme: ThemeMode,
     isSelected: Boolean,
     onClick: () -> Unit
@@ -373,7 +418,7 @@ private fun GPay_ThemeOption(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(Spacing.radiusSm))
+            .clip(Shapes.Small)
             .clickable(onClick = onClick)
             .padding(vertical = Spacing.sm),
         verticalAlignment = Alignment.CenterVertically
@@ -382,7 +427,8 @@ private fun GPay_ThemeOption(
             selected = isSelected,
             onClick = null,
             colors = RadioButtonDefaults.colors(
-                selectedColor = MaterialTheme.colorScheme.primary
+                selectedColor = BrandColors.Primary,
+                unselectedColor = DarkText.Tertiary
             )
         )
         Spacer(modifier = Modifier.width(Spacing.md))
@@ -396,16 +442,14 @@ private fun GPay_ThemeOption(
         Icon(
             icon,
             contentDescription = null,
-            tint = if (isSelected) MaterialTheme.colorScheme.primary 
-                  else MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(20.dp)
+            tint = if (isSelected) BrandColors.Primary else DarkText.Secondary,
+            modifier = Modifier.size(Dimensions.iconSm)
         )
         Spacer(modifier = Modifier.width(Spacing.sm))
         Text(
             text = text,
             style = MaterialTheme.typography.bodyLarge,
-            color = if (isSelected) MaterialTheme.colorScheme.primary 
-                   else MaterialTheme.colorScheme.onSurface
+            color = if (isSelected) BrandColors.Primary else DarkText.Primary
         )
     }
 }
