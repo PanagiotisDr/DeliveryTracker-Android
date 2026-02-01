@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.deliverytracker.app.R
+import com.deliverytracker.app.presentation.components.BigActionButton
 import com.deliverytracker.app.presentation.components.cards.CompactShiftCard
 import com.deliverytracker.app.presentation.components.cards.SmartSuggestionCard
 import com.deliverytracker.app.presentation.components.cards.SwipeableShiftCard
@@ -102,6 +103,15 @@ fun CommandCenterScreen(
                     label = stringResource(R.string.stats_today),
                     progress = (uiState.todayEarnings / uiState.dailyGoal).toFloat(),
                     goalValue = uiState.dailyGoal
+                )
+            }
+            
+            // ============ 🆕 NEW ORDER BUTTON ============
+            item {
+                BigActionButton(
+                    title = stringResource(R.string.btn_new_order),
+                    subtitle = stringResource(R.string.btn_new_order_subtitle),
+                    onClick = onNavigateToAddShift
                 )
             }
             
