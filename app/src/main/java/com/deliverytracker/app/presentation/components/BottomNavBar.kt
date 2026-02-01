@@ -111,6 +111,7 @@ fun PremiumBottomNavBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .navigationBarsPadding() // Respect system navigation bar
                 .height(Dimensions.bottomNavHeight)
                 .padding(horizontal = Spacing.sm),
             horizontalArrangement = Arrangement.SpaceEvenly,
@@ -230,6 +231,7 @@ fun GlassBottomNavBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
+            .navigationBarsPadding() // Respect system navigation bar
             .padding(horizontal = Spacing.md, vertical = Spacing.sm)
     ) {
         GlassCard(
