@@ -16,12 +16,19 @@ import androidx.core.view.WindowCompat
  * 
  * Material 3 theme configuration with:
  * - Dynamic color support (Android 12+)
- * - Dark-first design optimized for OLED
+ * - Dark-first design following Material guidelines
+ * - Background #121212 (NOT pure black per M3 recommendations)
+ * - Desaturated accent colors (tonal 200-300) for eye comfort
+ * - Text at 87% white for reduced eye strain
  * - Custom color scheme with semantic colors
  * - Edge-to-edge support
  * 
+ * References:
+ * - https://m3.material.io/styles/color
+ * - https://uxplanet.org/8-tips-for-dark-theme-design
+ * 
  * @author DeliveryTracker Team
- * @version 2.0.0
+ * @version 3.0.0 - Material 3 Compliant
  * @since 2026-02
  */
 
@@ -31,90 +38,110 @@ import androidx.core.view.WindowCompat
 
 /**
  * Dark color scheme - Primary design target
- * Optimized for OLED screens with true blacks
+ * 
+ * Following Material 3 dark theme guidelines:
+ * - Background #121212 (recommended, not pure black)
+ * - Desaturated primary (tonal 200) for reduced vibration
+ * - Text at 87% white for readability
+ * - Elevation = lighter surfaces
  */
 private val DarkColorScheme = darkColorScheme(
-    // Primary colors
-    primary = BrandColors.Primary,
-    onPrimary = DarkText.OnPrimary,
-    primaryContainer = BrandColors.PrimarySubtle,
+    // Primary colors (desaturated teal 200)
+    primary = BrandColors.Primary,              // #80DFD2 - soft teal
+    onPrimary = DarkText.OnPrimary,             // Black text on primary
+    primaryContainer = BrandColors.PrimarySubtle, // Dark teal container
     onPrimaryContainer = BrandColors.Primary,
     
-    // Secondary colors
-    secondary = BrandColors.Secondary,
+    // Secondary colors (light blue 200)
+    secondary = BrandColors.Secondary,          // #81D4FA - soft blue
     onSecondary = DarkText.OnPrimary,
-    secondaryContainer = Color(0xFF004D5A),
+    secondaryContainer = Color(0xFF0D3347),     // Dark blue container
     onSecondaryContainer = BrandColors.Secondary,
     
-    // Tertiary colors
-    tertiary = BrandColors.Tertiary,
+    // Tertiary colors (purple 200)
+    tertiary = BrandColors.Tertiary,            // #CE93D8 - soft purple
     onTertiary = DarkText.OnPrimary,
-    tertiaryContainer = Color(0xFF3D2D6B),
+    tertiaryContainer = Color(0xFF2D1F33),      // Dark purple container
     onTertiaryContainer = BrandColors.Tertiary,
     
-    // Error colors
-    error = SemanticColors.Error,
+    // Error colors (red 200)
+    error = SemanticColors.Error,               // #EF9A9A - soft red
     onError = DarkText.OnPrimary,
-    errorContainer = SemanticColors.ErrorMuted,
+    errorContainer = SemanticColors.ErrorMuted, // Dark red container
     onErrorContainer = SemanticColors.Error,
     
-    // Background and surface
-    background = DarkSurfaces.Background,
-    onBackground = DarkText.Primary,
-    surface = DarkSurfaces.SurfaceContainer,
-    onSurface = DarkText.Primary,
+    // Background and surfaces (#121212 base)
+    background = DarkSurfaces.Background,       // #121212 - Material recommended
+    onBackground = DarkText.Primary,            // 87% white
+    surface = DarkSurfaces.Surface,             // #121212 - base
+    onSurface = DarkText.Primary,               // 87% white
+    
+    // Surface containers (elevated = lighter)
+    surfaceContainerLowest = DarkSurfaces.Background,
+    surfaceContainerLow = DarkSurfaces.SurfaceElevation1,
+    surfaceContainer = DarkSurfaces.SurfaceElevation4,
+    surfaceContainerHigh = DarkSurfaces.SurfaceElevation8,
+    surfaceContainerHighest = DarkSurfaces.SurfaceElevation16,
     
     // Surface variants
     surfaceVariant = DarkSurfaces.SurfaceVariant,
-    onSurfaceVariant = DarkText.Secondary,
+    onSurfaceVariant = DarkText.Secondary,      // 60% white
     surfaceTint = DarkSurfaces.SurfaceTint,
     
-    // Inverse colors
+    // Inverse colors (for snackbars, etc)
     inverseSurface = LightSurfaces.Surface,
     inverseOnSurface = LightText.Primary,
     inversePrimary = BrandColors.PrimaryMuted,
     
     // Outlines
-    outline = DarkBorders.Default,
-    outlineVariant = DarkBorders.Subtle,
+    outline = DarkBorders.Default,              // #2E2E2E
+    outlineVariant = DarkBorders.Subtle,        // #232323
     
-    // Scrim
-    scrim = EffectColors.Scrim
+    // Scrim (overlay)
+    scrim = EffectColors.Scrim                  // 60% dark
 )
 
 /**
  * Light color scheme - Alternative theme
+ * Uses more saturated colors (tonal 500-600) for light backgrounds
  */
 private val LightColorScheme = lightColorScheme(
-    // Primary colors
-    primary = BrandColors.PrimaryMuted,
-    onPrimary = LightText.OnPrimary,
-    primaryContainer = Color(0xFFB2F5EA),
-    onPrimaryContainer = Color(0xFF00201D),
+    // Primary colors (saturated teal 500)
+    primary = BrandColors.PrimaryLight,         // #00BFA5 - vibrant teal
+    onPrimary = LightText.OnPrimary,            // White text
+    primaryContainer = Color(0xFFB2F5EA),       // Light teal container
+    onPrimaryContainer = Color(0xFF00201D),     // Dark teal text
     
-    // Secondary colors
-    secondary = BrandColors.SecondaryMuted,
+    // Secondary colors (blue 600)
+    secondary = BrandColors.SecondaryMuted,     // #0277BD
     onSecondary = LightText.OnPrimary,
-    secondaryContainer = Color(0xFFB3E5FC),
+    secondaryContainer = Color(0xFFB3E5FC),     // Light blue container
     onSecondaryContainer = Color(0xFF001F2A),
     
-    // Tertiary colors
+    // Tertiary colors (purple 500)
     tertiary = Color(0xFF7B5CB0),
     onTertiary = LightText.OnPrimary,
     tertiaryContainer = Color(0xFFE8DEF8),
     onTertiaryContainer = Color(0xFF1D1D2C),
     
-    // Error colors
-    error = SemanticColors.ErrorVariant,
+    // Error colors (red 500)
+    error = SemanticColors.ErrorVariant,        // #EF5350
     onError = LightText.OnPrimary,
     errorContainer = Color(0xFFFFDAD6),
     onErrorContainer = Color(0xFF410002),
     
-    // Background and surface
-    background = LightSurfaces.Background,
-    onBackground = LightText.Primary,
-    surface = LightSurfaces.Surface,
+    // Background and surfaces (near white)
+    background = LightSurfaces.Background,      // #FAFAFA
+    onBackground = LightText.Primary,           // Near black
+    surface = LightSurfaces.Surface,            // #FFFFFF
     onSurface = LightText.Primary,
+    
+    // Surface containers
+    surfaceContainerLowest = Color(0xFFFFFFFF),
+    surfaceContainerLow = Color(0xFFF7F7F7),
+    surfaceContainer = LightSurfaces.SurfaceContainer,
+    surfaceContainerHigh = LightSurfaces.SurfaceContainerHigh,
+    surfaceContainerHighest = LightSurfaces.SurfaceContainerHighest,
     
     // Surface variants
     surfaceVariant = LightSurfaces.SurfaceVariant,
