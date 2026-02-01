@@ -12,11 +12,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.deliverytracker.app.presentation.components.ValidatedTextField
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.deliverytracker.app.R
+import com.deliverytracker.app.presentation.theme.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -101,17 +103,20 @@ fun ShiftFormScreen(
             TopAppBar(
                 title = { 
                     Text(
-                        if (viewModel.isEditMode) 
+                        text = if (viewModel.isEditMode) 
                             stringResource(R.string.edit_shift)
                         else 
-                            stringResource(R.string.new_shift)
+                            stringResource(R.string.new_shift),
+                        fontWeight = FontWeight.SemiBold,
+                        color = DarkText.Primary
                     ) 
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack, 
-                            contentDescription = stringResource(R.string.back)
+                            contentDescription = stringResource(R.string.back),
+                            tint = DarkText.Primary
                         )
                     }
                 },
@@ -122,13 +127,18 @@ fun ShiftFormScreen(
                     ) {
                         Icon(
                             Icons.Default.Check, 
-                            contentDescription = stringResource(R.string.btn_save)
+                            contentDescription = stringResource(R.string.btn_save),
+                            tint = BrandColors.Primary
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = DarkSurfaces.Background
+                )
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        containerColor = DarkSurfaces.Background
     ) { paddingValues ->
         if (uiState.isLoading) {
             Box(

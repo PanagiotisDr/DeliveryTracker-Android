@@ -18,6 +18,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.deliverytracker.app.R
 import com.deliverytracker.app.domain.model.Expense
 import com.deliverytracker.app.domain.model.Shift
+import com.deliverytracker.app.presentation.theme.*
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -52,18 +53,29 @@ fun RecycleBinScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.recycle_bin_title)) },
+                title = { 
+                    Text(
+                        text = stringResource(R.string.recycle_bin_title),
+                        fontWeight = FontWeight.SemiBold,
+                        color = DarkText.Primary
+                    ) 
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack, 
-                            contentDescription = stringResource(R.string.back)
+                            contentDescription = stringResource(R.string.back),
+                            tint = DarkText.Primary
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = DarkSurfaces.Background
+                )
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        containerColor = DarkSurfaces.Background
     ) { paddingValues ->
         if (uiState.isLoading) {
             Box(

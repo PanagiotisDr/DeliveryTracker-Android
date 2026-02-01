@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.deliverytracker.app.R
+import com.deliverytracker.app.presentation.theme.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -58,14 +59,28 @@ fun ExportScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.export_title)) },
+                title = { 
+                    Text(
+                        text = stringResource(R.string.export_title),
+                        fontWeight = FontWeight.SemiBold,
+                        color = DarkText.Primary
+                    ) 
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack, 
+                            contentDescription = stringResource(R.string.back),
+                            tint = DarkText.Primary
+                        )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = DarkSurfaces.Background
+                )
             )
-        }
+        },
+        containerColor = DarkSurfaces.Background
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
             Column(
