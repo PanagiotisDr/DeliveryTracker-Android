@@ -1,8 +1,10 @@
 package com.deliverytracker.app.presentation.screens.shifts
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -10,19 +12,22 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.deliverytracker.app.R
 import com.deliverytracker.app.domain.model.Shift
+import com.deliverytracker.app.presentation.components.ConfirmDeleteDialog
+import com.deliverytracker.app.presentation.components.EmptyState
+import com.deliverytracker.app.presentation.theme.*
 import java.text.SimpleDateFormat
 import java.util.*
 
 /**
- * Οθόνη λίστας βαρδιών.
- * Χρησιμοποιεί stringResource για localization.
+ * 📋 Shift List Screen - Google Pay Style
+ * Clean white cards με soft shadows.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,7 +40,6 @@ fun ShiftListScreen(
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     
-    // Εμφάνιση μηνυμάτων
     LaunchedEffect(uiState.error, uiState.successMessage) {
         uiState.error?.let {
             snackbarHostState.showSnackbar(it)
@@ -50,7 +54,12 @@ fun ShiftListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.nav_shifts)) },
+                title = { 
+                    Text(
+                        text = stringResource(R.string.nav_shifts),
+                        fontWeight = FontWeight.SemiBold
+                    ) 
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -58,21 +67,27 @@ fun ShiftListScreen(
                             contentDescription = stringResource(R.string.back)
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
             )
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onNavigateToAddShift,
-                containerColor = MaterialTheme.colorScheme.primary
+                containerColor = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(Spacing.radiusMd)
             ) {
                 Icon(
                     Icons.Default.Add, 
-                    contentDescription = stringResource(R.string.new_shift)
+                    contentDescription = stringResource(R.string.new_shift),
+                    tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -82,21 +97,44 @@ fun ShiftListScreen(
             when {
                 uiState.isLoading -> {
                     CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
+                        modifier = Modifier.align(Alignment.Center),
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
                 uiState.shifts.isEmpty() -> {
-                    EmptyShiftsContent(
-                        modifier = Modifier.align(Alignment.Center),
-                        onAddClick = onNavigateToAddShift
-                    )
+                    EmptyState(
+                        emoji = "📋",
+                        title = stringResource(R.string.empty_shifts),
+                        subtitle = stringResource(R.string.empty_shifts_hint),
+                        modifier = Modifier.align(Alignment.Center)
+                    ) {
+                        Button(
+                            onClick = onNavigateToAddShift,
+                            shape = RoundedCornerShape(Spacing.radiusFull)
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = null)
+                            Spacer(modifier = Modifier.width(Spacing.sm))
+                            Text(stringResource(R.string.new_shift))
+                        }
+                    }
                 }
                 else -> {
-                    ShiftsList(
-                        shifts = uiState.shifts,
-                        onEditClick = onNavigateToEditShift,
-                        onDeleteClick = { viewModel.deleteShift(it) }
-                    )
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(Spacing.lg),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.md)
+                    ) {
+                        itemsIndexed(
+                            items = uiState.shifts,
+                            key = { _, shift -> shift.id }
+                        ) { _, shift ->
+                            GPay_ShiftCard(
+                                shift = shift,
+                                onEditClick = { onNavigateToEditShift(shift.id) },
+                                onDeleteClick = { viewModel.deleteShift(shift.id) }
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -104,127 +142,46 @@ fun ShiftListScreen(
 }
 
 /**
- * Περιεχόμενο όταν δεν υπάρχουν βάρδιες.
+ * 💳 Google Pay Style Shift Card
+ * Clean white, rounded, με soft shadow.
  */
 @Composable
-private fun EmptyShiftsContent(
-    modifier: Modifier = Modifier,
-    onAddClick: () -> Unit
-) {
-    Column(
-        modifier = modifier.padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            imageVector = Icons.Default.WorkOff,
-            contentDescription = null,
-            modifier = Modifier.size(80.dp),
-            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        Text(
-            text = stringResource(R.string.empty_shifts),
-            style = MaterialTheme.typography.titleMedium,
-            textAlign = TextAlign.Center
-        )
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        Text(
-            text = stringResource(R.string.empty_shifts_hint),
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        Button(onClick = onAddClick) {
-            Icon(Icons.Default.Add, null)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(stringResource(R.string.new_shift))
-        }
-    }
-}
-
-/**
- * Λίστα βαρδιών.
- */
-@Composable
-private fun ShiftsList(
-    shifts: List<Shift>,
-    onEditClick: (String) -> Unit,
-    onDeleteClick: (String) -> Unit
-) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        items(shifts, key = { it.id }) { shift ->
-            ShiftCard(
-                shift = shift,
-                onEditClick = { onEditClick(shift.id) },
-                onDeleteClick = { onDeleteClick(shift.id) }
-            )
-        }
-    }
-}
-
-/**
- * Κάρτα βάρδιας.
- */
-@Composable
-private fun ShiftCard(
+private fun GPay_ShiftCard(
     shift: Shift,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
+    val dateFormat = remember { SimpleDateFormat("EEE, dd MMM yyyy", Locale("el", "GR")) }
     
-    // Dialog επιβεβαίωσης διαγραφής
     if (showDeleteDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text(stringResource(R.string.dialog_delete_shift_title)) },
-            text = { Text(stringResource(R.string.dialog_delete_shift_message)) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showDeleteDialog = false
-                        onDeleteClick()
-                    }
-                ) {
-                    Text(
-                        text = stringResource(R.string.btn_delete), 
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
+        ConfirmDeleteDialog(
+            title = stringResource(R.string.dialog_delete_shift_title),
+            message = stringResource(R.string.dialog_delete_shift_message),
+            onConfirm = {
+                showDeleteDialog = false
+                onDeleteClick()
             },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
-                    Text(stringResource(R.string.btn_cancel))
-                }
-            }
+            onDismiss = { showDeleteDialog = false }
         )
     }
     
-    val dateFormat = remember { SimpleDateFormat("EEE, dd MMM yyyy", Locale("el", "GR")) }
-    
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 2.dp,
+                shape = RoundedCornerShape(Spacing.radiusLg),
+                ambientColor = GPay_ShadowColor,
+                spotColor = GPay_ShadowColor
+            ),
+        shape = RoundedCornerShape(Spacing.radiusLg),
+        color = MaterialTheme.colorScheme.surface
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+            modifier = Modifier.padding(Spacing.lg)
         ) {
-            // Header με ημερομηνία και actions
+            // Header: Date + Actions
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -234,7 +191,8 @@ private fun ShiftCard(
                     Text(
                         text = dateFormat.format(Date(shift.date)),
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = shift.formattedWorkTime,
@@ -243,48 +201,69 @@ private fun ShiftCard(
                     )
                 }
                 
-                Row {
-                    IconButton(onClick = onEditClick) {
+                // Action buttons
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                    IconButton(
+                        onClick = onEditClick,
+                        modifier = Modifier.size(36.dp)
+                    ) {
                         Icon(
                             Icons.Default.Edit,
                             contentDescription = stringResource(R.string.btn_edit),
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
-                    IconButton(onClick = { showDeleteDialog = true }) {
+                    IconButton(
+                        onClick = { showDeleteDialog = true },
+                        modifier = Modifier.size(36.dp)
+                    ) {
                         Icon(
                             Icons.Default.Delete,
                             contentDescription = stringResource(R.string.btn_delete),
-                            tint = MaterialTheme.colorScheme.error
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 }
             }
             
-            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+            Spacer(modifier = Modifier.height(Spacing.lg))
             
-            // Στατιστικά
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            
+            Spacer(modifier = Modifier.height(Spacing.lg))
+            
+            // Stats Grid - 2x2
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                StatItem(
-                    label = stringResource(R.string.dashboard_net),
+                GPay_CardStat(
                     value = "%.2f€".format(shift.netIncome),
-                    color = if (shift.netIncome >= 0) MaterialTheme.colorScheme.primary 
-                           else MaterialTheme.colorScheme.error
+                    label = stringResource(R.string.dashboard_net),
+                    valueColor = if (shift.netIncome >= 0) GPay_Success 
+                                else MaterialTheme.colorScheme.error
                 )
-                StatItem(
-                    label = stringResource(R.string.dashboard_hours),
-                    value = "%.1f".format(shift.hoursWorked)
+                GPay_CardStat(
+                    value = "%.1fh".format(shift.hoursWorked),
+                    label = stringResource(R.string.dashboard_hours)
                 )
-                StatItem(
-                    label = stringResource(R.string.dashboard_orders),
-                    value = shift.ordersCount.toString()
+            }
+            
+            Spacer(modifier = Modifier.height(Spacing.md))
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                GPay_CardStat(
+                    value = shift.ordersCount.toString(),
+                    label = stringResource(R.string.dashboard_orders)
                 )
-                StatItem(
-                    label = stringResource(R.string.stats_per_hour),
-                    value = "%.2f".format(shift.incomePerHour)
+                GPay_CardStat(
+                    value = "%.2f€".format(shift.incomePerHour),
+                    label = stringResource(R.string.stats_per_hour)
                 )
             }
         }
@@ -292,20 +271,23 @@ private fun ShiftCard(
 }
 
 /**
- * Στοιχείο στατιστικού στην κάρτα.
+ * Stat item για μέσα σε cards
  */
 @Composable
-private fun StatItem(
-    label: String,
+private fun GPay_CardStat(
     value: String,
-    color: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onSurface
+    label: String,
+    valueColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onSurface
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.width(80.dp)
+    ) {
         Text(
             text = value,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            color = color
+            color = valueColor
         )
         Text(
             text = label,

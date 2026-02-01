@@ -232,6 +232,7 @@
     <string name="dashboard_bonus">Bonus</string>
     <string name="dashboard_shifts">Shifts</string>
     <string name="dashboard_goal_reached">🎉 Great! You reached your goal!</string>
+    <string name="hero_today_earnings">Today\'s Earnings</string>
     
     <!-- Settings Additional -->
     <string name="settings_user">User</string>
@@ -262,6 +263,17 @@
     <string name="backup_create_desc">Export all your data to a JSON file</string>
     <string name="backup_restore">Restore Backup</string>
     <string name="backup_restore_desc">Import data from a backup file</string>
+    
+    <!-- Command Center -->
+    <string name="greeting_morning">Good morning</string>
+    <string name="greeting_afternoon">Good afternoon</string>
+    <string name="greeting_evening">Good evening</string>
+    <string name="recent_shifts">Recent Shifts</string>
+    <string name="btn_see_all">See all</string>
+    <string name="no_shifts_today">No shifts today</string>
+    <string name="btn_start_shift">Start Shift</string>
+    <string name="stats_trend">Weekly Trend</string>
+    <string name="stats_today">Today</string>
 </resources>
 
 

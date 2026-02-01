@@ -232,6 +232,7 @@
     <string name="dashboard_bonus">Bonus</string>
     <string name="dashboard_shifts">Βάρδιες</string>
     <string name="dashboard_goal_reached">🎉 Μπράβο! Πέτυχες τον στόχο!</string>
+    <string name="hero_today_earnings">Σημερινά Έσοδα</string>
     
     <!-- Settings Additional -->
     <string name="settings_user">Χρήστης</string>
@@ -262,6 +263,17 @@
     <string name="backup_create_desc">Εξαγωγή όλων των δεδομένων σε JSON</string>
     <string name="backup_restore">Επαναφορά Backup</string>
     <string name="backup_restore_desc">Εισαγωγή δεδομένων από backup αρχείο</string>
+    
+    <!-- Command Center -->
+    <string name="greeting_morning">Καλημέρα</string>
+    <string name="greeting_afternoon">Καλό μεσημέρι</string>
+    <string name="greeting_evening">Καλησπέρα</string>
+    <string name="recent_shifts">Πρόσφατες Βάρδιες</string>
+    <string name="btn_see_all">Δες όλα</string>
+    <string name="no_shifts_today">Χωρίς βάρδιες σήμερα</string>
+    <string name="btn_start_shift">Ξεκίνα Βάρδια</string>
+    <string name="stats_trend">Εβδομαδιαία Τάση</string>
+    <string name="stats_today">Σήμερα</string>
 </resources>
 
 

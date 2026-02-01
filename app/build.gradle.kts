@@ -15,12 +15,12 @@ plugins {
 
 android {
     namespace = "com.deliverytracker.app"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.deliverytracker.app"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0.0"
 
@@ -89,6 +89,13 @@ dependencies {
 
     // Vico Charts - Για γραφήματα στατιστικών
     implementation(libs.vico.compose.m3)
+
+    // Lottie Animations - Για premium animations
+    implementation(libs.lottie.compose)
+
+    // Accompanist - System UI & Loading effects
+    implementation(libs.accompanist.systemuicontroller)
+    implementation(libs.accompanist.placeholder)
 
     // DataStore - Για τοπικές ρυθμίσεις
     implementation(libs.datastore.preferences)

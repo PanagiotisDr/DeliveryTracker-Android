@@ -7,17 +7,27 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.deliverytracker.app.domain.model.ThemeMode
 import com.deliverytracker.app.domain.repository.AuthRepository
 import com.deliverytracker.app.domain.repository.UserSettingsRepository
+import com.deliverytracker.app.presentation.components.BottomNavBar
 import com.deliverytracker.app.presentation.navigation.NavGraph
+import com.deliverytracker.app.presentation.navigation.Screen
 import com.deliverytracker.app.presentation.theme.DeliveryTrackerTheme
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
@@ -25,7 +35,7 @@ import javax.inject.Inject
 
 /**
  * Η κύρια Activity της εφαρμογής.
- * Χρησιμοποιεί Jetpack Compose για το UI και Navigation.
+ * Χρησιμοποιεί Jetpack Compose με Bottom Navigation για το UI.
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -77,13 +87,50 @@ class MainActivity : ComponentActivity() {
                 } else {
                     val hasPin = currentUser?.hasPin ?: false
                     
-                    NavGraph(
-                        navController = navController,
-                        isLoggedIn = isLoggedIn,
-                        hasPin = hasPin
+                    // Βρίσκουμε το τρέχον route για να ξέρουμε αν πρέπει να δείξουμε το bottom nav
+                    val navBackStackEntry by navController.currentBackStackEntryAsState()
+                    val currentRoute = navBackStackEntry?.destination?.route
+                    
+                    // Δείχνουμε το bottom nav μόνο στις main screens (όχι auth screens)
+                    val showBottomNav = isLoggedIn && currentRoute in listOf(
+                        Screen.Dashboard.route,
+                        Screen.ShiftList.route,
+                        Screen.ExpenseList.route,
+                        Screen.Statistics.route,
+                        Screen.Settings.route
                     )
+                    
+                    Scaffold(
+                        bottomBar = {
+                            if (showBottomNav) {
+                                BottomNavBar(
+                                    currentRoute = currentRoute ?: "",
+                                    onNavigate = { route ->
+                                        navController.navigate(route) {
+                                            // Pop up όλα μέχρι το start destination για να μην χτίζεται stack
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
+                                            // Αποφυγή πολλαπλών instances της ίδιας οθόνης
+                                            launchSingleTop = true
+                                            // Restore state όταν επιστρέφουμε σε ένα tab
+                                            restoreState = true
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    ) { paddingValues ->
+                        NavGraph(
+                            navController = navController,
+                            isLoggedIn = isLoggedIn,
+                            hasPin = hasPin,
+                            modifier = Modifier.padding(paddingValues)
+                        )
+                    }
                 }
             }
         }
     }
 }
+

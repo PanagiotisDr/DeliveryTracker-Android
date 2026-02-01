@@ -25,7 +25,13 @@ firebaseAnalytics = "23.0.0"
 googleServices = "4.4.4"
 
 # Charts
-vico = "2.1.0"
+vico = "2.4.3"
+
+# Animations
+lottie = "6.7.1"
+
+# UI Effects
+accompanist = "0.36.0"
 
 # DataStore
 datastore = "1.1.2"
@@ -65,6 +71,13 @@ firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics
 
 # Charts
 vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
+
+# Animations
+lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottie" }
+
+# UI Effects
+accompanist-systemuicontroller = { group = "com.google.accompanist", name = "accompanist-systemuicontroller", version.ref = "accompanist" }
+accompanist-placeholder = { group = "com.google.accompanist", name = "accompanist-placeholder-material3", version.ref = "accompanist" }
 
 # DataStore
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
