@@ -90,6 +90,8 @@
     <string name="payment_card">Card</string>
     
     <!-- Dashboard -->
+    <string name="btn_new_order">New Order</string>
+    <string name="btn_new_order_subtitle">Quick add delivery</string>
     <string name="dashboard_net_income">Net Income</string>
     <string name="dashboard_gross_income">Gross Income</string>
     <string name="dashboard_total_expenses">Total Expenses</string>

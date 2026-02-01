@@ -37,6 +37,7 @@ fun DashboardScreen(
     onNavigateToExpenses: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToStatistics: () -> Unit,
+    onNavigateToNewOrder: () -> Unit = {},
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -57,6 +58,21 @@ fun DashboardScreen(
             progress = uiState.dailyProgress,
             goal = uiState.dailyGoal
         )
+        
+        Spacer(modifier = Modifier.height(Spacing.xl))
+        
+        // ════════════════════════════════════════════════════════════
+        // 🆕 NEW ORDER BUTTON - Big and prominent
+        // ════════════════════════════════════════════════════════════
+        Column(
+            modifier = Modifier.padding(horizontal = Spacing.screenHorizontal)
+        ) {
+            BigActionButton(
+                title = stringResource(R.string.btn_new_order),
+                subtitle = stringResource(R.string.btn_new_order_subtitle),
+                onClick = onNavigateToNewOrder
+            )
+        }
         
         Spacer(modifier = Modifier.height(Spacing.xl))
         

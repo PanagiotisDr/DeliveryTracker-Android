@@ -90,6 +90,8 @@
     <string name="payment_card">Κάρτα</string>
     
     <!-- Dashboard -->
+    <string name="btn_new_order">Νέα Παραγγελία</string>
+    <string name="btn_new_order_subtitle">Γρήγορη καταχώρηση</string>
     <string name="dashboard_net_income">Καθαρό Εισόδημα</string>
     <string name="dashboard_gross_income">Μεικτό Εισόδημα</string>
     <string name="dashboard_total_expenses">Σύνολο Εξόδων</string>
