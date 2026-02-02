@@ -4,11 +4,13 @@ import com.deliverytracker.app.domain.model.Result
 import com.deliverytracker.app.domain.model.User
 import com.deliverytracker.app.domain.model.UserRole
 import com.deliverytracker.app.domain.repository.AuthRepository
+import com.deliverytracker.app.domain.security.PinHasher
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -26,22 +28,26 @@ class AuthRepositoryImpl @Inject constructor(
     // Collection reference για τους χρήστες
     private val usersCollection = firestore.collection("users")
     
-    override val currentUser: Flow<User?> = callbackFlow {
+    override val currentUserState: Flow<Result<User?>> = callbackFlow {
         val authListener = FirebaseAuth.AuthStateListener { auth ->
             val firebaseUser = auth.currentUser
             if (firebaseUser != null) {
-                // Φόρτωσε τα user data από Firestore
+                trySend(Result.Loading)
                 usersCollection.document(firebaseUser.uid)
                     .get()
                     .addOnSuccessListener { doc ->
                         val user = doc.toUser()
-                        trySend(user)
+                        if (user == null) {
+                            trySend(Result.Error("Αποτυχία φόρτωσης χρήστη"))
+                        } else {
+                            trySend(Result.Success(user))
+                        }
                     }
-                    .addOnFailureListener {
-                        trySend(null)
+                    .addOnFailureListener { error ->
+                        trySend(Result.Error("Σφάλμα φόρτωσης χρήστη", error))
                     }
             } else {
-                trySend(null)
+                trySend(Result.Success(null))
             }
         }
         
@@ -51,6 +57,9 @@ class AuthRepositoryImpl @Inject constructor(
             firebaseAuth.removeAuthStateListener(authListener)
         }
     }
+
+    override val currentUser: Flow<User?> =
+        currentUserState.map { result -> result.getOrNull() }
     
     override val isLoggedIn: Boolean
         get() = firebaseAuth.currentUser != null
@@ -136,26 +145,58 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
     
-    override suspend fun updatePin(userId: String, pinHash: String?): Result<Unit> {
+    override suspend fun updatePin(userId: String, pin: String?): Result<Unit> {
         return try {
-            usersCollection.document(userId)
-                .update(mapOf(
-                    "pinHash" to pinHash,
+            val updates = if (pin.isNullOrBlank()) {
+                mapOf(
+                    "pinHash" to null,
+                    "pinSalt" to null,
                     "failedPinAttempts" to 0,
                     "pinLockoutEnd" to null
-                ))
-                .await()
+                )
+            } else {
+                val hashResult = PinHasher.createHash(pin)
+                mapOf(
+                    "pinHash" to hashResult.hash,
+                    "pinSalt" to hashResult.salt,
+                    "failedPinAttempts" to 0,
+                    "pinLockoutEnd" to null
+                )
+            }
+            
+            usersCollection.document(userId).update(updates).await()
             Result.Success(Unit)
         } catch (e: Exception) {
             Result.Error("Σφάλμα ενημέρωσης PIN", e)
         }
     }
     
-    override suspend fun verifyPin(userId: String, pinHash: String): Result<Boolean> {
+    override suspend fun verifyPin(userId: String, pin: String): Result<Boolean> {
         return try {
             val doc = usersCollection.document(userId).get().await()
             val storedHash = doc.getString("pinHash")
-            Result.Success(storedHash == pinHash)
+            if (storedHash.isNullOrBlank()) {
+                return Result.Success(false)
+            }
+            
+            val storedSalt = doc.getString("pinSalt")
+            val isValid = if (!storedSalt.isNullOrBlank()) {
+                PinHasher.verify(pin, storedSalt, storedHash)
+            } else {
+                PinHasher.verifyLegacy(pin, storedHash)
+            }
+            
+            if (isValid && storedSalt.isNullOrBlank()) {
+                val upgraded = PinHasher.createHash(pin)
+                usersCollection.document(userId).update(
+                    mapOf(
+                        "pinHash" to upgraded.hash,
+                        "pinSalt" to upgraded.salt
+                    )
+                ).await()
+            }
+            
+            Result.Success(isValid)
         } catch (e: Exception) {
             Result.Error("Σφάλμα επαλήθευσης PIN", e)
         }
@@ -210,6 +251,7 @@ class AuthRepositoryImpl @Inject constructor(
                 username = getString("username") ?: "",
                 role = getString("role")?.let { UserRole.valueOf(it) } ?: UserRole.USER,
                 pinHash = getString("pinHash"),
+                pinSalt = getString("pinSalt"),
                 failedPinAttempts = getLong("failedPinAttempts")?.toInt() ?: 0,
                 pinLockoutEnd = getLong("pinLockoutEnd"),
                 lastLoginAt = getLong("lastLoginAt"),
@@ -228,6 +270,7 @@ class AuthRepositoryImpl @Inject constructor(
         "username" to username,
         "role" to role.name,
         "pinHash" to pinHash,
+        "pinSalt" to pinSalt,
         "failedPinAttempts" to failedPinAttempts,
         "pinLockoutEnd" to pinLockoutEnd,
         "lastLoginAt" to lastLoginAt,

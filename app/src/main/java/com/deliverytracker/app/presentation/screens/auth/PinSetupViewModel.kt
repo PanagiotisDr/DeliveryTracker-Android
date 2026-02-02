@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.security.MessageDigest
 import javax.inject.Inject
 
 /**
@@ -99,8 +98,7 @@ class PinSetupViewModel @Inject constructor(
                 return@launch
             }
             
-            val pinHash = hashPin(pin)
-            when (val result = authRepository.updatePin(userId, pinHash)) {
+            when (val result = authRepository.updatePin(userId, pin)) {
                 is Result.Success -> {
                     _uiState.update { 
                         it.copy(isLoading = false, isSaved = true) 
@@ -123,13 +121,6 @@ class PinSetupViewModel @Inject constructor(
         _uiState.update { it.copy(isSkipped = true) }
     }
     
-    /**
-     * Hash του PIN.
-     */
-    private fun hashPin(pin: String): String {
-        val bytes = MessageDigest.getInstance("SHA-256").digest(pin.toByteArray())
-        return bytes.joinToString("") { "%02x".format(it) }
-    }
 }
 
 /**

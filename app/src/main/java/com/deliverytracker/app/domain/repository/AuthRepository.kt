@@ -15,6 +15,11 @@ interface AuthRepository {
      * Null αν δεν είναι συνδεδεμένος.
      */
     val currentUser: Flow<User?>
+
+    /**
+     * Επιστρέφει τον τρέχοντα χρήστη ως Result για explicit error handling.
+     */
+    val currentUserState: Flow<Result<User?>>
     
     /**
      * Επιστρέφει τον τρέχοντα χρήστη συγχρονικά.
@@ -54,12 +59,12 @@ interface AuthRepository {
     /**
      * Ενημέρωση του PIN του χρήστη.
      */
-    suspend fun updatePin(userId: String, pinHash: String?): Result<Unit>
+    suspend fun updatePin(userId: String, pin: String?): Result<Unit>
     
     /**
      * Επαλήθευση PIN.
      */
-    suspend fun verifyPin(userId: String, pinHash: String): Result<Boolean>
+    suspend fun verifyPin(userId: String, pin: String): Result<Boolean>
     
     /**
      * Καταγραφή αποτυχημένης προσπάθειας PIN.
