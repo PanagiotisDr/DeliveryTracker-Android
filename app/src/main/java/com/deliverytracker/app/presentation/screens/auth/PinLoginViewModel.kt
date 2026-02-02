@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.security.MessageDigest
 import javax.inject.Inject
 
 /**
@@ -98,8 +97,7 @@ class PinLoginViewModel @Inject constructor(
                 return@launch
             }
             
-            val pinHash = hashPin(pin)
-            when (val result = authRepository.verifyPin(userId, pinHash)) {
+            when (val result = authRepository.verifyPin(userId, pin)) {
                 is Result.Success -> {
                     if (result.data) {
                         // Επιτυχής επαλήθευση
@@ -133,13 +131,6 @@ class PinLoginViewModel @Inject constructor(
         }
     }
     
-    /**
-     * Hash του PIN για ασφαλή αποθήκευση.
-     */
-    private fun hashPin(pin: String): String {
-        val bytes = MessageDigest.getInstance("SHA-256").digest(pin.toByteArray())
-        return bytes.joinToString("") { "%02x".format(it) }
-    }
 }
 
 /**

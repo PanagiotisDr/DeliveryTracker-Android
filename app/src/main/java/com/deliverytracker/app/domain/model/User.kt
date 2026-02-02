@@ -10,6 +10,7 @@ data class User(
     val username: String,
     val role: UserRole = UserRole.USER,
     val pinHash: String? = null,
+    val pinSalt: String? = null,
     val failedPinAttempts: Int = 0,
     val pinLockoutEnd: Long? = null,
     val lastLoginAt: Long? = null,
