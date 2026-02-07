@@ -1,5 +1,7 @@
 package com.deliverytracker.app.data.repository
 
+import android.content.Context
+import com.deliverytracker.app.R
 import com.deliverytracker.app.domain.model.Expense
 import com.deliverytracker.app.domain.model.ExpenseCategory
 import com.deliverytracker.app.domain.model.PaymentMethod
@@ -7,6 +9,7 @@ import com.deliverytracker.app.domain.model.Result
 import com.deliverytracker.app.domain.repository.ExpenseRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -16,18 +19,29 @@ import javax.inject.Singleton
 
 /**
  * Firestore implementation του ExpenseRepository.
+ * Χρησιμοποιεί context.getString() για proper i18n error messages.
  */
 @Singleton
 class ExpenseRepositoryImpl @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val firestore: FirebaseFirestore
 ) : ExpenseRepository {
     
     private val expensesCollection = firestore.collection("expenses")
     
     override fun getExpenses(userId: String, includeDeleted: Boolean): Flow<List<Expense>> = callbackFlow {
-        // Απλό query χωρίς composite index
-        val query = expensesCollection
-            .whereEqualTo("userId", userId)
+        // Server-side filtering με composite index
+        // Απαιτεί το firestore.indexes.json να έχει deployed
+        val query = if (includeDeleted) {
+            expensesCollection
+                .whereEqualTo("userId", userId)
+                .orderBy("date", Query.Direction.DESCENDING)
+        } else {
+            expensesCollection
+                .whereEqualTo("userId", userId)
+                .whereEqualTo("isDeleted", false)
+                .orderBy("date", Query.Direction.DESCENDING)
+        }
         
         val listener = query.addSnapshotListener { snapshot, error ->
             if (error != null) {
@@ -35,16 +49,11 @@ class ExpenseRepositoryImpl @Inject constructor(
                 return@addSnapshotListener
             }
             
-            var expenses = snapshot?.documents?.mapNotNull { doc ->
+            val expenses = snapshot?.documents?.mapNotNull { doc ->
                 doc.toExpense()
             } ?: emptyList()
             
-            // Client-side filtering και sorting
-            if (!includeDeleted) {
-                expenses = expenses.filter { !it.isDeleted }
-            }
-            expenses = expenses.sortedByDescending { it.date }
-            
+            // Πλέον δεν χρειάζεται client-side filtering/sorting
             trySend(expenses)
         }
         
@@ -58,10 +67,10 @@ class ExpenseRepositoryImpl @Inject constructor(
             if (expense != null) {
                 Result.Success(expense)
             } else {
-                Result.Error("Δεν βρέθηκε το έξοδο")
+                Result.Error(context.getString(R.string.error_expense_not_found))
             }
         } catch (e: Exception) {
-            Result.Error("Σφάλμα φόρτωσης: ${e.message}", e)
+            Result.Error(context.getString(R.string.error_loading_data, e.message ?: ""), e)
         }
     }
     
@@ -76,7 +85,7 @@ class ExpenseRepositoryImpl @Inject constructor(
             docRef.set(newExpense.toMap()).await()
             Result.Success(newExpense)
         } catch (e: Exception) {
-            Result.Error("Σφάλμα δημιουργίας: ${e.message}", e)
+            Result.Error(context.getString(R.string.error_creating, e.message ?: ""), e)
         }
     }
     
@@ -88,7 +97,7 @@ class ExpenseRepositoryImpl @Inject constructor(
                 .await()
             Result.Success(updatedExpense)
         } catch (e: Exception) {
-            Result.Error("Σφάλμα ενημέρωσης: ${e.message}", e)
+            Result.Error(context.getString(R.string.error_updating, e.message ?: ""), e)
         }
     }
     
@@ -102,7 +111,7 @@ class ExpenseRepositoryImpl @Inject constructor(
                 .await()
             Result.Success(Unit)
         } catch (e: Exception) {
-            Result.Error("Σφάλμα διαγραφής: ${e.message}", e)
+            Result.Error(context.getString(R.string.error_deleting, e.message ?: ""), e)
         }
     }
     
@@ -116,7 +125,7 @@ class ExpenseRepositoryImpl @Inject constructor(
                 .await()
             Result.Success(Unit)
         } catch (e: Exception) {
-            Result.Error("Σφάλμα επαναφοράς: ${e.message}", e)
+            Result.Error(context.getString(R.string.error_restoring, e.message ?: ""), e)
         }
     }
     
@@ -125,7 +134,7 @@ class ExpenseRepositoryImpl @Inject constructor(
             expensesCollection.document(expenseId).delete().await()
             Result.Success(Unit)
         } catch (e: Exception) {
-            Result.Error("Σφάλμα διαγραφής: ${e.message}", e)
+            Result.Error(context.getString(R.string.error_deleting, e.message ?: ""), e)
         }
     }
     

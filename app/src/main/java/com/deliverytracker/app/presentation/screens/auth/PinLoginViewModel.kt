@@ -1,7 +1,9 @@
 package com.deliverytracker.app.presentation.screens.auth
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.deliverytracker.app.R
 import com.deliverytracker.app.domain.model.Result
 import com.deliverytracker.app.domain.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,6 +17,7 @@ import javax.inject.Inject
 
 /**
  * ViewModel για το PIN login.
+ * Χρησιμοποιεί @StringRes για proper i18n.
  */
 @HiltViewModel
 class PinLoginViewModel @Inject constructor(
@@ -51,7 +54,7 @@ class PinLoginViewModel @Inject constructor(
         val currentPin = _uiState.value.enteredPin
         if (currentPin.length < 4) {
             val newPin = currentPin + digit
-            _uiState.update { it.copy(enteredPin = newPin, error = null) }
+            _uiState.update { it.copy(enteredPin = newPin, errorRes = null, errorMessage = null) }
             
             // Αν ολοκληρώθηκε το PIN, επαλήθευση
             if (newPin.length == 4) {
@@ -67,7 +70,7 @@ class PinLoginViewModel @Inject constructor(
         val currentPin = _uiState.value.enteredPin
         if (currentPin.isNotEmpty()) {
             _uiState.update { 
-                it.copy(enteredPin = currentPin.dropLast(1), error = null) 
+                it.copy(enteredPin = currentPin.dropLast(1), errorRes = null, errorMessage = null) 
             }
         }
     }
@@ -76,11 +79,12 @@ class PinLoginViewModel @Inject constructor(
      * Καθαρίζει το PIN.
      */
     fun clearPin() {
-        _uiState.update { it.copy(enteredPin = "", error = null) }
+        _uiState.update { it.copy(enteredPin = "", errorRes = null, errorMessage = null) }
     }
     
     /**
      * Επαληθεύει το PIN.
+     * Ελέγχει πρώτα αν ο χρήστης είναι locked out.
      */
     private fun verifyPin(pin: String) {
         viewModelScope.launch {
@@ -91,7 +95,21 @@ class PinLoginViewModel @Inject constructor(
                 _uiState.update { 
                     it.copy(
                         isLoading = false, 
-                        error = "Δεν βρέθηκε χρήστης",
+                        errorRes = R.string.error_user_not_found,
+                        enteredPin = ""
+                    ) 
+                }
+                return@launch
+            }
+            
+            // Έλεγχος αν ο χρήστης είναι locked out
+            val lockoutResult = authRepository.checkPinLockout(userId)
+            if (lockoutResult is Result.Success && lockoutResult.data > 0) {
+                val secondsRemaining = (lockoutResult.data / 1000).toInt()
+                _uiState.update { 
+                    it.copy(
+                        isLoading = false, 
+                        errorRes = R.string.error_pin_locked,
                         enteredPin = ""
                     ) 
                 }
@@ -113,17 +131,18 @@ class PinLoginViewModel @Inject constructor(
                         _uiState.update { 
                             it.copy(
                                 isLoading = false, 
-                                error = "Λάθος PIN",
+                                errorRes = R.string.error_wrong_pin,
                                 enteredPin = ""
                             ) 
                         }
                     }
                 }
                 is Result.Error -> {
+                    // Dynamic error
                     _uiState.update { 
                         it.copy(
                             isLoading = false, 
-                            error = result.message,
+                            errorMessage = result.message,
                             enteredPin = ""
                         ) 
                     }
@@ -144,12 +163,14 @@ class PinLoginViewModel @Inject constructor(
 
 /**
  * UI State για το PIN login.
+ * Χρησιμοποιεί @StringRes για proper i18n.
  */
 data class PinLoginUiState(
     val isLoading: Boolean = false,
     val hasPin: Boolean = false,
     val userId: String? = null,
     val enteredPin: String = "",
-    val error: String? = null,
+    @StringRes val errorRes: Int? = null,    // Static validation errors
+    val errorMessage: String? = null,         // Dynamic errors
     val isVerified: Boolean = false
 )

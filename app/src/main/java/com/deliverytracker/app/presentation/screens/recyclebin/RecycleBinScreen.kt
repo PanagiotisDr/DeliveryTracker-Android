@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -35,17 +36,19 @@ fun RecycleBinScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
     val dateFormat = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
     val decimalFormat = remember { DecimalFormat("#,##0.00") }
     
     // Snackbar messages
-    LaunchedEffect(uiState.error, uiState.successMessage) {
-        uiState.error?.let {
+    LaunchedEffect(uiState.errorResId, uiState.errorMessage, uiState.successMessageResId) {
+        val errorText = uiState.errorResId?.let { context.getString(it) } ?: uiState.errorMessage
+        errorText?.let {
             snackbarHostState.showSnackbar(it)
             viewModel.clearMessages()
         }
-        uiState.successMessage?.let {
-            snackbarHostState.showSnackbar(it)
+        uiState.successMessageResId?.let {
+            snackbarHostState.showSnackbar(context.getString(it))
             viewModel.clearMessages()
         }
     }
@@ -57,7 +60,7 @@ fun RecycleBinScreen(
                     Text(
                         text = stringResource(R.string.recycle_bin_title),
                         fontWeight = FontWeight.SemiBold,
-                        color = DarkText.Primary
+                        color = MaterialTheme.colorScheme.onBackground
                     ) 
                 },
                 navigationIcon = {
@@ -65,17 +68,17 @@ fun RecycleBinScreen(
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack, 
                             contentDescription = stringResource(R.string.back),
-                            tint = DarkText.Primary
+                            tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = DarkSurfaces.Background
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = DarkSurfaces.Background
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         if (uiState.isLoading) {
             Box(
@@ -294,7 +297,7 @@ private fun DeletedExpenseCard(
             // Info
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = expense.category.displayName,
+                    text = stringResource(expense.category.displayNameResId),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )

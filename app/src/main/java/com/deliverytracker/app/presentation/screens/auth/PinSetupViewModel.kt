@@ -1,10 +1,12 @@
 package com.deliverytracker.app.presentation.screens.auth
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.deliverytracker.app.R
 import com.deliverytracker.app.domain.model.Result
 import com.deliverytracker.app.domain.repository.AuthRepository
-import com.google.firebase.auth.FirebaseAuth
+
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +18,7 @@ import javax.inject.Inject
 
 /**
  * ViewModel για τη ρύθμιση PIN.
+ * Χρησιμοποιεί @StringRes για proper i18n.
  */
 @HiltViewModel
 class PinSetupViewModel @Inject constructor(
@@ -35,7 +38,7 @@ class PinSetupViewModel @Inject constructor(
             // Πρώτη εισαγωγή
             if (state.pin.length < 4) {
                 val newPin = state.pin + digit
-                _uiState.update { it.copy(pin = newPin, error = null) }
+                _uiState.update { it.copy(pin = newPin, errorRes = null, errorMessage = null) }
                 
                 if (newPin.length == 4) {
                     // Πήγαινε σε confirmation
@@ -46,7 +49,7 @@ class PinSetupViewModel @Inject constructor(
             // Επιβεβαίωση
             if (state.confirmPin.length < 4) {
                 val newConfirmPin = state.confirmPin + digit
-                _uiState.update { it.copy(confirmPin = newConfirmPin, error = null) }
+                _uiState.update { it.copy(confirmPin = newConfirmPin, errorRes = null, errorMessage = null) }
                 
                 if (newConfirmPin.length == 4) {
                     // Έλεγχος αν ταιριάζουν
@@ -55,7 +58,7 @@ class PinSetupViewModel @Inject constructor(
                     } else {
                         _uiState.update { 
                             it.copy(
-                                error = "Τα PIN δεν ταιριάζουν",
+                                errorRes = R.string.error_pins_not_match,
                                 confirmPin = "",
                                 isConfirming = false,
                                 pin = ""
@@ -91,10 +94,10 @@ class PinSetupViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             
-            val userId = FirebaseAuth.getInstance().currentUser?.uid
+            val userId = authRepository.getCurrentUserId()
             if (userId == null) {
                 _uiState.update { 
-                    it.copy(isLoading = false, error = "Δεν βρέθηκε χρήστης") 
+                    it.copy(isLoading = false, errorRes = R.string.error_user_not_found) 
                 }
                 return@launch
             }
@@ -107,8 +110,9 @@ class PinSetupViewModel @Inject constructor(
                     }
                 }
                 is Result.Error -> {
+                    // Dynamic error
                     _uiState.update { 
-                        it.copy(isLoading = false, error = result.message) 
+                        it.copy(isLoading = false, errorMessage = result.message) 
                     }
                 }
                 is Result.Loading -> { /* Ignore */ }
@@ -134,13 +138,15 @@ class PinSetupViewModel @Inject constructor(
 
 /**
  * UI State για το PIN setup.
+ * Χρησιμοποιεί @StringRes για proper i18n.
  */
 data class PinSetupUiState(
     val isLoading: Boolean = false,
     val pin: String = "",
     val confirmPin: String = "",
     val isConfirming: Boolean = false,
-    val error: String? = null,
+    @StringRes val errorRes: Int? = null,    // Static errors
+    val errorMessage: String? = null,         // Dynamic errors
     val isSaved: Boolean = false,
     val isSkipped: Boolean = false
 )

@@ -14,6 +14,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.deliverytracker.app.presentation.theme.Spacing
+import com.deliverytracker.app.presentation.theme.Dimensions
 
 /**
  * Premium Stat Badge με emoji και προαιρετικό circular background.
@@ -38,7 +39,7 @@ fun StatBadge(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         // Αυξημένο width για να χωράνε Ελληνικές λέξεις
-        modifier = modifier.widthIn(min = 64.dp, max = 80.dp)
+        modifier = modifier.widthIn(min = Dimensions.statBadgeMinWidth, max = Dimensions.statBadgeMaxWidth)
     ) {
         if (showBackground) {
             // Emoji σε circular background

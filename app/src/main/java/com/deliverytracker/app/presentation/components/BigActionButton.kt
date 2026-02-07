@@ -42,9 +42,14 @@ fun BigActionButton(
     icon: ImageVector = Icons.Default.Add,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    gradientColors: List<Color> = Gradients.EarningsVibrant,
+    gradientColors: List<Color>? = null,
     enabled: Boolean = true
 ) {
+    // Χρήση theme-aware gradient αν δεν παρέχεται
+    val effectiveGradient = gradientColors ?: listOf(
+        MaterialTheme.colorScheme.primary,
+        MaterialTheme.colorScheme.secondary
+    )
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     
@@ -76,16 +81,16 @@ fun BigActionButton(
             .scale(scale)
             // Outer glow
             .shadow(
-                elevation = 16.dp,
+                elevation = Dimensions.elevationXl,
                 shape = Shapes.Large,
-                ambientColor = gradientColors.first().copy(alpha = glowAlpha),
-                spotColor = gradientColors.first().copy(alpha = glowAlpha)
+                ambientColor = effectiveGradient.first().copy(alpha = glowAlpha),
+                spotColor = effectiveGradient.first().copy(alpha = glowAlpha)
             )
             .clip(Shapes.Large)
             .background(
                 brush = Brush.linearGradient(
-                    colors = if (enabled) gradientColors 
-                            else listOf(DarkBorders.Subtle, DarkBorders.Subtle)
+                    colors = if (enabled) effectiveGradient 
+                            else listOf(MaterialTheme.colorScheme.outlineVariant, MaterialTheme.colorScheme.outlineVariant)
                 )
             )
             .clickable(
@@ -162,8 +167,8 @@ fun CompactActionButton(
     icon: ImageVector = Icons.Default.Add,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    backgroundColor: Color = BrandColors.Primary,
-    contentColor: Color = DarkText.OnPrimary
+    backgroundColor: Color = MaterialTheme.colorScheme.primary,
+    contentColor: Color = MaterialTheme.colorScheme.onPrimary
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -181,7 +186,7 @@ fun CompactActionButton(
         modifier = modifier
             .scale(scale)
             .shadow(
-                elevation = 8.dp,
+                elevation = Dimensions.elevationLg,
                 shape = Shapes.Full,
                 ambientColor = backgroundColor.copy(alpha = 0.4f),
                 spotColor = backgroundColor.copy(alpha = 0.4f)

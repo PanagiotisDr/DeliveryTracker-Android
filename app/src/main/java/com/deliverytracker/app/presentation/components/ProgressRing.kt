@@ -51,7 +51,7 @@ fun ProgressRing(
     modifier: Modifier = Modifier,
     size: Dp = Dimensions.progressCircularMd,
     strokeWidth: Dp = Dimensions.progressHeightThick,
-    trackColor: Color = DarkBorders.Default,
+    trackColor: Color = MaterialTheme.colorScheme.outline,
     gradientColors: List<Color>? = null,
     startAngle: Float = -90f,
     animationSpec: AnimationSpec<Float> = AnimationSpecs.springDefault(),
@@ -66,8 +66,13 @@ fun ProgressRing(
         label = "progress"
     )
     
-    // Select gradient based on progress level
-    val effectiveGradient = gradientColors ?: getProgressGradient(clampedProgress)
+    // Επιλογή gradient βάσει επιπέδου progress
+    val effectiveGradient = gradientColors ?: when {
+        clampedProgress >= 1f -> listOf(SemanticColors.Success, SemanticColors.SuccessBright)
+        clampedProgress >= 0.75f -> listOf(SemanticColors.Success, SemanticColors.SuccessBright)
+        clampedProgress >= 0.5f -> listOf(SemanticColors.Warning, SemanticColors.WarningBright)
+        else -> listOf(SemanticColors.Error, SemanticColors.ErrorBright)
+    }
     
     Box(
         modifier = modifier.size(size),
@@ -184,7 +189,7 @@ fun SpinningProgressRing(
     modifier: Modifier = Modifier,
     size: Dp = Dimensions.progressCircularMd,
     strokeWidth: Dp = Dimensions.progressHeightDefault,
-    color: Color = BrandColors.Primary
+    color: Color = MaterialTheme.colorScheme.primary
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "spin")
     
@@ -246,13 +251,18 @@ fun GoalProgressRing(
     goalReached: Boolean = progress >= 1f,
     modifier: Modifier = Modifier,
     size: Dp = Dimensions.progressCircularHero,
-    emoji: String = if (goalReached) "🎯" else "💪"
+    emoji: String = if (goalReached) Emojis.GOAL_REACHED else Emojis.GOAL_PROGRESS
 ) {
+    // Χρήση theme-aware colors για progress gradients
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val secondaryColor = MaterialTheme.colorScheme.secondary
+    val tertiaryColor = MaterialTheme.colorScheme.tertiary
+    
     val gradientColors = when {
-        goalReached -> Gradients.ProgressComplete
-        progress >= 0.75f -> Gradients.ProgressHigh
-        progress >= 0.5f -> Gradients.ProgressMedium
-        else -> Gradients.ProgressLow
+        goalReached -> listOf(SemanticColors.Success, SemanticColors.SuccessBright)
+        progress >= 0.75f -> listOf(primaryColor, secondaryColor)
+        progress >= 0.5f -> listOf(secondaryColor, tertiaryColor)
+        else -> listOf(tertiaryColor, MaterialTheme.colorScheme.outlineVariant)
     }
     
     ProgressRing(

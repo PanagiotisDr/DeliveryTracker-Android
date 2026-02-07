@@ -1,11 +1,14 @@
 package com.deliverytracker.app.data.repository
 
+import android.content.Context
+import com.deliverytracker.app.R
 import com.deliverytracker.app.domain.model.Result
 import com.deliverytracker.app.domain.model.User
 import com.deliverytracker.app.domain.model.UserRole
 import com.deliverytracker.app.domain.repository.AuthRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -16,9 +19,11 @@ import javax.inject.Singleton
 /**
  * Υλοποίηση του AuthRepository με Firebase.
  * Χρησιμοποιεί Firebase Auth για authentication και Firestore για user data.
+ * Χρησιμοποιεί context.getString() για proper i18n.
  */
 @Singleton
 class AuthRepositoryImpl @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val firebaseAuth: FirebaseAuth,
     private val firestore: FirebaseFirestore
 ) : AuthRepository {
@@ -52,6 +57,8 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
     
+    override fun getCurrentUserId(): String? = firebaseAuth.currentUser?.uid
+    
     override val isLoggedIn: Boolean
         get() = firebaseAuth.currentUser != null
     
@@ -71,12 +78,12 @@ class AuthRepositoryImpl @Inject constructor(
             // Σύνδεση με Firebase Auth
             val authResult = firebaseAuth.signInWithEmailAndPassword(email, password).await()
             val firebaseUser = authResult.user
-                ?: return Result.Error("Αποτυχία σύνδεσης")
+                ?: return Result.Error(context.getString(R.string.error_login_failed))
             
             // Φόρτωσε τα user data από Firestore
             val userDoc = usersCollection.document(firebaseUser.uid).get().await()
             val user = userDoc.toUser()
-                ?: return Result.Error("Δεν βρέθηκε ο χρήστης")
+                ?: return Result.Error(context.getString(R.string.error_user_not_found))
             
             // Ενημέρωσε το lastLoginAt
             usersCollection.document(firebaseUser.uid)
@@ -98,7 +105,7 @@ class AuthRepositoryImpl @Inject constructor(
             // Δημιουργία λογαριασμού στο Firebase Auth
             val authResult = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
             val firebaseUser = authResult.user
-                ?: return Result.Error("Αποτυχία εγγραφής")
+                ?: return Result.Error(context.getString(R.string.error_register_failed))
             
             // Έλεγχος αν είναι ο πρώτος χρήστης (admin)
             val usersSnapshot = usersCollection.limit(1).get().await()
@@ -147,7 +154,7 @@ class AuthRepositoryImpl @Inject constructor(
                 .await()
             Result.Success(Unit)
         } catch (e: Exception) {
-            Result.Error("Σφάλμα ενημέρωσης PIN", e)
+            Result.Error(context.getString(R.string.error_pin_update), e)
         }
     }
     
@@ -157,7 +164,7 @@ class AuthRepositoryImpl @Inject constructor(
             val storedHash = doc.getString("pinHash")
             Result.Success(storedHash == pinHash)
         } catch (e: Exception) {
-            Result.Error("Σφάλμα επαλήθευσης PIN", e)
+            Result.Error(context.getString(R.string.error_pin_verify), e)
         }
     }
     
@@ -179,7 +186,7 @@ class AuthRepositoryImpl @Inject constructor(
             usersCollection.document(userId).update(updates).await()
             Result.Success(newAttempts)
         } catch (e: Exception) {
-            Result.Error("Σφάλμα καταγραφής", e)
+            Result.Error(context.getString(R.string.error_recording), e)
         }
     }
     
@@ -193,7 +200,23 @@ class AuthRepositoryImpl @Inject constructor(
                 .await()
             Result.Success(Unit)
         } catch (e: Exception) {
-            Result.Error("Σφάλμα επαναφοράς", e)
+            Result.Error(context.getString(R.string.error_reset), e)
+        }
+    }
+    
+    override suspend fun checkPinLockout(userId: String): Result<Long> {
+        return try {
+            val doc = usersCollection.document(userId).get().await()
+            val lockoutEnd = doc.getLong("pinLockoutEnd")
+            
+            // Αν υπάρχει lockout και δεν έχει λήξει, επιστρέφουμε τον εναπομείναντα χρόνο
+            if (lockoutEnd != null && lockoutEnd > System.currentTimeMillis()) {
+                Result.Success(lockoutEnd - System.currentTimeMillis())
+            } else {
+                Result.Success(0L)
+            }
+        } catch (e: Exception) {
+            Result.Error(context.getString(R.string.error_pin_verify), e)
         }
     }
     
@@ -240,20 +263,20 @@ class AuthRepositoryImpl @Inject constructor(
     private fun mapFirebaseError(e: Exception): String {
         return when {
             e.message?.contains("INVALID_EMAIL") == true -> 
-                "Μη έγκυρη διεύθυνση email"
+                context.getString(R.string.error_invalid_email)
             e.message?.contains("WRONG_PASSWORD") == true || 
             e.message?.contains("INVALID_LOGIN_CREDENTIALS") == true -> 
-                "Λάθος email ή κωδικός"
+                context.getString(R.string.error_wrong_credentials)
             e.message?.contains("USER_NOT_FOUND") == true -> 
-                "Δεν βρέθηκε χρήστης με αυτό το email"
+                context.getString(R.string.error_user_not_found)
             e.message?.contains("EMAIL_EXISTS") == true || 
             e.message?.contains("EMAIL_ALREADY_IN_USE") == true -> 
-                "Το email χρησιμοποιείται ήδη"
+                context.getString(R.string.error_email_in_use)
             e.message?.contains("WEAK_PASSWORD") == true -> 
-                "Ο κωδικός πρέπει να έχει τουλάχιστον 6 χαρακτήρες"
+                context.getString(R.string.error_weak_password)
             e.message?.contains("NETWORK") == true -> 
-                "Σφάλμα σύνδεσης. Ελέγξτε το internet."
-            else -> "Σφάλμα: ${e.localizedMessage ?: "Άγνωστο σφάλμα"}"
+                context.getString(R.string.error_network)
+            else -> context.getString(R.string.error_unknown, e.localizedMessage ?: "")
         }
     }
 }

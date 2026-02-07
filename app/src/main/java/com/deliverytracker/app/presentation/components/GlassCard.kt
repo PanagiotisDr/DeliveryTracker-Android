@@ -51,12 +51,12 @@ import com.deliverytracker.app.presentation.theme.*
 @Composable
 fun GlassCard(
     modifier: Modifier = Modifier,
-    backgroundColor: Color = DarkSurfaces.SurfaceContainer.copy(alpha = 0.6f),
-    borderColor: Color = DarkBorders.Glass,
+    backgroundColor: Color = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.6f),
+    borderColor: Color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
     borderWidth: Dp = Dimensions.borderThin,
     cornerRadius: Dp = Spacing.radiusLg,
     glowEnabled: Boolean = false,
-    glowColor: Color = EffectColors.GlowSubtle,
+    glowColor: Color = Color(0x26FF5722),      // 15% orange glow
     contentPadding: PaddingValues = PaddingValues(Spacing.md),
     content: @Composable ColumnScope.() -> Unit
 ) {
@@ -110,20 +110,25 @@ fun GlassCard(
 @Composable
 fun GradientBorderGlassCard(
     modifier: Modifier = Modifier,
-    gradientColors: List<Color> = Gradients.Earnings,
-    backgroundColor: Color = DarkSurfaces.SurfaceContainer.copy(alpha = 0.7f),
+    gradientColors: List<Color>? = null,
+    backgroundColor: Color = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.7f),
     cornerRadius: Dp = Spacing.radiusLg,
     borderWidth: Dp = Dimensions.borderMedium,
     contentPadding: PaddingValues = PaddingValues(Spacing.md),
     content: @Composable ColumnScope.() -> Unit
 ) {
+    // Χρήση theme-aware gradient colors αν δεν παρέχονται
+    val effectiveGradient = gradientColors ?: listOf(
+        MaterialTheme.colorScheme.primary,
+        MaterialTheme.colorScheme.secondary
+    )
     val shape = RoundedCornerShape(cornerRadius)
     
     Box(
         modifier = modifier
             .clip(shape)
             .background(
-                brush = Brush.linearGradient(gradientColors),
+                brush = Brush.linearGradient(effectiveGradient),
                 shape = shape
             )
             .padding(borderWidth)
@@ -151,8 +156,8 @@ fun GradientBorderGlassCard(
 @Composable
 fun AnimatedGlowCard(
     modifier: Modifier = Modifier,
-    glowColor: Color = BrandColors.Primary,
-    backgroundColor: Color = DarkSurfaces.SurfaceContainer.copy(alpha = 0.8f),
+    glowColor: Color = MaterialTheme.colorScheme.primary,
+    backgroundColor: Color = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.8f),
     cornerRadius: Dp = Spacing.radiusLg,
     contentPadding: PaddingValues = PaddingValues(Spacing.md),
     content: @Composable ColumnScope.() -> Unit
@@ -214,7 +219,7 @@ fun AnimatedGlowCard(
 @Composable
 fun HeroGradientCard(
     modifier: Modifier = Modifier,
-    gradientColors: List<Color> = Gradients.Earnings,
+    gradientColors: List<Color>? = null,
     cornerRadius: Dp = Spacing.radiusNone,
     contentPadding: PaddingValues = PaddingValues(
         horizontal = Spacing.lg,
@@ -222,6 +227,11 @@ fun HeroGradientCard(
     ),
     content: @Composable ColumnScope.() -> Unit
 ) {
+    // Χρήση theme-aware gradient colors αν δεν παρέχονται
+    val effectiveGradient = gradientColors ?: listOf(
+        MaterialTheme.colorScheme.primary,
+        MaterialTheme.colorScheme.secondary
+    )
     val shape = if (cornerRadius > 0.dp) {
         RoundedCornerShape(cornerRadius)
     } else {
@@ -234,7 +244,7 @@ fun HeroGradientCard(
             .clip(shape)
             .background(
                 brush = Brush.linearGradient(
-                    colors = gradientColors,
+                    colors = effectiveGradient,
                     start = Offset(0f, 0f),
                     end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
                 )
@@ -295,10 +305,10 @@ fun ElevatedCard(
 @Composable
 fun AccentBorderCard(
     modifier: Modifier = Modifier,
-    accentColor: Color = BrandColors.Primary,
-    backgroundColor: Color = DarkSurfaces.SurfaceContainer,
+    accentColor: Color = MaterialTheme.colorScheme.primary,
+    backgroundColor: Color = MaterialTheme.colorScheme.surfaceContainer,
     cornerRadius: Dp = Spacing.radiusMd,
-    accentWidth: Dp = 4.dp,
+    accentWidth: Dp = Dimensions.accentWidth,
     contentPadding: PaddingValues = PaddingValues(Spacing.md),
     content: @Composable RowScope.() -> Unit
 ) {

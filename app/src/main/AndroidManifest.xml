@@ -20,6 +20,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.DeliveryTracker"
+        android:enableOnBackInvokedCallback="true"
         tools:targetApi="35">
         
         <!-- Main Activity - Compose based -->

@@ -54,13 +54,13 @@ fun CommandCenterScreen(
     var currentSheet by remember { mutableStateOf(SheetType.SHIFTS) }
     
     Scaffold(
-        containerColor = CC_Background,
+        containerColor = MaterialTheme.colorScheme.background,
         floatingActionButton = {
             // Glowing FAB
             FloatingActionButton(
                 onClick = onNavigateToAddShift,
-                containerColor = CC_Primary,
-                contentColor = CC_OnPrimary,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = RoundedCornerShape(Spacing.radiusLg)
             ) {
                 Icon(
@@ -86,13 +86,13 @@ fun CommandCenterScreen(
                 Text(
                     text = getGreeting(),
                     style = MaterialTheme.typography.headlineSmall,
-                    color = CC_TextSecondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = uiState.userName.ifEmpty { "Διανομέας" },
+                    text = uiState.userName.ifEmpty { stringResource(R.string.placeholder_rider) },
                     style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.Bold,
-                    color = CC_TextPrimary
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
             
@@ -125,8 +125,8 @@ fun CommandCenterScreen(
                     GlanceableWidget(
                         value = "${decimalFormat.format(uiState.avgPerHour)}€",
                         label = stringResource(R.string.stats_per_hour),
-                        emoji = "⏱️",
-                        valueColor = CC_Primary,
+                        emoji = Emojis.TIME,
+                        valueColor = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.weight(1f)
                     )
                     
@@ -134,15 +134,15 @@ fun CommandCenterScreen(
                     GlanceableWidget(
                         value = "${if (uiState.weeklyTrend >= 0) "+" else ""}${uiState.weeklyTrend.toInt()}%",
                         label = stringResource(R.string.stats_trend),
-                        emoji = if (uiState.weeklyTrend >= 0) "📈" else "📉",
-                        valueColor = if (uiState.weeklyTrend >= 0) CC_Success else CC_Error,
+                        emoji = if (uiState.weeklyTrend >= 0) AppEmojis.TREND_UP else AppEmojis.TREND_DOWN,
+                        valueColor = if (uiState.weeklyTrend >= 0) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error,
                         modifier = Modifier.weight(1f)
                     )
                     
                     // Quick action widget
                     QuickActionWidget(
                         label = stringResource(R.string.nav_expenses),
-                        emoji = "💳",
+                        emoji = AppEmojis.CREDIT_CARD,
                         onClick = onNavigateToAddExpense,
                         modifier = Modifier.weight(1f)
                     )
@@ -151,12 +151,18 @@ fun CommandCenterScreen(
             
             // ============ SMART SUGGESTION ============
             item {
-                if (uiState.smartSuggestion != null) {
+                uiState.smartSuggestion?.let { suggestion ->
+                    // Χρήση stringResource με formatArgs για localized strings
+                    val subtitle = if (suggestion.formatArgs.isNotEmpty()) {
+                        stringResource(suggestion.subtitleResId, *suggestion.formatArgs.toTypedArray())
+                    } else {
+                        stringResource(suggestion.subtitleResId)
+                    }
                     SmartSuggestionCard(
-                        emoji = uiState.smartSuggestion!!.emoji,
-                        title = uiState.smartSuggestion!!.title,
-                        subtitle = uiState.smartSuggestion!!.subtitle,
-                        onClick = { uiState.smartSuggestion!!.action() }
+                        emoji = suggestion.emoji,
+                        title = stringResource(suggestion.titleResId),
+                        subtitle = subtitle,
+                        onClick = { suggestion.action() }
                     )
                 }
             }
@@ -172,7 +178,7 @@ fun CommandCenterScreen(
                         text = stringResource(R.string.recent_shifts),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
-                        color = CC_TextPrimary
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     TextButton(onClick = {
                         currentSheet = SheetType.SHIFTS
@@ -180,7 +186,7 @@ fun CommandCenterScreen(
                     }) {
                         Text(
                             text = stringResource(R.string.btn_see_all),
-                            color = CC_Primary
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
@@ -195,20 +201,20 @@ fun CommandCenterScreen(
                             .fillMaxWidth()
                             .height(120.dp)
                             .background(
-                                color = CC_WidgetBg,
+                                color = MaterialTheme.colorScheme.surfaceContainer,
                                 shape = RoundedCornerShape(Spacing.widgetRadius)
                             ),
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = "📭",
+                                text = AppEmojis.EMPTY_MAILBOX,
                                 style = MaterialTheme.typography.headlineMedium
                             )
                             Text(
                                 text = stringResource(R.string.empty_shifts),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = CC_TextSecondary
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -232,7 +238,7 @@ fun CommandCenterScreen(
                     text = stringResource(R.string.stats_today),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = CC_TextPrimary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(top = Spacing.md)
                 )
             }
@@ -264,14 +270,14 @@ fun CommandCenterScreen(
                             Text(
                                 text = stringResource(R.string.no_shifts_today),
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = CC_TextSecondary
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Spacer(modifier = Modifier.height(Spacing.md))
                             FilledTonalButton(
                                 onClick = onNavigateToAddShift,
                                 colors = ButtonDefaults.filledTonalButtonColors(
-                                    containerColor = CC_Primary.copy(alpha = 0.15f),
-                                    contentColor = CC_Primary
+                                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                                    contentColor = MaterialTheme.colorScheme.primary
                                 )
                             ) {
                                 Text(stringResource(R.string.btn_start_shift))
@@ -292,7 +298,7 @@ fun CommandCenterScreen(
             ModalBottomSheet(
                 onDismissRequest = { showSheet = false },
                 sheetState = sheetState,
-                containerColor = CC_SheetBackground,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                 dragHandle = {
                     Box(
                         modifier = Modifier
@@ -300,7 +306,7 @@ fun CommandCenterScreen(
                             .width(40.dp)
                             .height(4.dp)
                             .background(
-                                color = CC_SheetHandle,
+                                color = MaterialTheme.colorScheme.outline,
                                 shape = RoundedCornerShape(2.dp)
                             )
                     )
@@ -316,9 +322,12 @@ fun CommandCenterScreen(
                         onDeleteShift = { viewModel.deleteShift(it) }
                     )
                     SheetType.EXPENSES -> ExpenseListSheetContent(
+                        expenses = uiState.allExpenses,
                         onDismiss = { showSheet = false }
                     )
                     SheetType.STATISTICS -> StatisticsSheetContent(
+                        shifts = uiState.allShifts,
+                        expenses = uiState.allExpenses,
                         onDismiss = { showSheet = false }
                     )
                 }
@@ -362,7 +371,7 @@ private fun ShiftListSheetContent(
                 text = stringResource(R.string.nav_shifts),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
-                color = CC_TextPrimary,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(bottom = Spacing.md)
             )
         }
@@ -383,36 +392,333 @@ private fun ShiftListSheetContent(
 
 @Composable
 private fun ExpenseListSheetContent(
+    expenses: List<com.deliverytracker.app.domain.model.Expense>,
     onDismiss: () -> Unit
 ) {
-    // Placeholder - θα υλοποιηθεί αργότερα
-    Box(
+    val decimalFormat = remember { DecimalFormat("#,##0.00") }
+    val dateFormat = remember { java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()) }
+    
+    LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .height(400.dp),
-        contentAlignment = Alignment.Center
+            .padding(horizontal = Spacing.screenPadding),
+        verticalArrangement = Arrangement.spacedBy(Spacing.md)
     ) {
-        Text(
-            text = "Expenses Sheet - Coming Soon",
-            color = CC_TextSecondary
-        )
+        item {
+            Text(
+                text = stringResource(R.string.sheet_expenses_title),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(bottom = Spacing.md)
+            )
+        }
+        
+        if (expenses.isEmpty()) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = stringResource(R.string.sheet_no_expenses),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        } else {
+            // Εμφάνιση τελευταίων 20 εξόδων
+            items(expenses.take(20)) { expense ->
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    ),
+                    shape = RoundedCornerShape(Spacing.radiusMd)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(Spacing.md),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Emoji κατηγορίας
+                        Box(
+                            modifier = Modifier
+                                .size(Dimensions.iconHuge)
+                                .background(
+                                    color = MaterialTheme.colorScheme.primaryContainer,
+                                    shape = RoundedCornerShape(Spacing.radiusSm)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = expense.category.emoji,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+                        
+                        Spacer(modifier = Modifier.width(Spacing.md))
+                        
+                        // Πληροφορίες εξόδου
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(expense.category.displayNameResId),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = dateFormat.format(java.util.Date(expense.date)),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        
+                        // Ποσό (κόκκινο = έξοδο)
+                        Text(
+                            text = "-${decimalFormat.format(expense.amount)}€",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = SemanticColors.Error
+                        )
+                    }
+                }
+            }
+        }
+        
+        item {
+            Spacer(modifier = Modifier.height(Spacing.huge))
+        }
     }
 }
 
 @Composable
 private fun StatisticsSheetContent(
+    shifts: List<com.deliverytracker.app.domain.model.Shift>,
+    expenses: List<com.deliverytracker.app.domain.model.Expense>,
     onDismiss: () -> Unit
 ) {
-    // Placeholder - θα υλοποιηθεί αργότερα
-    Box(
+    val decimalFormat = remember { DecimalFormat("#,##0.00") }
+    
+    // Υπολογισμός στατιστικών
+    val totalShifts = shifts.size
+    val totalOrders = shifts.sumOf { it.ordersCount }
+    val totalHours = shifts.sumOf { it.hoursWorked }
+    val grossIncome = shifts.sumOf { it.netIncome }
+    val totalExpenses = expenses.sumOf { it.amount }
+    val netProfit = grossIncome - totalExpenses
+    val avgPerHour = if (totalHours > 0) grossIncome / totalHours else 0.0
+    val avgPerOrder = if (totalOrders > 0) grossIncome / totalOrders else 0.0
+    
+    LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .height(400.dp),
-        contentAlignment = Alignment.Center
+            .padding(horizontal = Spacing.screenPadding),
+        verticalArrangement = Arrangement.spacedBy(Spacing.md)
     ) {
-        Text(
-            text = "Statistics Sheet - Coming Soon",
-            color = CC_TextSecondary
-        )
+        item {
+            Text(
+                text = stringResource(R.string.sheet_statistics_title),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(bottom = Spacing.md)
+            )
+        }
+        
+        if (shifts.isEmpty()) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = stringResource(R.string.sheet_no_shifts),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        } else {
+            // Κύρια στατιστικά σε grid 2x2
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.md)
+                ) {
+                    StatCard(
+                        label = stringResource(R.string.sheet_total_shifts),
+                        value = totalShifts.toString(),
+                        modifier = Modifier.weight(1f)
+                    )
+                    StatCard(
+                        label = stringResource(R.string.sheet_total_orders),
+                        value = totalOrders.toString(),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+            
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.md)
+                ) {
+                    StatCard(
+                        label = stringResource(R.string.sheet_total_hours),
+                        value = "${decimalFormat.format(totalHours)}h",
+                        modifier = Modifier.weight(1f)
+                    )
+                    StatCard(
+                        label = stringResource(R.string.sheet_avg_per_hour),
+                        value = "${decimalFormat.format(avgPerHour)}€",
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+            
+            // Οικονομική σύνοψη
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
+                    ),
+                    shape = RoundedCornerShape(Spacing.radiusLg)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(Spacing.lg),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+                    ) {
+                        // Ακαθάριστα έσοδα
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = stringResource(R.string.dashboard_gross_income),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = "${decimalFormat.format(grossIncome)}€",
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = SemanticColors.Success
+                            )
+                        }
+                        
+                        // Σύνολο εξόδων
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = stringResource(R.string.dashboard_total_expenses),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = "-${decimalFormat.format(totalExpenses)}€",
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = SemanticColors.Error
+                            )
+                        }
+                        
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                        )
+                        
+                        // Καθαρό κέρδος
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = stringResource(R.string.dashboard_net_profit),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "${decimalFormat.format(netProfit)}€",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = if (netProfit >= 0) SemanticColors.Success else SemanticColors.Error
+                            )
+                        }
+                        
+                        // Μέσος όρος ανά παραγγελία
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = stringResource(R.string.sheet_avg_per_order),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = "${decimalFormat.format(avgPerOrder)}€",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        
+        item {
+            Spacer(modifier = Modifier.height(Spacing.huge))
+        }
+    }
+}
+
+/**
+ * Μικρό card για ένα στατιστικό στοιχείο.
+ */
+@Composable
+private fun StatCard(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        ),
+        shape = RoundedCornerShape(Spacing.radiusMd)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Spacing.md),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+        ) {
+            Text(
+                text = value,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }

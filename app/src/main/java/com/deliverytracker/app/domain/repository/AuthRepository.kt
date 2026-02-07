@@ -23,6 +23,13 @@ interface AuthRepository {
     fun getCurrentUser(): User?
     
     /**
+     * Επιστρέφει το userId του τρέχοντα χρήστη.
+     * Null αν δεν είναι συνδεδεμένος.
+     * Χρησιμοποιείται αντί του FirebaseAuth.getInstance().currentUser?.uid
+     */
+    fun getCurrentUserId(): String?
+    
+    /**
      * Ελέγχει αν υπάρχει συνδεδεμένος χρήστης.
      */
     val isLoggedIn: Boolean
@@ -70,4 +77,10 @@ interface AuthRepository {
      * Επαναφορά PIN lockout.
      */
     suspend fun resetPinLockout(userId: String): Result<Unit>
+    
+    /**
+     * Έλεγχος αν ο χρήστης είναι locked out.
+     * Επιστρέφει τα εναπομείναντα milliseconds του lockout, ή 0 αν δεν είναι locked.
+     */
+    suspend fun checkPinLockout(userId: String): Result<Long>
 }

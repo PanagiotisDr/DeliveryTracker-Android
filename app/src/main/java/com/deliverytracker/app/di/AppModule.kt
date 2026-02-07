@@ -15,6 +15,7 @@ import com.deliverytracker.app.domain.repository.ShiftRepository
 import com.deliverytracker.app.domain.repository.UserSettingsRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,6 +26,9 @@ import javax.inject.Singleton
 /**
  * Hilt module για Firebase dependencies.
  * Παρέχει τα Firebase instances σε όλη την εφαρμογή.
+ *
+ * Χρησιμοποιεί @Provides γιατί τα Firebase instances δημιουργούνται
+ * μέσω factory methods (getInstance()) — δεν υποστηρίζουν constructor injection.
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -46,70 +50,57 @@ object FirebaseModule {
 }
 
 /**
- * Hilt module για Repository dependencies.
- * Συνδέει τα interfaces με τις υλοποιήσεις τους.
+ * Hilt module για Repository bindings.
+ * Συνδέει τα domain interfaces με τις data layer υλοποιήσεις τους.
+ *
+ * Χρησιμοποιεί @Binds αντί @Provides γιατί:
+ * - Τα implementations έχουν ήδη @Inject constructor
+ * - Το @Binds είναι πιο αποδοτικό (δεν δημιουργεί factory class)
+ * - Είναι πιο καθαρό — δηλώνει μόνο "ποια κλάση υλοποιεί ποιο interface"
  */
 @Module
 @InstallIn(SingletonComponent::class)
-object RepositoryModule {
+abstract class RepositoryModule {
     
     /**
-     * Παρέχει το AuthRepository.
+     * Συνδέει AuthRepositoryImpl → AuthRepository
      */
-    @Provides
+    @Binds
     @Singleton
-    fun provideAuthRepository(
-        firebaseAuth: FirebaseAuth,
-        firestore: FirebaseFirestore
-    ): AuthRepository = AuthRepositoryImpl(firebaseAuth, firestore)
+    abstract fun bindAuthRepository(impl: AuthRepositoryImpl): AuthRepository
     
     /**
-     * Παρέχει το ShiftRepository.
+     * Συνδέει ShiftRepositoryImpl → ShiftRepository
      */
-    @Provides
+    @Binds
     @Singleton
-    fun provideShiftRepository(
-        firestore: FirebaseFirestore
-    ): ShiftRepository = ShiftRepositoryImpl(firestore)
+    abstract fun bindShiftRepository(impl: ShiftRepositoryImpl): ShiftRepository
     
     /**
-     * Παρέχει το ExpenseRepository.
+     * Συνδέει ExpenseRepositoryImpl → ExpenseRepository
      */
-    @Provides
+    @Binds
     @Singleton
-    fun provideExpenseRepository(
-        firestore: FirebaseFirestore
-    ): ExpenseRepository = ExpenseRepositoryImpl(firestore)
+    abstract fun bindExpenseRepository(impl: ExpenseRepositoryImpl): ExpenseRepository
     
     /**
-     * Παρέχει το UserSettingsRepository.
+     * Συνδέει UserSettingsRepositoryImpl → UserSettingsRepository
      */
-    @Provides
+    @Binds
     @Singleton
-    fun provideUserSettingsRepository(
-        firestore: FirebaseFirestore
-    ): UserSettingsRepository = UserSettingsRepositoryImpl(firestore)
+    abstract fun bindUserSettingsRepository(impl: UserSettingsRepositoryImpl): UserSettingsRepository
     
     /**
-     * Παρέχει το ExportRepository.
+     * Συνδέει ExportRepositoryImpl → ExportRepository
      */
-    @Provides
+    @Binds
     @Singleton
-    fun provideExportRepository(
-        @ApplicationContext context: Context,
-        shiftRepository: ShiftRepository,
-        expenseRepository: ExpenseRepository
-    ): ExportRepository = ExportRepositoryImpl(context, shiftRepository, expenseRepository)
+    abstract fun bindExportRepository(impl: ExportRepositoryImpl): ExportRepository
     
     /**
-     * Παρέχει το BackupRepository.
+     * Συνδέει BackupRepositoryImpl → BackupRepository
      */
-    @Provides
+    @Binds
     @Singleton
-    fun provideBackupRepository(
-        @ApplicationContext context: Context,
-        shiftRepository: ShiftRepository,
-        expenseRepository: ExpenseRepository
-    ): BackupRepository = BackupRepositoryImpl(context, shiftRepository, expenseRepository)
+    abstract fun bindBackupRepository(impl: BackupRepositoryImpl): BackupRepository
 }
-

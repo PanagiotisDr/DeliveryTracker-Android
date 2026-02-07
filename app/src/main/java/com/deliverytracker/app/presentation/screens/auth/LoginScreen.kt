@@ -2,6 +2,7 @@ package com.deliverytracker.app.presentation.screens.auth
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import com.deliverytracker.app.presentation.theme.Dimensions
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -68,7 +69,7 @@ fun LoginScreen(
         
         // Logo
         Text(
-            text = "🚗",
+            text = AppEmojis.MOTORCYCLE,
             style = MaterialTheme.typography.displayLarge
         )
         
@@ -176,8 +177,9 @@ fun LoginScreen(
             )
         }
         
-        // Error Message
-        uiState.error?.let { error ->
+        // Error Message - Χρήση errorRes ή errorMessage
+        val errorText = uiState.errorRes?.let { stringResource(it) } ?: uiState.errorMessage
+        errorText?.let { error ->
             Spacer(modifier = Modifier.height(Spacing.sm))
             Surface(
                 color = MaterialTheme.colorScheme.errorContainer,
@@ -210,7 +212,7 @@ fun LoginScreen(
                 CircularProgressIndicator(
                     modifier = Modifier.size(24.dp),
                     color = MaterialTheme.colorScheme.onPrimary,
-                    strokeWidth = 2.dp
+                    strokeWidth = Dimensions.borderMedium
                 )
             } else {
                 Text(

@@ -65,6 +65,7 @@
     <string name="shift_minutes">Minutes</string>
     <string name="shift_hours_suffix">h</string>
     <string name="shift_minutes_suffix">m</string>
+    <string name="work_time_format">%1$d%2$s %3$d%4$s</string>
     <string name="shift_notes">Notes</string>
     
     <!-- Expense Form -->
@@ -74,16 +75,7 @@
     <string name="expense_payment_method">Payment Method</string>
     <string name="expense_notes">Notes</string>
     
-    <!-- Expense Categories -->
-    <string name="category_fuel">Fuel</string>
-    <string name="category_maintenance">Maintenance / Service</string>
-    <string name="category_insurance">Insurance</string>
-    <string name="category_mobile">Mobile / Data</string>
-    <string name="category_equipment">Equipment</string>
-    <string name="category_kteo">KTEO (Vehicle Inspection)</string>
-    <string name="category_road_tax">Road Tax</string>
-    <string name="category_fines">Fines</string>
-    <string name="category_other">Other</string>
+    <!-- (Categories moved to end of file for consistency) -->
     
     <!-- Payment Methods -->
     <string name="payment_cash">Cash</string>
@@ -109,10 +101,17 @@
     <string name="period_this_month">This Month</string>
     <string name="period_this_year">This Year</string>
     <string name="period_custom">Custom</string>
+    <!-- Period values για Statistics filter (χωρίς "This") -->
+    <string name="period_week">Week</string>
+    <string name="period_month">Month</string>
+    <string name="period_year">Year</string>
+    <string name="period_all">All</string>
     
     <!-- Settings -->
     <string name="settings_general">General</string>
     <string name="settings_theme">Theme</string>
+    <string name="settings_dynamic_color">Dynamic Colors</string>
+    <string name="settings_dynamic_color_desc">Use wallpaper colors (Material You)</string>
     <string name="settings_language">Language</string>
     <string name="settings_tax">Tax Settings</string>
     <string name="settings_vat">VAT (%)</string>
@@ -123,6 +122,9 @@
     <string name="settings_set_pin">Set PIN</string>
     <string name="settings_change_pin">Change PIN</string>
     <string name="settings_remove_pin">Remove PIN</string>
+    <string name="settings_pin_desc">Quick login with PIN</string>
+    <string name="settings_pin_remove_confirm">Are you sure you want to remove your PIN? You will need to enter your password each time you open the app.</string>
+    <string name="msg_pin_removed">PIN removed successfully</string>
     
     <!-- Theme Options -->
     <string name="theme_system">System</string>
@@ -139,7 +141,6 @@
     
     <!-- Errors -->
     <string name="error_required">This field is required</string>
-    <string name="error_invalid_email">Invalid email address</string>
     <string name="error_password_short">Password must be at least 6 characters</string>
     <string name="error_passwords_mismatch">Passwords do not match</string>
     <string name="error_invalid_number">Please enter a valid number</string>
@@ -151,7 +152,14 @@
     <string name="error_zero_orders">Please enter number of orders</string>
     <string name="error_zero_km">Please enter kilometers</string>
     <string name="error_zero_amount">Amount cannot be zero</string>
-    <string name="error_network">Network error. Please try again.</string>
+    <string name="error_not_logged_in">You are not logged in</string>
+    <string name="error_loading">Loading failed</string>
+    <string name="msg_shift_deleted">Shift deleted</string>
+    <string name="msg_expense_deleted">Expense deleted</string>
+    <string name="msg_shift_restored">Shift restored</string>
+    <string name="msg_expense_restored">Expense restored</string>
+    <string name="msg_shift_deleted_permanently">Shift permanently deleted</string>
+    <string name="msg_expense_deleted_permanently">Expense permanently deleted</string>
     
     <!-- PIN -->
     <string name="pin_enter">Enter your PIN</string>
@@ -210,12 +218,6 @@
     <string name="stats_per_km">€/km</string>
     <string name="stats_orders_per_shift">Orders/shift</string>
     <string name="stats_best_day">🏆 Best Day</string>
-    
-    <!-- Period Filters -->
-    <string name="period_all">All</string>
-    <string name="period_week">Week</string>
-    <string name="period_month">Month</string>
-    <string name="period_year">Year</string>
     
     <!-- Recycle Bin -->
     <string name="recycle_bin_title">🗑️ Recycle Bin</string>
@@ -276,6 +278,130 @@
     <string name="btn_start_shift">Start Shift</string>
     <string name="stats_trend">Weekly Trend</string>
     <string name="stats_today">Today</string>
+    
+    <!-- Error Messages - Auth -->
+    <string name="error_enter_email">Enter your email</string>
+    <string name="error_enter_password">Enter your password</string>
+    <string name="error_enter_email_first">Enter your email first</string>
+    <string name="error_enter_username">Enter username</string>
+    <string name="error_username_min_chars">Username must have at least 3 characters</string>
+    <string name="error_password_min_chars">Password must have at least 6 characters</string>
+    <string name="error_passwords_not_match">Passwords do not match</string>
+    <string name="error_wrong_pin">Wrong PIN</string>
+    <string name="error_pin_locked">Too many wrong attempts. Please wait.</string>
+    <string name="error_pins_not_match">PINs do not match</string>
+    
+    <!-- Error Messages - Forms -->
+    <string name="error_enter_amount">Enter the amount</string>
+    <string name="error_generic">Error: %s</string>
+    
+    <!-- Smart Suggestions -->
+    <string name="suggestion_peak_morning_title">Peak hours now!</string>
+    <string name="suggestion_peak_morning_subtitle">Start shift - 11:00-14:00 are the most profitable</string>
+    <string name="suggestion_peak_evening_title">Evening peak!</string>
+    <string name="suggestion_peak_evening_subtitle">18:00-21:00 have high demand</string>
+    <string name="suggestion_almost_there_title">Almost there!</string>
+    <string name="suggestion_almost_there_subtitle">%s€ left to reach your goal</string>
+    <string name="suggestion_goal_achieved_title">Goal achieved!</string>
+    <string name="suggestion_goal_achieved_subtitle">You earned %s€ above your goal</string>
+    
+    <!-- Placeholders -->
+    <string name="placeholder_rider">Rider</string>
+    <string name="placeholder_unknown_initial">?</string>
+    
+    <!-- Expense Categories -->
+    <string name="category_fuel">Fuel</string>
+    <string name="category_maintenance">Maintenance</string>
+    <string name="category_insurance">Insurance</string>
+    <string name="category_phone">Phone/Data</string>
+    <string name="category_equipment">Equipment</string>
+    <string name="category_tax">Taxes/EFKA</string>
+    <string name="category_kteo">KTEO</string>
+    <string name="category_road_tax">Road Tax</string>
+    <string name="category_fines">Fines</string>
+    <string name="category_other">Other</string>
+    
+    <!-- Repository Errors -->
+    <string name="error_shift_not_found">Shift not found</string>
+    <string name="error_expense_not_found">Expense not found</string>
+    <string name="error_loading_data">Loading error: %s</string>
+    <string name="error_creating">Creation error: %s</string>
+    <string name="error_updating">Update error: %s</string>
+    <string name="error_deleting">Deletion error: %s</string>
+    <string name="error_restoring">Restore error: %s</string>
+    <string name="error_settings_update">Settings update error: %s</string>
+    <string name="error_settings_create">Settings creation error: %s</string>
+    <string name="error_theme_save">Theme save error: %s</string>
+    <string name="error_no_shifts_period">No shifts for this period</string>
+    <string name="error_no_expenses_period">No expenses for this period</string>
+    <string name="error_export">Export error: %s</string>
+    <string name="error_report_create">Report creation error: %s</string>
+    
+    <!-- Export Messages -->
+    <string name="msg_file_saved">File saved: %s</string>
+    <string name="msg_report_saved">Report saved: %s</string>
+    
+    <!-- Export CSV Headers -->
+    <string name="export_header_shifts">Date,Hours,Minutes,Gross,Tips,Bonus,Net,Orders,Km,Notes</string>
+    <string name="export_header_expenses">Date,Category,Amount,Payment Method,Notes</string>
+    
+    <!-- Export Report Labels -->
+    <string name="report_period">Period: %s - %s</string>
+    <string name="report_summary">SUMMARY</string>
+    <string name="report_gross_income">Gross Income:</string>
+    <string name="report_tips">Tips:</string>
+    <string name="report_net_income">Net Income:</string>
+    <string name="report_expenses_title">EXPENSES</string>
+    <string name="report_total_expenses">Total Expenses:</string>
+    <string name="report_profit_title">PROFIT</string>
+    <string name="report_profit">Profit:</string>
+    <string name="report_stats_title">STATISTICS</string>
+    <string name="report_shifts_count">Shifts:</string>
+    <string name="report_orders_count">Orders:</string>
+    <string name="report_km_count">Kilometers:</string>
+    <string name="report_hours_count">Hours:</string>
+    <string name="report_avg_per_order">€/Order:</string>
+    <string name="report_avg_per_km">€/Km:</string>
+    <string name="report_avg_per_hour">€/Hour:</string>
+    <string name="report_footer">DeliveryTracker Report</string>
+    <string name="report_created_at">Created: %s</string>
+    
+    <!-- Backup Errors -->
+    <string name="error_backup_create">Backup creation error: %s</string>
+    <string name="error_backup_not_found">Backup file not found</string>
+    <string name="error_restore">Restore error: %s</string>
+    <string name="error_backups_read">Error reading backups: %s</string>
+    
+    <!-- Auth Errors -->
+    <string name="error_login_failed">Login failed</string>
+    <string name="error_register_failed">Registration failed</string>
+    <string name="error_user_not_found">User not found</string>
+    <string name="error_invalid_email">Invalid email address</string>
+    <string name="error_wrong_credentials">Wrong email or password</string>
+    <string name="error_email_in_use">Email is already in use</string>
+    <string name="error_weak_password">Password must be at least 6 characters</string>
+    <string name="error_network">Connection error. Check your internet.</string>
+    <string name="error_unknown">Error: %s</string>
+    <string name="error_pin_update">PIN update error</string>
+    <string name="error_pin_verify">PIN verification error</string>
+    <string name="error_recording">Recording error</string>
+    <string name="error_reset">Reset error</string>
+    
+    <!-- Units & Placeholders -->
+    <string name="unit_km">km</string>
+    <string name="placeholder_amount">0,00</string>
+    <string name="coming_soon">Coming Soon</string>
+    
+    <!-- Bottom Sheet Stats -->
+    <string name="sheet_statistics_title">Statistics Summary</string>
+    <string name="sheet_expenses_title">Recent Expenses</string>
+    <string name="sheet_no_expenses">No expenses recorded yet</string>
+    <string name="sheet_no_shifts">No shifts recorded yet</string>
+    <string name="sheet_total_shifts">Total Shifts</string>
+    <string name="sheet_total_orders">Total Orders</string>
+    <string name="sheet_total_hours">Total Hours</string>
+    <string name="sheet_avg_per_hour">Avg/Hour</string>
+    <string name="sheet_avg_per_order">Avg/Order</string>
 </resources>
 
 

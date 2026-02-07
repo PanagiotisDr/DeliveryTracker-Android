@@ -46,10 +46,12 @@ data class Shift(
         get() = grossIncome + tips + bonus
     
     /**
-     * Υπολογισμός συνολικών εσόδων (μικτά + tips + bonus).
+     * Alias για backward compatibility.
+     * @see netIncome
      */
+    @Deprecated("Χρησιμοποίησε netIncome αντί totalIncome", replaceWith = ReplaceWith("netIncome"))
     val totalIncome: Double
-        get() = grossIncome + tips + bonus
+        get() = netIncome
     
     /**
      * Υπολογισμός χιλιομέτρων (νέο field ή legacy).
@@ -68,8 +70,10 @@ data class Shift(
         get() = workedHours + (workedMinutes / 60.0)
     
     /**
-     * Μορφοποιημένη εμφάνιση ωρών (π.χ. "8ω 30λ").
+     * Μορφοποιημένη εμφάνιση ωρών (Ελληνικά μόνο - "8ω 30λ").
+     * @deprecated Χρησιμοποίησε Shift.formattedWorkTime(context) από presentation layer
      */
+    @Deprecated("Hardcoded ελληνικά - χρησιμοποίησε Shift.formattedWorkTime(context)")
     val formattedWorkTime: String
         get() = "${workedHours}ω ${workedMinutes}λ"
     

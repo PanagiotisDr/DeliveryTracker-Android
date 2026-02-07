@@ -1,13 +1,15 @@
 package com.deliverytracker.app.presentation.screens.shifts
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.deliverytracker.app.R
 import com.deliverytracker.app.domain.model.Result
 import com.deliverytracker.app.domain.model.Shift
 import com.deliverytracker.app.domain.repository.AuthRepository
 import com.deliverytracker.app.domain.repository.ShiftRepository
-import com.google.firebase.auth.FirebaseAuth
+import com.deliverytracker.app.presentation.theme.BusinessRules
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -21,6 +23,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ShiftFormViewModel @Inject constructor(
     private val shiftRepository: ShiftRepository,
+    private val authRepository: AuthRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     
@@ -72,7 +75,7 @@ class ShiftFormViewModel @Inject constructor(
                 }
                 is Result.Error -> {
                     _uiState.update { 
-                        it.copy(isLoading = false, error = result.message)
+                        it.copy(isLoading = false, errorMessage = result.message)
                     }
                 }
                 is Result.Loading -> { /* Ignore */ }
@@ -179,7 +182,7 @@ class ShiftFormViewModel @Inject constructor(
             val totalIncome = grossIncome + tips + bonus
             
             if (totalIncome <= 0) {
-                _uiState.update { it.copy(error = "error_zero_income") }
+                _uiState.update { it.copy(errorResId = R.string.error_zero_income) }
                 return@launch
             }
             
@@ -189,13 +192,13 @@ class ShiftFormViewModel @Inject constructor(
             val totalMinutes = hours * 60 + minutes
             
             if (totalMinutes == 0 && totalIncome > 0) {
-                _uiState.update { it.copy(error = "error_zero_duration") }
+                _uiState.update { it.copy(errorResId = R.string.error_zero_duration) }
                 return@launch
             }
             
             // 3. Έλεγχος μέγιστης διάρκειας (24 ώρες = 1440 λεπτά)
-            if (totalMinutes > 1440) {
-                _uiState.update { it.copy(error = "error_over_24_hours") }
+            if (totalMinutes > BusinessRules.MAX_SHIFT_MINUTES_PER_DAY) {
+                _uiState.update { it.copy(errorResId = R.string.error_over_24_hours) }
                 return@launch
             }
             
@@ -230,7 +233,7 @@ class ShiftFormViewModel @Inject constructor(
             }.timeInMillis
             
             if (shiftDate > todayStart) {
-                _uiState.update { it.copy(error = "error_future_date") }
+                _uiState.update { it.copy(errorResId = R.string.error_future_date) }
                 return@launch
             }
             
@@ -238,7 +241,7 @@ class ShiftFormViewModel @Inject constructor(
             val ordersCount = state.ordersCount.toIntOrNull() ?: 0
             
             if (ordersCount == 0 && totalIncome > 0) {
-                _uiState.update { it.copy(error = "error_zero_orders") }
+                _uiState.update { it.copy(errorResId = R.string.error_zero_orders) }
                 return@launch
             }
             
@@ -246,16 +249,16 @@ class ShiftFormViewModel @Inject constructor(
             val kilometers = parseDecimal(state.kilometers)
             
             if (kilometers <= 0 && ordersCount > 0) {
-                _uiState.update { it.copy(error = "error_zero_km") }
+                _uiState.update { it.copy(errorResId = R.string.error_zero_km) }
                 return@launch
             }
             
             // ========== END VALIDATION ==========
             
-            // Παίρνουμε το userId απευθείας από το FirebaseAuth
-            val userId = FirebaseAuth.getInstance().currentUser?.uid
+            // Παίρνουμε το userId μέσω AuthRepository
+            val userId = authRepository.getCurrentUserId()
             if (userId == null) {
-                _uiState.update { it.copy(error = "Δεν είστε συνδεδεμένος") }
+                _uiState.update { it.copy(errorResId = R.string.error_not_logged_in) }
                 return@launch
             }
             
@@ -290,7 +293,7 @@ class ShiftFormViewModel @Inject constructor(
                 }
                 is Result.Error -> {
                     _uiState.update { 
-                        it.copy(isLoading = false, error = result.message)
+                        it.copy(isLoading = false, errorMessage = result.message)
                     }
                 }
                 is Result.Loading -> { /* Ignore */ }
@@ -299,7 +302,7 @@ class ShiftFormViewModel @Inject constructor(
     }
     
     fun clearError() {
-        _uiState.update { it.copy(error = null) }
+        _uiState.update { it.copy(errorResId = null, errorMessage = null) }
     }
 }
 
@@ -309,7 +312,8 @@ class ShiftFormViewModel @Inject constructor(
 data class ShiftFormUiState(
     val isLoading: Boolean = false,
     val isSaved: Boolean = false,
-    val error: String? = null,
+    @StringRes val errorResId: Int? = null,  // Validation errors (R.string.*)
+    val errorMessage: String? = null,         // Dynamic errors (Firebase κλπ)
     
     // Form fields
     val dateText: String = "",

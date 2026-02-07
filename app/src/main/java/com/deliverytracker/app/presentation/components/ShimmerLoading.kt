@@ -4,6 +4,7 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -30,9 +31,15 @@ import com.deliverytracker.app.presentation.theme.*
  */
 @Composable
 fun rememberShimmerBrush(
-    shimmerColors: List<Color> = Gradients.Shimmer,
+    shimmerColors: List<Color>? = null,
     animationDuration: Int = 1200
 ): Brush {
+    // Χρήση theme-aware shimmer colors αν δεν παρέχονται
+    val effectiveColors = shimmerColors ?: listOf(
+        MaterialTheme.colorScheme.surfaceContainer,
+        MaterialTheme.colorScheme.surfaceContainerHigh,
+        MaterialTheme.colorScheme.surfaceContainer
+    )
     val transition = rememberInfiniteTransition(label = "shimmer")
     
     val translateAnimation by transition.animateFloat(
@@ -49,7 +56,7 @@ fun rememberShimmerBrush(
     )
     
     return Brush.linearGradient(
-        colors = shimmerColors,
+        colors = effectiveColors,
         start = Offset(translateAnimation - 500f, translateAnimation - 500f),
         end = Offset(translateAnimation, translateAnimation)
     )
@@ -126,7 +133,7 @@ fun ShimmerCard(
             .fillMaxWidth()
             .height(height)
             .clip(RoundedCornerShape(Spacing.radiusLg))
-            .background(DarkSurfaces.SurfaceContainer)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
     ) {
         Box(
             modifier = Modifier
@@ -149,7 +156,7 @@ fun ShimmerListItem(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(Spacing.radiusMd))
-            .background(DarkSurfaces.SurfaceContainer)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
             .padding(Spacing.md),
         horizontalArrangement = Arrangement.spacedBy(Spacing.md)
     ) {
@@ -215,7 +222,7 @@ fun ShimmerDashboardStats(
                 .fillMaxWidth()
                 .height(Dimensions.heroCardHeight)
                 .clip(RoundedCornerShape(Spacing.radiusLg))
-                .background(DarkSurfaces.SurfaceContainer)
+                .background(MaterialTheme.colorScheme.surfaceContainer)
         ) {
             Column(
                 modifier = Modifier

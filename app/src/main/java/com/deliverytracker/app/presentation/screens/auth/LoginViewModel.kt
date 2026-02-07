@@ -1,7 +1,9 @@
 package com.deliverytracker.app.presentation.screens.auth
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.deliverytracker.app.R
 import com.deliverytracker.app.domain.model.Result
 import com.deliverytracker.app.domain.model.User
 import com.deliverytracker.app.domain.repository.AuthRepository
@@ -15,15 +17,17 @@ import javax.inject.Inject
 
 /**
  * State για την οθόνη σύνδεσης.
+ * Χρησιμοποιεί @StringRes για proper i18n.
  */
 data class LoginUiState(
     val email: String = "",
     val password: String = "",
     val isLoading: Boolean = false,
-    val error: String? = null,
+    @StringRes val errorRes: Int? = null,  // Αλλαγή σε StringRes για localization
+    val errorMessage: String? = null,      // Για dynamic errors (π.χ. Firebase)
     val isLoggedIn: Boolean = false,
     val needsPinSetup: Boolean = false,
-    val resetPasswordSent: Boolean = false  // Αν στάλθηκε email επαναφοράς κωδικού
+    val resetPasswordSent: Boolean = false
 )
 
 /**
@@ -42,14 +46,14 @@ class LoginViewModel @Inject constructor(
      * Ενημερώνει το email.
      */
     fun onEmailChange(email: String) {
-        _uiState.update { it.copy(email = email, error = null) }
+        _uiState.update { it.copy(email = email, errorRes = null, errorMessage = null) }
     }
     
     /**
      * Ενημερώνει τον κωδικό.
      */
     fun onPasswordChange(password: String) {
-        _uiState.update { it.copy(password = password, error = null) }
+        _uiState.update { it.copy(password = password, errorRes = null, errorMessage = null) }
     }
     
     /**
@@ -58,18 +62,18 @@ class LoginViewModel @Inject constructor(
     fun login() {
         val state = _uiState.value
         
-        // Validation
+        // Validation με StringRes
         if (state.email.isBlank()) {
-            _uiState.update { it.copy(error = "Εισάγετε το email σας") }
+            _uiState.update { it.copy(errorRes = R.string.error_enter_email) }
             return
         }
         if (state.password.isBlank()) {
-            _uiState.update { it.copy(error = "Εισάγετε τον κωδικό σας") }
+            _uiState.update { it.copy(errorRes = R.string.error_enter_password) }
             return
         }
         
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            _uiState.update { it.copy(isLoading = true, errorRes = null, errorMessage = null) }
             
             when (val result = authRepository.login(state.email.trim(), state.password)) {
                 is Result.Success -> {
@@ -88,7 +92,8 @@ class LoginViewModel @Inject constructor(
                     }
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(isLoading = false, error = result.message) }
+                    // Dynamic error από Firebase
+                    _uiState.update { it.copy(isLoading = false, errorMessage = result.message) }
                 }
                 is Result.Loading -> {
                     // Handled by isLoading state
@@ -104,7 +109,7 @@ class LoginViewModel @Inject constructor(
         val email = _uiState.value.email
         
         if (email.isBlank()) {
-            _uiState.update { it.copy(error = "Εισάγετε πρώτα το email σας") }
+            _uiState.update { it.copy(errorRes = R.string.error_enter_email_first) }
             return
         }
         
@@ -116,13 +121,14 @@ class LoginViewModel @Inject constructor(
                     _uiState.update { 
                         it.copy(
                             isLoading = false, 
-                            error = null,
+                            errorRes = null,
+                            errorMessage = null,
                             resetPasswordSent = true
                         ) 
                     }
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(isLoading = false, error = result.message) }
+                    _uiState.update { it.copy(isLoading = false, errorMessage = result.message) }
                 }
                 is Result.Loading -> {}
             }
@@ -133,6 +139,6 @@ class LoginViewModel @Inject constructor(
      * Καθαρίζει τα σφάλματα.
      */
     fun clearError() {
-        _uiState.update { it.copy(error = null) }
+        _uiState.update { it.copy(errorRes = null, errorMessage = null) }
     }
 }

@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -37,6 +38,7 @@ fun ExpenseFormScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
     
     // State για Date Picker
     var showDatePicker by remember { mutableStateOf(false) }
@@ -58,8 +60,9 @@ fun ExpenseFormScreen(
     }
     
     // Εμφάνιση error
-    LaunchedEffect(uiState.error) {
-        uiState.error?.let {
+    LaunchedEffect(uiState.errorResId, uiState.errorMessage) {
+        val errorText = uiState.errorResId?.let { context.getString(it) } ?: uiState.errorMessage
+        errorText?.let {
             snackbarHostState.showSnackbar(it)
             viewModel.clearError()
         }
@@ -100,7 +103,7 @@ fun ExpenseFormScreen(
                         else 
                             stringResource(R.string.new_expense),
                         fontWeight = FontWeight.SemiBold,
-                        color = DarkText.Primary
+                        color = MaterialTheme.colorScheme.onBackground
                     ) 
                 },
                 navigationIcon = {
@@ -108,7 +111,7 @@ fun ExpenseFormScreen(
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack, 
                             contentDescription = stringResource(R.string.back),
-                            tint = DarkText.Primary
+                            tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 },
@@ -120,17 +123,17 @@ fun ExpenseFormScreen(
                         Icon(
                             Icons.Default.Check, 
                             contentDescription = stringResource(R.string.btn_save),
-                            tint = BrandColors.Primary
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = DarkSurfaces.Background
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = DarkSurfaces.Background
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         if (uiState.isLoading) {
             Box(
@@ -199,7 +202,7 @@ fun ExpenseFormScreen(
                         FilterChip(
                             selected = uiState.category == category,
                             onClick = { viewModel.updateCategory(category) },
-                            label = { Text("${category.emoji} ${category.displayName}") }
+                            label = { Text("${category.emoji} ${stringResource(category.displayNameResId)}") }
                         )
                     }
                 }
@@ -219,7 +222,7 @@ fun ExpenseFormScreen(
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     singleLine = true,
-                    placeholder = { Text("0,00") },
+                    placeholder = { Text(stringResource(R.string.placeholder_amount)) },
                     suffix = { Text(stringResource(R.string.currency_symbol)) },
                     leadingIcon = { Icon(Icons.Default.Euro, null) }
                 )
@@ -277,7 +280,7 @@ fun ExpenseFormScreen(
                     label = { Text(stringResource(R.string.notes_optional)) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(min = 100.dp),
+                        .heightIn(min = Dimensions.textFieldMinHeight),
                     maxLines = 4,
                     leadingIcon = { Icon(Icons.Default.Notes, null) }
                 )

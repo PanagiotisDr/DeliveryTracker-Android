@@ -19,6 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -44,18 +45,28 @@ import com.deliverytracker.app.presentation.theme.*
 @Composable
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToPinSetup: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
     val savedMessage = stringResource(R.string.msg_settings_saved)
+    val pinRemovedMessage = stringResource(R.string.msg_pin_removed)
+    // Τοπικό state για το dialog επιβεβαίωσης αφαίρεσης PIN
+    var showPinRemoveDialog by remember { mutableStateOf(false) }
     
-    LaunchedEffect(uiState.isSaved, uiState.error) {
+    LaunchedEffect(uiState.isSaved, uiState.pinRemoved, uiState.errorResId, uiState.errorMessage) {
         if (uiState.isSaved) {
             snackbarHostState.showSnackbar(savedMessage)
             viewModel.clearMessages()
         }
-        uiState.error?.let {
+        if (uiState.pinRemoved) {
+            snackbarHostState.showSnackbar(pinRemovedMessage)
+            viewModel.clearMessages()
+        }
+        val errorText = uiState.errorResId?.let { context.getString(it) } ?: uiState.errorMessage
+        errorText?.let {
             snackbarHostState.showSnackbar(it)
             viewModel.clearMessages()
         }
@@ -68,7 +79,7 @@ fun SettingsScreen(
                     Text(
                         text = stringResource(R.string.nav_settings),
                         fontWeight = FontWeight.SemiBold,
-                        color = DarkText.Primary
+                        color = MaterialTheme.colorScheme.onSurface
                     ) 
                 },
                 navigationIcon = {
@@ -76,7 +87,7 @@ fun SettingsScreen(
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack, 
                             contentDescription = stringResource(R.string.back),
-                            tint = DarkText.Primary
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 },
@@ -87,18 +98,18 @@ fun SettingsScreen(
                     ) {
                         Text(
                             text = stringResource(R.string.btn_save),
-                            color = BrandColors.Primary,
+                            color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.SemiBold
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = DarkSurfaces.Background
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = DarkSurfaces.Background
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         if (uiState.isLoading) {
             Box(
@@ -108,7 +119,7 @@ fun SettingsScreen(
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(
-                    color = BrandColors.Primary,
+                    color = MaterialTheme.colorScheme.primary,
                     strokeWidth = Dimensions.progressHeightDefault
                 )
             }
@@ -135,7 +146,10 @@ fun SettingsScreen(
                                 .size(Dimensions.iconXl)
                                 .background(
                                     brush = Brush.linearGradient(
-                                        colors = Gradients.EarningsVibrant
+                                        colors = listOf(
+                                            MaterialTheme.colorScheme.primary,
+                                            MaterialTheme.colorScheme.secondary
+                                        )
                                     ),
                                     shape = CircleShape
                                 ),
@@ -144,7 +158,7 @@ fun SettingsScreen(
                             Text(
                                 text = uiState.username.take(1).uppercase().ifEmpty { "?" },
                                 style = MaterialTheme.typography.headlineSmall,
-                                color = DarkText.OnPrimary,
+                                color = MaterialTheme.colorScheme.onPrimary,
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -156,12 +170,12 @@ fun SettingsScreen(
                                 text = uiState.username.ifEmpty { stringResource(R.string.settings_user) },
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold,
-                                color = DarkText.Primary
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
                                 text = uiState.email,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = DarkText.Secondary
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                         
@@ -169,7 +183,7 @@ fun SettingsScreen(
                             Icon(
                                 Icons.Default.Lock,
                                 contentDescription = null,
-                                tint = BrandColors.Primary,
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(Dimensions.iconSm)
                             )
                         }
@@ -257,7 +271,7 @@ fun SettingsScreen(
                     
                     // Info hint
                     Surface(
-                        color = BrandColors.Primary.copy(alpha = 0.1f),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
                         shape = Shapes.Medium
                     ) {
                         Row(
@@ -267,17 +281,125 @@ fun SettingsScreen(
                             Icon(
                                 Icons.Default.Info,
                                 contentDescription = null,
-                                tint = BrandColors.Primary,
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(Dimensions.iconSm)
                             )
                             Spacer(modifier = Modifier.width(Spacing.sm))
                             Text(
                                 text = stringResource(R.string.settings_tax_hint),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = DarkText.Secondary
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
+                }
+                
+                // ════════════════════════════════════════════════════════════
+                // ΑΣΦΑΛΕΙΑ (SECURITY) — PIN Management
+                // ════════════════════════════════════════════════════════════
+                SettingsCard(
+                    title = stringResource(R.string.settings_security),
+                    icon = Icons.Default.Lock
+                ) {
+                    // PIN Toggle
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = Spacing.xs),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Pin,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(Dimensions.iconSm)
+                        )
+                        Spacer(modifier = Modifier.width(Spacing.sm))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.settings_pin),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = stringResource(R.string.settings_pin_desc),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = uiState.hasPin,
+                            onCheckedChange = { enabled ->
+                                if (enabled) {
+                                    // Πλοήγηση στη ρύθμιση PIN
+                                    onNavigateToPinSetup()
+                                } else {
+                                    // Εμφάνιση dialog επιβεβαίωσης για αφαίρεση
+                                    showPinRemoveDialog = true
+                                }
+                            },
+                            colors = SwitchDefaults.colors(
+                                checkedTrackColor = MaterialTheme.colorScheme.primary,
+                                checkedThumbColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        )
+                    }
+                    
+                    // Κουμπί αλλαγής PIN (μόνο αν ενεργό)
+                    if (uiState.hasPin) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = Spacing.sm),
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onNavigateToPinSetup() }
+                                .padding(vertical = Spacing.sm),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.Edit,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(Dimensions.iconSm)
+                            )
+                            Spacer(modifier = Modifier.width(Spacing.sm))
+                            Text(
+                                text = stringResource(R.string.settings_change_pin),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+                
+                // Dialog Επιβεβαίωσης Αφαίρεσης PIN
+                if (showPinRemoveDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showPinRemoveDialog = false },
+                        icon = { Icon(Icons.Default.Warning, contentDescription = null) },
+                        title = { Text(stringResource(R.string.settings_remove_pin)) },
+                        text = { Text(stringResource(R.string.settings_pin_remove_confirm)) },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    viewModel.removePin()
+                                    showPinRemoveDialog = false
+                                }
+                            ) {
+                                Text(
+                                    stringResource(R.string.settings_remove_pin),
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showPinRemoveDialog = false }) {
+                                Text(stringResource(R.string.btn_cancel))
+                            }
+                        }
+                    )
                 }
                 
                 // ════════════════════════════════════════════════════════════
@@ -294,6 +416,47 @@ fun SettingsScreen(
                             onClick = { viewModel.updateTheme(theme) }
                         )
                     }
+                    
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = Spacing.md),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                    )
+                    
+                    // Dynamic Color (Material You) Toggle
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = Spacing.xs),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Colorize,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(Dimensions.iconSm)
+                        )
+                        Spacer(modifier = Modifier.width(Spacing.sm))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.settings_dynamic_color),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = stringResource(R.string.settings_dynamic_color_desc),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = uiState.dynamicColor,
+                            onCheckedChange = { viewModel.updateDynamicColor(it) },
+                            colors = SwitchDefaults.colors(
+                                checkedTrackColor = MaterialTheme.colorScheme.primary,
+                                checkedThumbColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        )
+                    }
                 }
                 
                 // ════════════════════════════════════════════════════════════
@@ -305,8 +468,8 @@ fun SettingsScreen(
                         .fillMaxWidth()
                         .height(Dimensions.buttonHeightLg),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = BrandColors.Primary,
-                        contentColor = DarkText.OnPrimary
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
                     ),
                     shape = Shapes.Full,
                     enabled = !uiState.isLoading
@@ -337,8 +500,8 @@ private fun SettingsCard(
     content: @Composable ColumnScope.() -> Unit
 ) {
     GlassCard(
-        backgroundColor = DarkSurfaces.SurfaceContainer,
-        borderColor = DarkBorders.Glass,
+        backgroundColor = MaterialTheme.colorScheme.surfaceContainer,
+        borderColor = MaterialTheme.colorScheme.outlineVariant,
         contentPadding = PaddingValues(Spacing.lg)
     ) {
         if (title != null) {
@@ -347,7 +510,7 @@ private fun SettingsCard(
                     Icon(
                         icon,
                         contentDescription = null,
-                        tint = BrandColors.Primary,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(Dimensions.iconSm)
                     )
                     Spacer(modifier = Modifier.width(Spacing.sm))
@@ -356,7 +519,7 @@ private fun SettingsCard(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = DarkText.Primary
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
             Spacer(modifier = Modifier.height(Spacing.lg))
@@ -382,7 +545,7 @@ private fun PremiumOutlinedField(
         label = { 
             Text(
                 text = label,
-                color = DarkText.Secondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             ) 
         },
         modifier = modifier,
@@ -391,17 +554,17 @@ private fun PremiumOutlinedField(
         suffix = { 
             Text(
                 text = suffix,
-                color = DarkText.Secondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             ) 
         },
         shape = Shapes.Medium,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = BrandColors.Primary,
-            unfocusedBorderColor = DarkBorders.Subtle,
-            focusedLabelColor = BrandColors.Primary,
-            cursorColor = BrandColors.Primary,
-            focusedTextColor = DarkText.Primary,
-            unfocusedTextColor = DarkText.Primary
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+            focusedLabelColor = MaterialTheme.colorScheme.primary,
+            cursorColor = MaterialTheme.colorScheme.primary,
+            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurface
         )
     )
 }
@@ -427,8 +590,8 @@ private fun ThemeOption(
             selected = isSelected,
             onClick = null,
             colors = RadioButtonDefaults.colors(
-                selectedColor = BrandColors.Primary,
-                unselectedColor = DarkText.Tertiary
+                selectedColor = MaterialTheme.colorScheme.primary,
+                unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
         )
         Spacer(modifier = Modifier.width(Spacing.md))
@@ -442,14 +605,14 @@ private fun ThemeOption(
         Icon(
             icon,
             contentDescription = null,
-            tint = if (isSelected) BrandColors.Primary else DarkText.Secondary,
+            tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(Dimensions.iconSm)
         )
         Spacer(modifier = Modifier.width(Spacing.sm))
         Text(
             text = text,
             style = MaterialTheme.typography.bodyLarge,
-            color = if (isSelected) BrandColors.Primary else DarkText.Primary
+            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
         )
     }
 }

@@ -7,7 +7,9 @@ import com.deliverytracker.app.domain.model.UserSettings
 import com.deliverytracker.app.domain.repository.AuthRepository
 import com.deliverytracker.app.domain.repository.ShiftRepository
 import com.deliverytracker.app.domain.repository.UserSettingsRepository
-import com.google.firebase.auth.FirebaseAuth
+import com.deliverytracker.app.domain.usecase.CalculateDashboardStatsUseCase
+import com.deliverytracker.app.domain.usecase.CalculateGoalProgressUseCase
+
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,6 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import android.util.Log
 import java.util.*
 import javax.inject.Inject
 
@@ -25,6 +28,7 @@ data class DashboardUiState(
     val username: String? = null,
     val isLoading: Boolean = true,
     val isLoggedOut: Boolean = false,
+    val errorMessage: String? = null,
     
     // Σημερινά στατιστικά
     val todayNetIncome: Double = 0.0,
@@ -46,12 +50,15 @@ data class DashboardUiState(
 
 /**
  * ViewModel για το Dashboard.
+ * Χρησιμοποιεί UseCases για τους υπολογισμούς αντί inline logic.
  */
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val shiftRepository: ShiftRepository,
-    private val userSettingsRepository: UserSettingsRepository
+    private val userSettingsRepository: UserSettingsRepository,
+    private val calculateDashboardStats: CalculateDashboardStatsUseCase,
+    private val calculateGoalProgress: CalculateGoalProgressUseCase
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(DashboardUiState())
@@ -65,7 +72,7 @@ class DashboardViewModel @Inject constructor(
      * Φορτώνει όλα τα δεδομένα του Dashboard.
      */
     private fun loadData() {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val userId = authRepository.getCurrentUserId() ?: return
         
         // Φόρτωση user info
         viewModelScope.launch {
@@ -79,7 +86,10 @@ class DashboardViewModel @Inject constructor(
         // Φόρτωση settings (goals)
         viewModelScope.launch {
             userSettingsRepository.getUserSettings(userId)
-                .catch { /* Ignore errors */ }
+                .catch { e -> 
+                    // Καταγραφή σφάλματος για debugging
+                    Log.e("DashboardViewModel", "Σφάλμα φόρτωσης ρυθμίσεων", e)
+                }
                 .collect { settings ->
                     _uiState.update {
                         it.copy(
@@ -94,72 +104,46 @@ class DashboardViewModel @Inject constructor(
         // Φόρτωση shifts
         viewModelScope.launch {
             shiftRepository.getShifts(userId)
-                .catch { /* Ignore errors */ }
+                .catch { e -> 
+                    // Καταγραφή σφάλματος και ενημέρωση UI
+                    Log.e("DashboardViewModel", "Σφάλμα φόρτωσης βαρδιών", e)
+                    _uiState.update { it.copy(isLoading = false, errorMessage = e.message) }
+                }
                 .collect { shifts ->
-                    calculateStats(shifts)
+                    // Χρήση UseCase αντί inline υπολογισμών
+                    val stats = calculateDashboardStats(shifts)
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            todayNetIncome = stats.todayNetIncome,
+                            todayOrders = stats.todayOrders,
+                            todayHours = stats.todayHours,
+                            todayBonus = stats.todayBonus,
+                            monthNetIncome = stats.monthNetIncome,
+                            monthOrders = stats.monthOrders,
+                            monthShifts = stats.monthShifts
+                        )
+                    }
+                    updateProgress()
                 }
         }
     }
     
     /**
-     * Υπολογίζει τα στατιστικά από τις βάρδιες.
-     */
-    private fun calculateStats(shifts: List<Shift>) {
-        val calendar = Calendar.getInstance()
-        val today = calendar.get(Calendar.DAY_OF_YEAR)
-        val thisMonth = calendar.get(Calendar.MONTH)
-        val thisYear = calendar.get(Calendar.YEAR)
-        
-        // Σημερινές βάρδιες
-        val todayShifts = shifts.filter { shift ->
-            val shiftCal = Calendar.getInstance().apply { timeInMillis = shift.date }
-            shiftCal.get(Calendar.DAY_OF_YEAR) == today &&
-            shiftCal.get(Calendar.YEAR) == thisYear
-        }
-        
-        // Μηνιαίες βάρδιες
-        val monthShifts = shifts.filter { shift ->
-            val shiftCal = Calendar.getInstance().apply { timeInMillis = shift.date }
-            shiftCal.get(Calendar.MONTH) == thisMonth &&
-            shiftCal.get(Calendar.YEAR) == thisYear
-        }
-        
-        _uiState.update {
-            it.copy(
-                isLoading = false,
-                // Today
-                todayNetIncome = todayShifts.sumOf { s -> s.netIncome },
-                todayOrders = todayShifts.sumOf { s -> s.ordersCount },
-                todayHours = todayShifts.sumOf { s -> s.hoursWorked },
-                todayBonus = todayShifts.sumOf { s -> s.bonus },
-                // Month
-                monthNetIncome = monthShifts.sumOf { s -> s.netIncome },
-                monthOrders = monthShifts.sumOf { s -> s.ordersCount },
-                monthShifts = monthShifts.size
-            )
-        }
-        
-        updateProgress()
-    }
-    
-    /**
-     * Ενημερώνει την πρόοδο προς τους στόχους.
+     * Ενημερώνει την πρόοδο προς τους στόχους χρησιμοποιώντας UseCase.
      */
     private fun updateProgress() {
         val state = _uiState.value
-        
-        val dailyProgress = if (state.dailyGoal != null && state.dailyGoal > 0) {
-            (state.todayNetIncome / state.dailyGoal).toFloat().coerceIn(0f, 1f)
-        } else 0f
-        
-        val monthlyProgress = if (state.monthlyGoal != null && state.monthlyGoal > 0) {
-            (state.monthNetIncome / state.monthlyGoal).toFloat().coerceIn(0f, 1f)
-        } else 0f
-        
+        val progress = calculateGoalProgress(
+            todayIncome = state.todayNetIncome,
+            monthIncome = state.monthNetIncome,
+            dailyGoal = state.dailyGoal,
+            monthlyGoal = state.monthlyGoal
+        )
         _uiState.update {
             it.copy(
-                dailyProgress = dailyProgress,
-                monthlyProgress = monthlyProgress
+                dailyProgress = progress.dailyProgress,
+                monthlyProgress = progress.monthlyProgress
             )
         }
     }

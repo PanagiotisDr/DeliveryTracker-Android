@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -47,16 +48,18 @@ fun ExpenseListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
     val decimalFormat = remember { DecimalFormat("#,##0.00") }
     val dateFormat = remember { SimpleDateFormat("dd MMM", Locale("el", "GR")) }
     
-    LaunchedEffect(uiState.error, uiState.successMessage) {
-        uiState.error?.let {
+    LaunchedEffect(uiState.errorResId, uiState.errorMessage, uiState.successMessageResId) {
+        val errorText = uiState.errorResId?.let { context.getString(it) } ?: uiState.errorMessage
+        errorText?.let {
             snackbarHostState.showSnackbar(it)
             viewModel.clearMessages()
         }
-        uiState.successMessage?.let {
-            snackbarHostState.showSnackbar(it)
+        uiState.successMessageResId?.let {
+            snackbarHostState.showSnackbar(context.getString(it))
             viewModel.clearMessages()
         }
     }
@@ -68,7 +71,7 @@ fun ExpenseListScreen(
                     Text(
                         text = stringResource(R.string.nav_expenses),
                         fontWeight = FontWeight.SemiBold,
-                        color = DarkText.Primary
+                        color = MaterialTheme.colorScheme.onBackground
                     ) 
                 },
                 navigationIcon = {
@@ -76,12 +79,12 @@ fun ExpenseListScreen(
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack, 
                             contentDescription = stringResource(R.string.back),
-                            tint = DarkText.Primary
+                            tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = DarkSurfaces.Background
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         },
@@ -91,7 +94,7 @@ fun ExpenseListScreen(
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = DarkSurfaces.Background
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -110,7 +113,7 @@ fun ExpenseListScreen(
                 // Empty state
                 uiState.expenses.isEmpty() -> {
                     EmptyState(
-                        emoji = "💰",
+                        emoji = Emojis.MONEY,
                         title = stringResource(R.string.empty_expenses),
                         subtitle = stringResource(R.string.empty_expenses_hint),
                         modifier = Modifier.align(Alignment.Center)
@@ -118,8 +121,8 @@ fun ExpenseListScreen(
                         Button(
                             onClick = onNavigateToAddExpense,
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = BrandColors.Primary,
-                                contentColor = DarkText.OnPrimary
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
                             ),
                             shape = Shapes.Full
                         ) {
@@ -202,7 +205,7 @@ private fun PremiumExpenseCard(
     }
     
     GlassCard(
-        backgroundColor = DarkSurfaces.SurfaceContainer,
+        backgroundColor = MaterialTheme.colorScheme.surfaceContainer,
         borderColor = categoryColor.copy(alpha = 0.4f),
         contentPadding = PaddingValues(Spacing.md)
     ) {
@@ -231,21 +234,21 @@ private fun PremiumExpenseCard(
             // Info
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = expense.category.displayName,
+                    text = stringResource(expense.category.displayNameResId),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = DarkText.Primary
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = dateFormat.format(Date(expense.date)),
                     style = MaterialTheme.typography.bodySmall,
-                    color = DarkText.Secondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 if (expense.notes.isNotEmpty()) {
                     Text(
                         text = expense.notes,
                         style = MaterialTheme.typography.bodySmall,
-                        color = DarkText.Tertiary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                         maxLines = 1
                     )
                 }
@@ -270,7 +273,7 @@ private fun PremiumExpenseCard(
                     Icon(
                         Icons.Default.Edit,
                         contentDescription = stringResource(R.string.btn_edit),
-                        tint = DarkText.Secondary,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(Dimensions.iconSm)
                     )
                 }

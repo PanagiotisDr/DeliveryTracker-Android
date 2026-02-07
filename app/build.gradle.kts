@@ -10,6 +10,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.google.services)
 }
 
@@ -82,7 +83,8 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
 
-    // Firebase - ΧΩΡΙΣ -ktx suffix (deprecated στις νέες εκδόσεις)
+    // Firebase - Εκδόσεις μέσω BOM (αυτόματη συμβατότητα)
+    implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.analytics)
@@ -93,18 +95,19 @@ dependencies {
     // Lottie Animations - Για premium animations
     implementation(libs.lottie.compose)
 
-    // Accompanist - System UI & Loading effects
-    implementation(libs.accompanist.systemuicontroller)
-    implementation(libs.accompanist.placeholder)
+    // Σημείωση: Accompanist αφαιρέθηκε (deprecated - native στο Compose πλέον)
 
     // DataStore - Για τοπικές ρυθμίσεις
     implementation(libs.datastore.preferences)
     
-    // Splash Screen API
-    implementation("androidx.core:core-splashscreen:1.0.1")
+    // Splash Screen API - Μέσω Version Catalog
+    implementation(libs.splashscreen)
 
-    // Testing
-    testImplementation(libs.junit)
+    // Testing - JUnit 5 + Modern Tools
+    testImplementation(libs.junit5)
+    testRuntimeOnly(libs.junit5.platform.launcher)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -113,4 +116,9 @@ dependencies {
     // Debug
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+}
+
+// Ενεργοποίηση JUnit 5 engine για test discovery
+tasks.withType<Test> {
+    useJUnitPlatform()
 }

@@ -1,11 +1,13 @@
 package com.deliverytracker.app.presentation.screens.expenses
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.deliverytracker.app.R
 import com.deliverytracker.app.domain.model.Expense
 import com.deliverytracker.app.domain.model.Result
+import com.deliverytracker.app.domain.repository.AuthRepository
 import com.deliverytracker.app.domain.repository.ExpenseRepository
-import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -13,12 +15,14 @@ import javax.inject.Inject
 
 /**
  * UI State για τη λίστα εξόδων.
+ * Χρησιμοποιεί @StringRes για proper i18n.
  */
 data class ExpenseListUiState(
     val isLoading: Boolean = true,
     val expenses: List<Expense> = emptyList(),
-    val error: String? = null,
-    val successMessage: String? = null
+    @StringRes val errorResId: Int? = null,          // Static errors
+    val errorMessage: String? = null,                 // Dynamic errors
+    @StringRes val successMessageResId: Int? = null  // Static success messages
 )
 
 /**
@@ -26,7 +30,8 @@ data class ExpenseListUiState(
  */
 @HiltViewModel
 class ExpenseListViewModel @Inject constructor(
-    private val expenseRepository: ExpenseRepository
+    private val expenseRepository: ExpenseRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(ExpenseListUiState())
@@ -40,13 +45,14 @@ class ExpenseListViewModel @Inject constructor(
      * Φορτώνει τα έξοδα του χρήστη.
      */
     private fun loadExpenses() {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val userId = authRepository.getCurrentUserId() ?: return
         
         viewModelScope.launch {
             expenseRepository.getExpenses(userId)
                 .catch { e ->
+                    // Dynamic error με context
                     _uiState.update { 
-                        it.copy(isLoading = false, error = "Σφάλμα φόρτωσης: ${e.message}")
+                        it.copy(isLoading = false, errorMessage = e.message)
                     }
                 }
                 .collect { expenses ->
@@ -68,7 +74,7 @@ class ExpenseListViewModel @Inject constructor(
             _uiState.update { 
                 it.copy(
                     expenses = currentExpenses.filter { exp -> exp.id != expenseId },
-                    successMessage = "Το έξοδο διαγράφηκε"
+                    successMessageResId = R.string.msg_expense_deleted
                 )
             }
             
@@ -80,8 +86,8 @@ class ExpenseListViewModel @Inject constructor(
                         _uiState.update { 
                             it.copy(
                                 expenses = (currentExpenses).sortedByDescending { e -> e.date },
-                                error = result.message,
-                                successMessage = null
+                                errorMessage = result.message,
+                                successMessageResId = null
                             )
                         }
                     }
@@ -92,6 +98,6 @@ class ExpenseListViewModel @Inject constructor(
     }
     
     fun clearMessages() {
-        _uiState.update { it.copy(error = null, successMessage = null) }
+        _uiState.update { it.copy(errorResId = null, errorMessage = null, successMessageResId = null) }
     }
 }

@@ -52,7 +52,7 @@ fun SwipeableShiftCard(
     
     // Background color animation
     val backgroundColor by animateColorAsState(
-        targetValue = if (isDeleting) CC_Error else CC_Surface,
+        targetValue = if (isDeleting) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.surface,
         label = "bgColor"
     )
     
@@ -67,7 +67,7 @@ fun SwipeableShiftCard(
             modifier = Modifier
                 .matchParentSize()
                 .clip(RoundedCornerShape(Spacing.cardRadius))
-                .background(CC_Error),
+                .background(MaterialTheme.colorScheme.error),
             contentAlignment = Alignment.CenterEnd
         ) {
             Row(
@@ -77,7 +77,7 @@ fun SwipeableShiftCard(
                 Icon(
                     Icons.Default.Delete,
                     contentDescription = stringResource(R.string.btn_delete),
-                    tint = Color.White,
+                    tint = MaterialTheme.colorScheme.onError,
                     modifier = Modifier.size(28.dp)
                 )
             }
@@ -104,8 +104,8 @@ fun SwipeableShiftCard(
                     }
                 },
             shape = RoundedCornerShape(Spacing.cardRadius),
-            color = CC_Surface,
-            tonalElevation = 0.dp
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = Dimensions.elevationNone
         ) {
             Row(
                 modifier = Modifier
@@ -121,12 +121,12 @@ fun SwipeableShiftCard(
                         text = dateFormat.format(Date(shift.date)),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
-                        color = CC_TextPrimary
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = shift.formattedWorkTime,
                         style = MaterialTheme.typography.bodySmall,
-                        color = CC_TextSecondary
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 
@@ -141,10 +141,10 @@ fun SwipeableShiftCard(
                             text = shift.ordersCount.toString(),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = CC_TextPrimary
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = "📦",
+                            text = Emojis.ORDERS,
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
@@ -155,10 +155,10 @@ fun SwipeableShiftCard(
                             text = String.format("%.1f", shift.hoursWorked),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = CC_TextPrimary
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = "⏱️",
+                            text = Emojis.TIME,
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
@@ -169,7 +169,7 @@ fun SwipeableShiftCard(
                             text = "${decimalFormat.format(shift.netIncome)}€",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
-                            color = if (shift.netIncome >= 0) CC_Success else CC_Error
+                            color = if (shift.netIncome >= 0) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error
                         )
                     }
                 }
@@ -182,7 +182,7 @@ fun SwipeableShiftCard(
                     Icon(
                         Icons.Default.Edit,
                         contentDescription = stringResource(R.string.btn_edit),
-                        tint = CC_TextSecondary
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -207,8 +207,8 @@ fun SmartSuggestionCard(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(Spacing.cardRadius),
-        color = CC_SurfaceElevated,
-        tonalElevation = 0.dp
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        tonalElevation = Dimensions.elevationNone
     ) {
         Row(
             modifier = Modifier
@@ -221,7 +221,7 @@ fun SmartSuggestionCard(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(RoundedCornerShape(Spacing.radiusMd))
-                    .background(CC_Primary.copy(alpha = 0.15f)),
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -237,12 +237,12 @@ fun SmartSuggestionCard(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = CC_TextPrimary
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.bodySmall,
-                    color = CC_TextSecondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             
@@ -250,7 +250,7 @@ fun SmartSuggestionCard(
             Text(
                 text = "→",
                 style = MaterialTheme.typography.titleLarge,
-                color = CC_Primary
+                color = MaterialTheme.colorScheme.primary
             )
         }
     }
@@ -272,8 +272,8 @@ fun CompactShiftCard(
         onClick = onClick,
         modifier = modifier.width(140.dp),
         shape = RoundedCornerShape(Spacing.widgetRadius),
-        color = CC_WidgetBg,
-        tonalElevation = 0.dp
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        tonalElevation = Dimensions.elevationNone
     ) {
         Column(
             modifier = Modifier.padding(Spacing.widgetPadding),
@@ -282,7 +282,7 @@ fun CompactShiftCard(
             Text(
                 text = dateFormat.format(Date(shift.date)),
                 style = MaterialTheme.typography.labelMedium,
-                color = CC_TextSecondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             
             Spacer(modifier = Modifier.height(Spacing.sm))
@@ -291,7 +291,7 @@ fun CompactShiftCard(
                 text = "${decimalFormat.format(shift.netIncome)}€",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = if (shift.netIncome >= 0) CC_Success else CC_Error
+                color = if (shift.netIncome >= 0) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error
             )
             
             Spacer(modifier = Modifier.height(Spacing.xs))
@@ -300,14 +300,14 @@ fun CompactShiftCard(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
             ) {
                 Text(
-                    text = "📦${shift.ordersCount}",
+                    text = "${Emojis.ORDERS}${shift.ordersCount}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = CC_TextSecondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "⏱️${String.format("%.1f", shift.hoursWorked)}h",
+                    text = "${Emojis.TIME}${String.format("%.1f", shift.hoursWorked)}h",
                     style = MaterialTheme.typography.bodySmall,
-                    color = CC_TextSecondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }

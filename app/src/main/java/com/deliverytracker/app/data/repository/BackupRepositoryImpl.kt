@@ -2,6 +2,7 @@ package com.deliverytracker.app.data.repository
 
 import android.content.Context
 import android.os.Environment
+import com.deliverytracker.app.R
 import com.deliverytracker.app.domain.model.Expense
 import com.deliverytracker.app.domain.model.ExpenseCategory
 import com.deliverytracker.app.domain.model.PaymentMethod
@@ -20,10 +21,12 @@ import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.deliverytracker.app.data.util.BackupEncryption
 
 /**
  * Υλοποίηση του BackupRepository.
  * Δημιουργεί JSON backups όλων των δεδομένων του χρήστη.
+ * Χρησιμοποιεί context.getString() για proper i18n.
  */
 @Singleton
 class BackupRepositoryImpl @Inject constructor(
@@ -40,7 +43,7 @@ class BackupRepositoryImpl @Inject constructor(
     override suspend fun createBackup(): Result<String> {
         return try {
             val userId = FirebaseAuth.getInstance().currentUser?.uid
-                ?: return Result.Error("Δεν είστε συνδεδεμένος")
+                ?: return Result.Error(context.getString(R.string.error_not_logged_in))
             
             // Λήψη όλων των δεδομένων
             val shifts = shiftRepository.getShifts(userId, includeDeleted = false).first()
@@ -55,16 +58,18 @@ class BackupRepositoryImpl @Inject constructor(
                 put("expenses", expensesToJson(expenses))
             }
             
-            // Αποθήκευση σε αρχείο
+            // Αποθήκευση σε αρχείο με κρυπτογράφηση
             val backupDir = getBackupDirectory()
-            val fileName = "backup_${dateFormat.format(Date())}.json"
+            val fileName = "backup_${dateFormat.format(Date())}.enc"  // .enc αντί για .json
             val file = File(backupDir, fileName)
             
-            file.writeText(backup.toString(2))
+            // Κρυπτογράφηση του JSON πριν την αποθήκευση
+            val encryptedData = BackupEncryption.encrypt(backup.toString(2))
+            file.writeText(encryptedData)
             
             Result.Success(file.absolutePath)
         } catch (e: Exception) {
-            Result.Error("Σφάλμα δημιουργίας backup: ${e.message}")
+            Result.Error(context.getString(R.string.error_backup_create, e.message ?: ""))
         }
     }
     
@@ -74,14 +79,23 @@ class BackupRepositoryImpl @Inject constructor(
     override suspend fun restoreBackup(backupPath: String): Result<Int> {
         return try {
             val userId = FirebaseAuth.getInstance().currentUser?.uid
-                ?: return Result.Error("Δεν είστε συνδεδεμένος")
+                ?: return Result.Error(context.getString(R.string.error_not_logged_in))
             
             val file = File(backupPath)
             if (!file.exists()) {
-                return Result.Error("Το αρχείο backup δεν βρέθηκε")
+                return Result.Error(context.getString(R.string.error_backup_not_found))
             }
             
-            val json = JSONObject(file.readText())
+            // Ανάγνωση και αποκρυπτογράφηση αν χρειάζεται
+            val fileContent = file.readText()
+            val jsonString = if (BackupEncryption.isEncrypted(fileContent)) {
+                BackupEncryption.decrypt(fileContent)
+            } else {
+                // Backwards compatibility με παλιά plain JSON backups
+                fileContent
+            }
+            
+            val json = JSONObject(jsonString)
             var restoredCount = 0
             
             // Επαναφορά βαρδιών
@@ -108,7 +122,7 @@ class BackupRepositoryImpl @Inject constructor(
             
             Result.Success(restoredCount)
         } catch (e: Exception) {
-            Result.Error("Σφάλμα επαναφοράς: ${e.message}")
+            Result.Error(context.getString(R.string.error_restore, e.message ?: ""))
         }
     }
     
@@ -125,7 +139,7 @@ class BackupRepositoryImpl @Inject constructor(
             
             Result.Success(files)
         } catch (e: Exception) {
-            Result.Error("Σφάλμα ανάγνωσης backups: ${e.message}")
+            Result.Error(context.getString(R.string.error_backups_read, e.message ?: ""))
         }
     }
     

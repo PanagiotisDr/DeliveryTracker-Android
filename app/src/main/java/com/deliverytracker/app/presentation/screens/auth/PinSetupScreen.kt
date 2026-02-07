@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import com.deliverytracker.app.presentation.theme.Dimensions
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Backspace
@@ -18,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.ui.res.stringResource
 import com.deliverytracker.app.R
+import com.deliverytracker.app.presentation.theme.AppEmojis
 
 /**
  * Οθόνη ρύθμισης PIN μετά το πρώτο login.
@@ -49,7 +51,7 @@ fun PinSetupScreen(
             
             // Icon
             Text(
-                text = "🔐",
+                text = AppEmojis.LOCK,
                 style = MaterialTheme.typography.displayLarge
             )
             
@@ -83,8 +85,9 @@ fun PinSetupScreen(
                     uiState.pin.length
             )
             
-            // Error
-            uiState.error?.let { error ->
+            // Error - Χρήση errorRes ή errorMessage
+            val errorText = uiState.errorRes?.let { stringResource(it) } ?: uiState.errorMessage
+            errorText?.let { error ->
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = error,
@@ -185,7 +188,7 @@ private fun NumberPadSetup(
                                 .size(72.dp)
                                 .clip(CircleShape)
                                 .border(
-                                    width = 1.dp,
+                                    width = Dimensions.borderThin,
                                     color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
                                     shape = CircleShape
                                 )

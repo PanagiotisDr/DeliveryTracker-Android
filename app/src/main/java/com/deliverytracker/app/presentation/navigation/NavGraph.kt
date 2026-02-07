@@ -1,28 +1,37 @@
 package com.deliverytracker.app.presentation.navigation
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
+import androidx.navigation.toRoute
 import com.deliverytracker.app.presentation.screens.auth.LoginScreen
-import com.deliverytracker.app.presentation.screens.auth.RegisterScreen
-import com.deliverytracker.app.presentation.screens.commandcenter.CommandCenterScreen
 import com.deliverytracker.app.presentation.screens.auth.PinLoginScreen
 import com.deliverytracker.app.presentation.screens.auth.PinSetupScreen
+import com.deliverytracker.app.presentation.screens.auth.RegisterScreen
+import com.deliverytracker.app.presentation.screens.commandcenter.CommandCenterScreen
 import com.deliverytracker.app.presentation.screens.shifts.ShiftFormScreen
 import com.deliverytracker.app.presentation.screens.shifts.ShiftListScreen
-import com.google.firebase.auth.FirebaseAuth
+
+// Διάρκεια animations σε ms — κεντρικά για εύκολη αλλαγή
+private const val NAV_ANIM_DURATION = 300
+private const val NAV_ANIM_DURATION_FAST = 200
 
 /**
  * Κύριο Navigation Graph της εφαρμογής.
- * Διαχειρίζεται τη μετάβαση μεταξύ οθονών.
- * 
+ * Χρησιμοποιεί Type-Safe Navigation (Compose 2.9+).
+ * Animated transitions: fade+slide οριζόντια για main, vertical slide για forms.
+ *
  * @param modifier Modifier για padding από το parent Scaffold
  */
 @Composable
@@ -30,187 +39,233 @@ fun NavGraph(
     navController: NavHostController,
     isLoggedIn: Boolean,
     hasPin: Boolean = false,
+    onSignOut: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    // Αν είναι συνδεδεμένος και έχει PIN -> PinLogin
-    // Αν είναι συνδεδεμένος χωρίς PIN -> Dashboard
-    // Αν δεν είναι συνδεδεμένος -> Login
-    val startDestination = when {
-        isLoggedIn && hasPin -> Screen.PinLogin.route
-        isLoggedIn -> Screen.Dashboard.route
-        else -> Screen.Login.route
-    }
-    
     // Box wrapper για να εφαρμόσουμε το padding από το Scaffold
     Box(modifier = modifier) {
         NavHost(
             navController = navController,
-            startDestination = startDestination
+            startDestination = when {
+                isLoggedIn && hasPin -> PinLogin
+                isLoggedIn -> Dashboard
+                else -> Login
+            },
+            // Default transitions — fade + subtle horizontal slide
+            enterTransition = {
+                fadeIn(tween(NAV_ANIM_DURATION)) + slideInHorizontally(
+                    initialOffsetX = { it / 4 },
+                    animationSpec = tween(NAV_ANIM_DURATION)
+                )
+            },
+            exitTransition = {
+                fadeOut(tween(NAV_ANIM_DURATION_FAST)) + slideOutHorizontally(
+                    targetOffsetX = { -it / 4 },
+                    animationSpec = tween(NAV_ANIM_DURATION)
+                )
+            },
+            popEnterTransition = {
+                fadeIn(tween(NAV_ANIM_DURATION)) + slideInHorizontally(
+                    initialOffsetX = { -it / 4 },
+                    animationSpec = tween(NAV_ANIM_DURATION)
+                )
+            },
+            popExitTransition = {
+                fadeOut(tween(NAV_ANIM_DURATION_FAST)) + slideOutHorizontally(
+                    targetOffsetX = { it / 4 },
+                    animationSpec = tween(NAV_ANIM_DURATION)
+                )
+            }
         ) {
-            // ============ Auth Screens ============
+            // ════════════════════════════════════════════════════
+            // AUTH SCREENS
+            // ════════════════════════════════════════════════════
             
-            composable(Screen.Login.route) {
+            composable<Login> {
                 LoginScreen(
                     onNavigateToRegister = {
-                        navController.navigate(Screen.Register.route)
+                        navController.navigate(Register)
                     },
                     onLoginSuccess = {
-                        navController.navigate(Screen.Dashboard.route) {
-                            popUpTo(Screen.Login.route) { inclusive = true }
+                        navController.navigate(Dashboard) {
+                            popUpTo<Login> { inclusive = true }
                         }
                     },
                     onNeedsPinSetup = {
-                        navController.navigate(Screen.PinSetup.route) {
-                            popUpTo(Screen.Login.route) { inclusive = true }
+                        navController.navigate(PinSetup) {
+                            popUpTo<Login> { inclusive = true }
                         }
                     }
                 )
             }
             
-            composable(Screen.Register.route) {
+            composable<Register> {
                 RegisterScreen(
                     onNavigateBack = {
                         navController.popBackStack()
                     },
                     onRegisterSuccess = {
                         // Μετά την εγγραφή, πήγαινε στο PIN setup
-                        navController.navigate(Screen.PinSetup.route) {
-                            popUpTo(Screen.Login.route) { inclusive = true }
+                        navController.navigate(PinSetup) {
+                            popUpTo<Login> { inclusive = true }
                         }
                     }
                 )
             }
             
-            // ============ PIN Screens ============
+            // ════════════════════════════════════════════════════
+            // PIN SCREENS
+            // ════════════════════════════════════════════════════
             
-            composable(Screen.PinLogin.route) {
+            composable<PinLogin> {
                 PinLoginScreen(
                     onPinSuccess = {
-                        navController.navigate(Screen.Dashboard.route) {
-                            popUpTo(Screen.PinLogin.route) { inclusive = true }
+                        navController.navigate(Dashboard) {
+                            popUpTo<PinLogin> { inclusive = true }
                         }
                     },
                     onUsePassword = {
                         // Αποσύνδεση για να πάει στο κανονικό login
-                        FirebaseAuth.getInstance().signOut()
-                        navController.navigate(Screen.Login.route) {
-                            popUpTo(Screen.PinLogin.route) { inclusive = true }
+                        onSignOut()
+                        navController.navigate(Login) {
+                            popUpTo<PinLogin> { inclusive = true }
                         }
                     }
                 )
             }
             
-            composable(Screen.PinSetup.route) {
+            composable<PinSetup> {
                 PinSetupScreen(
                     onSetupComplete = {
-                        navController.navigate(Screen.Dashboard.route) {
-                            popUpTo(Screen.PinSetup.route) { inclusive = true }
+                        navController.navigate(Dashboard) {
+                            popUpTo<PinSetup> { inclusive = true }
                         }
                     },
                     onSkip = {
-                        navController.navigate(Screen.Dashboard.route) {
-                            popUpTo(Screen.PinSetup.route) { inclusive = true }
+                        navController.navigate(Dashboard) {
+                            popUpTo<PinSetup> { inclusive = true }
                         }
                     }
                 )
             }
             
-            // ============ Main Screens ============
+            // ════════════════════════════════════════════════════
+            // MAIN SCREENS
+            // ════════════════════════════════════════════════════
             
-            composable(Screen.Dashboard.route) {
+            composable<Dashboard> {
                 CommandCenterScreen(
                     onNavigateToAddShift = {
-                        navController.navigate(Screen.ShiftForm.createRoute())
+                        navController.navigate(ShiftForm())
                     },
                     onNavigateToAddExpense = {
-                        navController.navigate(Screen.ExpenseForm.createRoute())
+                        navController.navigate(ExpenseForm())
                     },
                     onNavigateToSettings = {
-                        navController.navigate(Screen.Settings.route)
+                        navController.navigate(Settings)
                     },
                     onNavigateToShiftDetail = { shiftId ->
-                        navController.navigate(Screen.ShiftForm.createRoute(shiftId))
+                        navController.navigate(ShiftForm(shiftId = shiftId))
                     }
                 )
             }
             
-            // ============ Shift Screens ============
+            // ════════════════════════════════════════════════════
+            // SHIFT SCREENS
+            // ════════════════════════════════════════════════════
             
-            composable(Screen.ShiftList.route) {
+            composable<ShiftList> {
                 ShiftListScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToAddShift = { 
-                        navController.navigate(Screen.ShiftForm.createRoute()) 
+                    onNavigateToAddShift = {
+                        navController.navigate(ShiftForm())
                     },
                     onNavigateToEditShift = { shiftId ->
-                        navController.navigate(Screen.ShiftForm.createRoute(shiftId))
+                        navController.navigate(ShiftForm(shiftId = shiftId))
                     }
                 )
             }
             
-            composable(
-                route = Screen.ShiftForm.route,
-                arguments = listOf(
-                    navArgument("shiftId") {
-                        type = NavType.StringType
-                        nullable = true
-                        defaultValue = null
-                    }
-                )
+            // Vertical slide — modal-style transition για φόρμες
+            composable<ShiftForm>(
+                enterTransition = {
+                    fadeIn(tween(NAV_ANIM_DURATION)) + slideInVertically(
+                        initialOffsetY = { it / 3 },
+                        animationSpec = tween(NAV_ANIM_DURATION)
+                    )
+                },
+                popExitTransition = {
+                    fadeOut(tween(NAV_ANIM_DURATION_FAST)) + slideOutVertically(
+                        targetOffsetY = { it / 3 },
+                        animationSpec = tween(NAV_ANIM_DURATION)
+                    )
+                }
             ) {
                 ShiftFormScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
             
-            // ============ Expense Screens ============
+            // ════════════════════════════════════════════════════
+            // EXPENSE SCREENS
+            // ════════════════════════════════════════════════════
             
-            composable(Screen.ExpenseList.route) {
+            composable<ExpenseList> {
                 com.deliverytracker.app.presentation.screens.expenses.ExpenseListScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToAddExpense = {
-                        navController.navigate(Screen.ExpenseForm.createRoute())
+                        navController.navigate(ExpenseForm())
                     },
                     onNavigateToEditExpense = { expenseId ->
-                        navController.navigate(Screen.ExpenseForm.createRoute(expenseId))
+                        navController.navigate(ExpenseForm(expenseId = expenseId))
                     }
                 )
             }
             
-            composable(
-                route = Screen.ExpenseForm.route,
-                arguments = listOf(
-                    navArgument("expenseId") {
-                        type = NavType.StringType
-                        nullable = true
-                        defaultValue = null
-                    }
-                )
+            // Vertical slide — modal-style transition για φόρμες
+            composable<ExpenseForm>(
+                enterTransition = {
+                    fadeIn(tween(NAV_ANIM_DURATION)) + slideInVertically(
+                        initialOffsetY = { it / 3 },
+                        animationSpec = tween(NAV_ANIM_DURATION)
+                    )
+                },
+                popExitTransition = {
+                    fadeOut(tween(NAV_ANIM_DURATION_FAST)) + slideOutVertically(
+                        targetOffsetY = { it / 3 },
+                        animationSpec = tween(NAV_ANIM_DURATION)
+                    )
+                }
             ) {
                 com.deliverytracker.app.presentation.screens.expenses.ExpenseFormScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
             
-            composable(Screen.Statistics.route) {
+            // ════════════════════════════════════════════════════
+            // OTHER SCREENS
+            // ════════════════════════════════════════════════════
+            
+            composable<Statistics> {
                 com.deliverytracker.app.presentation.screens.statistics.StatisticsScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
             
-            composable(Screen.Settings.route) {
+            composable<Settings> {
                 com.deliverytracker.app.presentation.screens.settings.SettingsScreen(
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToPinSetup = { navController.navigate(PinSetup) }
                 )
             }
             
-            composable(Screen.RecycleBin.route) {
+            composable<RecycleBin> {
                 com.deliverytracker.app.presentation.screens.recyclebin.RecycleBinScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
             
-            composable(Screen.Export.route) {
+            composable<Export> {
                 com.deliverytracker.app.presentation.screens.export.ExportScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )

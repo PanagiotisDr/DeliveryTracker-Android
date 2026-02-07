@@ -54,21 +54,26 @@ fun ShiftFormScreen(
         }
     }
     
-    // Εμφάνιση error με localized message
-    val errorMessages = mapOf(
-        "error_zero_income" to stringResource(R.string.error_zero_income),
-        "error_zero_duration" to stringResource(R.string.error_zero_duration),
-        "error_over_24_hours" to stringResource(R.string.error_over_24_hours),
-        "error_future_date" to stringResource(R.string.error_future_date),
-        "error_zero_orders_with_km" to stringResource(R.string.error_zero_orders_with_km),
-        "error_zero_orders" to stringResource(R.string.error_zero_orders),
-        "error_zero_km" to stringResource(R.string.error_zero_km)
-    )
+    // Εμφάνιση error — dual-error pattern (validation + dynamic)
+    LaunchedEffect(uiState.errorResId, uiState.errorMessage) {
+        val message = when {
+            uiState.errorResId != null -> null // Θα γίνει resolve στο @Composable scope
+            uiState.errorMessage != null -> uiState.errorMessage
+            else -> null
+        }
+        // Αν έχουμε errorResId, δεν μπορούμε να καλέσουμε stringResource εδώ
+        // οπότε χρησιμοποιούμε dedicated composable effect
+        if (uiState.errorMessage != null) {
+            snackbarHostState.showSnackbar(uiState.errorMessage!!)
+            viewModel.clearError()
+        }
+    }
     
-    LaunchedEffect(uiState.error) {
-        uiState.error?.let { errorKey ->
-            val message = errorMessages[errorKey] ?: errorKey
-            snackbarHostState.showSnackbar(message)
+    // Resolve validation errors μέσω stringResource
+    uiState.errorResId?.let { resId ->
+        val errorText = stringResource(resId)
+        LaunchedEffect(resId) {
+            snackbarHostState.showSnackbar(errorText)
             viewModel.clearError()
         }
     }
@@ -108,7 +113,7 @@ fun ShiftFormScreen(
                         else 
                             stringResource(R.string.new_shift),
                         fontWeight = FontWeight.SemiBold,
-                        color = DarkText.Primary
+                        color = MaterialTheme.colorScheme.onBackground
                     ) 
                 },
                 navigationIcon = {
@@ -116,7 +121,7 @@ fun ShiftFormScreen(
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack, 
                             contentDescription = stringResource(R.string.back),
-                            tint = DarkText.Primary
+                            tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 },
@@ -128,17 +133,17 @@ fun ShiftFormScreen(
                         Icon(
                             Icons.Default.Check, 
                             contentDescription = stringResource(R.string.btn_save),
-                            tint = BrandColors.Primary
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = DarkSurfaces.Background
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = DarkSurfaces.Background
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         if (uiState.isLoading) {
             Box(
@@ -229,7 +234,7 @@ fun ShiftFormScreen(
                 
                 // Έσοδα - ΥΠΟΧΡΕΩΤΙΚΟ
                 Text(
-                    text = "💰 ${stringResource(R.string.stats_income)}",
+                    text = "${Emojis.MONEY} ${stringResource(R.string.stats_income)}",
                     style = MaterialTheme.typography.titleMedium
                 )
                 
@@ -279,7 +284,7 @@ fun ShiftFormScreen(
                 
                 // Στατιστικά - ΥΠΟΧΡΕΩΤΙΚΑ
                 Text(
-                    text = "📊 ${stringResource(R.string.nav_statistics)}",
+                    text = "${Emojis.STATS} ${stringResource(R.string.nav_statistics)}",
                     style = MaterialTheme.typography.titleMedium
                 )
                 
@@ -306,7 +311,7 @@ fun ShiftFormScreen(
                         isValid = uiState.kilometers.isNotBlank() && 
                             uiState.kilometers.replace(",", ".").toDoubleOrNull()?.let { it > 0 } == true,
                         modifier = Modifier.weight(1f),
-                        suffix = { Text("km") },
+                        suffix = { Text(stringResource(R.string.unit_km)) },
                         keyboardType = KeyboardType.Decimal
                     )
                 }
@@ -325,7 +330,7 @@ fun ShiftFormScreen(
                     label = { Text(stringResource(R.string.notes_optional)) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(min = 100.dp),
+                        .heightIn(min = Dimensions.textFieldMinHeight),
                     maxLines = 4,
                     leadingIcon = { Icon(Icons.Default.Notes, null) }
                 )

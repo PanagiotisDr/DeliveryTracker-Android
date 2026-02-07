@@ -11,6 +11,9 @@ data class UserSettings(
     // ============ Θέμα Εμφάνισης ============
     val theme: ThemeMode = ThemeMode.SYSTEM,
     
+    /** Dynamic Color (Material You) — χρώματα wallpaper αντί Warm Premium */
+    val dynamicColor: Boolean = false,
+    
     // ============ Φορολογικές Ρυθμίσεις ============
     
     /** Ποσοστό ΦΠΑ (default 24%) */

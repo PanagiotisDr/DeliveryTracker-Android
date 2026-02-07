@@ -58,7 +58,7 @@ fun HeroDashboard(
         modifier = modifier
             .fillMaxWidth()
             .shadow(
-                elevation = 16.dp,
+                elevation = Dimensions.elevationXl,
                 shape = shape,
                 spotColor = HeroGradientMid.copy(alpha = 0.5f)
             )
@@ -188,7 +188,7 @@ data class HeroSecondaryStatItem(
 private fun HeroSecondaryStat(stat: HeroSecondaryStatItem) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.widthIn(min = 60.dp, max = 100.dp)
+        modifier = Modifier.widthIn(min = Dimensions.widgetMinWidth, max = Dimensions.widgetMaxWidth)
     ) {
         Text(
             text = stat.emoji,

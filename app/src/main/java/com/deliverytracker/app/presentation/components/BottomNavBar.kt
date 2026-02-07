@@ -33,10 +33,10 @@ import com.deliverytracker.app.presentation.theme.*
  * - Animated selection indicator
  * - Icon scale animation
  * - Haptic feedback
- * - Glass morphism background
+ * - Theme-aware colors (αντί hardcoded Dark colors)
  * 
  * @author DeliveryTracker Team
- * @version 1.0.0
+ * @version 1.1.0 - Theme-aware update
  * @since 2026-02
  */
 
@@ -88,6 +88,7 @@ val defaultNavItems = listOf(
 
 /**
  * Premium animated bottom navigation bar
+ * Χρησιμοποιεί MaterialTheme.colorScheme για proper theme support
  * 
  * @param currentRoute Current selected route
  * @param onNavigate Callback when navigation item is clicked
@@ -102,10 +103,11 @@ fun PremiumBottomNavBar(
     modifier: Modifier = Modifier
 ) {
     val haptic = LocalHapticFeedback.current
+    val colorScheme = MaterialTheme.colorScheme
     
     Surface(
         modifier = modifier.fillMaxWidth(),
-        color = DarkSurfaces.SurfaceContainer.copy(alpha = 0.95f),
+        color = colorScheme.surfaceContainer.copy(alpha = 0.95f),
         shadowElevation = Dimensions.elevationLg
     ) {
         Row(
@@ -138,6 +140,7 @@ fun PremiumBottomNavBar(
 
 /**
  * Individual navigation bar item with animations
+ * Χρησιμοποιεί MaterialTheme.colorScheme για proper theme support
  */
 @Composable
 private fun NavBarItem(
@@ -146,6 +149,8 @@ private fun NavBarItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colorScheme = MaterialTheme.colorScheme
+    
     // Animation values
     val scale by animateFloatAsState(
         targetValue = if (isSelected) 1.1f else 1f,
@@ -154,7 +159,7 @@ private fun NavBarItem(
     )
     
     val iconColor by animateColorAsState(
-        targetValue = if (isSelected) BrandColors.Primary else DarkText.Tertiary,
+        targetValue = if (isSelected) colorScheme.primary else colorScheme.onSurfaceVariant,
         animationSpec = AnimationSpecs.default(),
         label = "iconColor"
     )
@@ -188,7 +193,7 @@ private fun NavBarItem(
                         .width(Spacing.huge)
                         .height(Spacing.xxl)
                         .clip(RoundedCornerShape(Spacing.radiusFull))
-                        .background(BrandColors.Primary.copy(alpha = 0.15f))
+                        .background(colorScheme.primary.copy(alpha = 0.15f))
                 )
             }
             
@@ -211,13 +216,14 @@ private fun NavBarItem(
             style = CustomTextStyles.NavigationLabel.copy(
                 fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
             ),
-            color = if (isSelected) BrandColors.Primary else DarkText.Secondary.copy(alpha = labelAlpha)
+            color = if (isSelected) colorScheme.primary else colorScheme.onSurfaceVariant.copy(alpha = labelAlpha)
         )
     }
 }
 
 /**
  * Alternative: Glass morphism bottom nav bar
+ * Χρησιμοποιεί MaterialTheme.colorScheme για proper theme support
  */
 @Composable
 fun GlassBottomNavBar(
@@ -227,6 +233,7 @@ fun GlassBottomNavBar(
     modifier: Modifier = Modifier
 ) {
     val haptic = LocalHapticFeedback.current
+    val colorScheme = MaterialTheme.colorScheme
     
     Box(
         modifier = modifier
@@ -235,9 +242,9 @@ fun GlassBottomNavBar(
             .padding(horizontal = Spacing.md, vertical = Spacing.sm)
     ) {
         GlassCard(
-            backgroundColor = DarkSurfaces.SurfaceContainer.copy(alpha = 0.8f),
+            backgroundColor = colorScheme.surfaceContainer.copy(alpha = 0.8f),
             cornerRadius = Spacing.radiusXxl,
-            borderColor = DarkBorders.Glass,
+            borderColor = colorScheme.outlineVariant.copy(alpha = 0.2f),
             contentPadding = PaddingValues(vertical = Spacing.sm, horizontal = Spacing.xs)
         ) {
             Row(
@@ -267,6 +274,7 @@ fun GlassBottomNavBar(
 
 /**
  * Glass nav item with pill indicator
+ * Χρησιμοποιεί MaterialTheme.colorScheme για proper theme support
  */
 @Composable
 private fun GlassNavItem(
@@ -275,8 +283,10 @@ private fun GlassNavItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colorScheme = MaterialTheme.colorScheme
+    
     val iconColor by animateColorAsState(
-        targetValue = if (isSelected) BrandColors.Primary else DarkText.Secondary,
+        targetValue = if (isSelected) colorScheme.primary else colorScheme.onSurfaceVariant,
         animationSpec = AnimationSpecs.default(),
         label = "iconColor"
     )
@@ -297,7 +307,7 @@ private fun GlassNavItem(
                 .padding(horizontal = Spacing.sm, vertical = Spacing.xxs)
                 .clip(RoundedCornerShape(Spacing.radiusFull))
                 .background(
-                    if (isSelected) BrandColors.Primary.copy(alpha = 0.15f)
+                    if (isSelected) colorScheme.primary.copy(alpha = 0.15f)
                     else Color.Transparent
                 )
                 .padding(horizontal = Spacing.md, vertical = Spacing.xs),
@@ -321,6 +331,7 @@ private fun GlassNavItem(
 
 /**
  * Floating action button for quick add
+ * Χρησιμοποιεί MaterialTheme.colorScheme για proper theme support
  */
 @Composable
 fun QuickAddFAB(
@@ -330,6 +341,7 @@ fun QuickAddFAB(
     label: String = ""
 ) {
     val haptic = LocalHapticFeedback.current
+    val colorScheme = MaterialTheme.colorScheme
     
     if (extended && label.isNotEmpty()) {
         ExtendedFloatingActionButton(
@@ -338,8 +350,8 @@ fun QuickAddFAB(
                 onClick()
             },
             modifier = modifier,
-            containerColor = BrandColors.Primary,
-            contentColor = DarkText.OnPrimary,
+            containerColor = colorScheme.primary,
+            contentColor = colorScheme.onPrimary,
             icon = {
                 Icon(
                     imageVector = Icons.Filled.Add,
@@ -355,8 +367,8 @@ fun QuickAddFAB(
                 onClick()
             },
             modifier = modifier,
-            containerColor = BrandColors.Primary,
-            contentColor = DarkText.OnPrimary
+            containerColor = colorScheme.primary,
+            contentColor = colorScheme.onPrimary
         ) {
             Icon(
                 imageVector = Icons.Filled.Add,

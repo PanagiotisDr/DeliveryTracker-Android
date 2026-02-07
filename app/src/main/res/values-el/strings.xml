@@ -65,6 +65,7 @@
     <string name="shift_minutes">Λεπτά</string>
     <string name="shift_hours_suffix">ω</string>
     <string name="shift_minutes_suffix">λ</string>
+    <string name="work_time_format">%1$d%2$s %3$d%4$s</string>
     <string name="shift_notes">Σημειώσεις</string>
     
     <!-- Expense Form -->
@@ -74,16 +75,7 @@
     <string name="expense_payment_method">Μέθοδος Πληρωμής</string>
     <string name="expense_notes">Σημειώσεις</string>
     
-    <!-- Expense Categories -->
-    <string name="category_fuel">Καύσιμα</string>
-    <string name="category_maintenance">Συντήρηση / Service</string>
-    <string name="category_insurance">Ασφάλεια</string>
-    <string name="category_mobile">Κινητό / Data</string>
-    <string name="category_equipment">Εξοπλισμός</string>
-    <string name="category_kteo">ΚΤΕΟ</string>
-    <string name="category_road_tax">Τέλη Κυκλοφορίας</string>
-    <string name="category_fines">Πρόστιμα</string>
-    <string name="category_other">Άλλο</string>
+    <!-- (Categories moved to end of file for consistency) -->
     
     <!-- Payment Methods -->
     <string name="payment_cash">Μετρητά</string>
@@ -113,6 +105,8 @@
     <!-- Settings -->
     <string name="settings_general">Γενικά</string>
     <string name="settings_theme">Θέμα</string>
+    <string name="settings_dynamic_color">Δυναμικά Χρώματα</string>
+    <string name="settings_dynamic_color_desc">Χρήση χρωμάτων wallpaper (Material You)</string>
     <string name="settings_language">Γλώσσα</string>
     <string name="settings_tax">Φορολογικές Ρυθμίσεις</string>
     <string name="settings_vat">ΦΠΑ (%)</string>
@@ -123,6 +117,9 @@
     <string name="settings_set_pin">Ορισμός PIN</string>
     <string name="settings_change_pin">Αλλαγή PIN</string>
     <string name="settings_remove_pin">Αφαίρεση PIN</string>
+    <string name="settings_pin_desc">Γρήγορη σύνδεση με PIN</string>
+    <string name="settings_pin_remove_confirm">Σίγουρα θέλεις να αφαιρέσεις το PIN; Θα χρειάζεται κωδικός κάθε φορά που ανοίγεις την εφαρμογή.</string>
+    <string name="msg_pin_removed">Το PIN αφαιρέθηκε</string>
     
     <!-- Theme Options -->
     <string name="theme_system">Σύστημα</string>
@@ -139,7 +136,6 @@
     
     <!-- Errors -->
     <string name="error_required">Αυτό το πεδίο είναι υποχρεωτικό</string>
-    <string name="error_invalid_email">Μη έγκυρη διεύθυνση email</string>
     <string name="error_password_short">Ο κωδικός πρέπει να έχει τουλάχιστον 6 χαρακτήρες</string>
     <string name="error_passwords_mismatch">Οι κωδικοί δεν ταιριάζουν</string>
     <string name="error_invalid_number">Παρακαλώ εισάγετε έναν έγκυρο αριθμό</string>
@@ -151,7 +147,14 @@
     <string name="error_zero_orders">Εισάγετε αριθμό παραγγελιών</string>
     <string name="error_zero_km">Εισάγετε χιλιόμετρα</string>
     <string name="error_zero_amount">Το ποσό δεν μπορεί να είναι μηδέν</string>
-    <string name="error_network">Σφάλμα δικτύου. Δοκιμάστε ξανά.</string>
+    <string name="error_not_logged_in">Δεν είστε συνδεδεμένος</string>
+    <string name="error_loading">Σφάλμα φόρτωσης</string>
+    <string name="msg_shift_deleted">Η βάρδια διαγράφηκε</string>
+    <string name="msg_expense_deleted">Το έξοδο διαγράφηκε</string>
+    <string name="msg_shift_restored">Η βάρδια επαναφέρθηκε</string>
+    <string name="msg_expense_restored">Το έξοδο επαναφέρθηκε</string>
+    <string name="msg_shift_deleted_permanently">Η βάρδια διαγράφηκε οριστικά</string>
+    <string name="msg_expense_deleted_permanently">Το έξοδο διαγράφηκε οριστικά</string>
     
     <!-- PIN -->
     <string name="pin_enter">Εισάγετε το PIN σας</string>
@@ -276,6 +279,130 @@
     <string name="btn_start_shift">Ξεκίνα Βάρδια</string>
     <string name="stats_trend">Εβδομαδιαία Τάση</string>
     <string name="stats_today">Σήμερα</string>
+    
+    <!-- Error Messages - Auth -->
+    <string name="error_enter_email">Εισάγετε το email σας</string>
+    <string name="error_enter_password">Εισάγετε τον κωδικό σας</string>
+    <string name="error_enter_email_first">Εισάγετε πρώτα το email σας</string>
+    <string name="error_enter_username">Εισάγετε όνομα χρήστη</string>
+    <string name="error_username_min_chars">Το όνομα πρέπει να έχει τουλάχιστον 3 χαρακτήρες</string>
+    <string name="error_password_min_chars">Ο κωδικός πρέπει να έχει τουλάχιστον 6 χαρακτήρες</string>
+    <string name="error_passwords_not_match">Οι κωδικοί δεν ταιριάζουν</string>
+    <string name="error_wrong_pin">Λάθος PIN</string>
+    <string name="error_pin_locked">Πολλές λάθος προσπάθειες. Περιμένετε.</string>
+    <string name="error_pins_not_match">Τα PIN δεν ταιριάζουν</string>
+    
+    <!-- Error Messages - Forms -->
+    <string name="error_enter_amount">Συμπλήρωσε το ποσό</string>
+    <string name="error_generic">Σφάλμα: %s</string>
+    
+    <!-- Smart Suggestions -->
+    <string name="suggestion_peak_morning_title">Peak hours τώρα!</string>
+    <string name="suggestion_peak_morning_subtitle">Ξεκίνα βάρδια - οι 11:00-14:00 είναι οι πιο κερδοφόρες</string>
+    <string name="suggestion_peak_evening_title">Βραδινό peak!</string>
+    <string name="suggestion_peak_evening_subtitle">Οι ώρες 18:00-21:00 έχουν υψηλή ζήτηση</string>
+    <string name="suggestion_almost_there_title">Σχεδόν εκεί!</string>
+    <string name="suggestion_almost_there_subtitle">Λείπουν %s€ για τον στόχο</string>
+    <string name="suggestion_goal_achieved_title">Στόχος επιτεύχθηκε!</string>
+    <string name="suggestion_goal_achieved_subtitle">Έβγαλες %s€ πάνω από τον στόχο</string>
+    
+    <!-- Placeholders -->
+    <string name="placeholder_rider">Διανομέας</string>
+    <string name="placeholder_unknown_initial">?</string>
+    
+    <!-- Expense Categories -->
+    <string name="category_fuel">Καύσιμα</string>
+    <string name="category_maintenance">Συντήρηση</string>
+    <string name="category_insurance">Ασφάλεια</string>
+    <string name="category_phone">Τηλέφωνο/Data</string>
+    <string name="category_equipment">Εξοπλισμός</string>
+    <string name="category_tax">Φόροι/ΕΦΚΑ</string>
+    <string name="category_kteo">ΚΤΕΟ</string>
+    <string name="category_road_tax">Τέλη Κυκλοφορίας</string>
+    <string name="category_fines">Πρόστιμα</string>
+    <string name="category_other">Άλλα</string>
+    
+    <!-- Repository Errors -->
+    <string name="error_shift_not_found">Δεν βρέθηκε η βάρδια</string>
+    <string name="error_expense_not_found">Δεν βρέθηκε το έξοδο</string>
+    <string name="error_loading_data">Σφάλμα φόρτωσης: %s</string>
+    <string name="error_creating">Σφάλμα δημιουργίας: %s</string>
+    <string name="error_updating">Σφάλμα ενημέρωσης: %s</string>
+    <string name="error_deleting">Σφάλμα διαγραφής: %s</string>
+    <string name="error_restoring">Σφάλμα επαναφοράς: %s</string>
+    <string name="error_settings_update">Σφάλμα ενημέρωσης ρυθμίσεων: %s</string>
+    <string name="error_settings_create">Σφάλμα δημιουργίας ρυθμίσεων: %s</string>
+    <string name="error_theme_save">Σφάλμα αποθήκευσης θέματος: %s</string>
+    <string name="error_no_shifts_period">Δεν υπάρχουν βάρδιες για αυτή την περίοδο</string>
+    <string name="error_no_expenses_period">Δεν υπάρχουν έξοδα για αυτή την περίοδο</string>
+    <string name="error_export">Σφάλμα εξαγωγής: %s</string>
+    <string name="error_report_create">Σφάλμα δημιουργίας αναφοράς: %s</string>
+    
+    <!-- Export Messages -->
+    <string name="msg_file_saved">Αρχείο αποθηκεύτηκε: %s</string>
+    <string name="msg_report_saved">Αναφορά αποθηκεύτηκε: %s</string>
+    
+    <!-- Export CSV Headers -->
+    <string name="export_header_shifts">Ημερομηνία,Ώρες,Λεπτά,Μικτά Έσοδα,Tips,Bonus,Καθαρά,Παραγγελίες,Χιλιόμετρα,Σημειώσεις</string>
+    <string name="export_header_expenses">Ημερομηνία,Κατηγορία,Ποσό,Μέθοδος Πληρωμής,Σημειώσεις</string>
+    
+    <!-- Export Report Labels -->
+    <string name="report_period">Περίοδος: %s - %s</string>
+    <string name="report_summary">ΣYΝΟΨΗ</string>
+    <string name="report_gross_income">Μικτά Έσοδα:</string>
+    <string name="report_tips">Φιλοδωρήματα:</string>
+    <string name="report_net_income">Καθαρά Έσοδα:</string>
+    <string name="report_expenses_title">ΕΞΟΔΑ</string>
+    <string name="report_total_expenses">Σύνολο Εξόδων:</string>
+    <string name="report_profit_title">ΚΕΡΔΟΣ</string>
+    <string name="report_profit">Κέρδος:</string>
+    <string name="report_stats_title">ΣΤΑΤΙΣΤΙΚΑ</string>
+    <string name="report_shifts_count">Βάρδιες:</string>
+    <string name="report_orders_count">Παραγγελίες:</string>
+    <string name="report_km_count">Χιλιόμετρα:</string>
+    <string name="report_hours_count">Ώρες:</string>
+    <string name="report_avg_per_order">€/Παραγγελία:</string>
+    <string name="report_avg_per_km">€/Χλμ:</string>
+    <string name="report_avg_per_hour">€/Ώρα:</string>
+    <string name="report_footer">Αναφορά DeliveryTracker</string>
+    <string name="report_created_at">Δημιουργήθηκε: %s</string>
+    
+    <!-- Backup Errors -->
+    <string name="error_backup_create">Σφάλμα δημιουργίας backup: %s</string>
+    <string name="error_backup_not_found">Το αρχείο backup δεν βρέθηκε</string>
+    <string name="error_restore">Σφάλμα επαναφοράς: %s</string>
+    <string name="error_backups_read">Σφάλμα ανάγνωσης backups: %s</string>
+    
+    <!-- Auth Errors -->
+    <string name="error_login_failed">Αποτυχία σύνδεσης</string>
+    <string name="error_register_failed">Αποτυχία εγγραφής</string>
+    <string name="error_user_not_found">Δεν βρέθηκε ο χρήστης</string>
+    <string name="error_invalid_email">Μη έγκυρη διεύθυνση email</string>
+    <string name="error_wrong_credentials">Λάθος email ή κωδικός</string>
+    <string name="error_email_in_use">Το email χρησιμοποιείται ήδη</string>
+    <string name="error_weak_password">Ο κωδικός πρέπει να έχει τουλάχιστον 6 χαρακτήρες</string>
+    <string name="error_network">Σφάλμα σύνδεσης. Ελέγξτε το internet.</string>
+    <string name="error_unknown">Σφάλμα: %s</string>
+    <string name="error_pin_update">Σφάλμα ενημέρωσης PIN</string>
+    <string name="error_pin_verify">Σφάλμα επαλήθευσης PIN</string>
+    <string name="error_recording">Σφάλμα καταγραφής</string>
+    <string name="error_reset">Σφάλμα επαναφοράς</string>
+    
+    <!-- Units & Placeholders -->
+    <string name="unit_km">χλμ</string>
+    <string name="placeholder_amount">0,00</string>
+    <string name="coming_soon">Σύντομα Διαθέσιμο</string>
+    
+    <!-- Bottom Sheet Stats -->
+    <string name="sheet_statistics_title">Σύνοψη Στατιστικών</string>
+    <string name="sheet_expenses_title">Πρόσφατα Έξοδα</string>
+    <string name="sheet_no_expenses">Δεν υπάρχουν έξοδα ακόμα</string>
+    <string name="sheet_no_shifts">Δεν υπάρχουν βάρδιες ακόμα</string>
+    <string name="sheet_total_shifts">Σύνολο Βαρδιών</string>
+    <string name="sheet_total_orders">Σύνολο Παραγγελιών</string>
+    <string name="sheet_total_hours">Σύνολο Ωρών</string>
+    <string name="sheet_avg_per_hour">Μ.Ο./Ώρα</string>
+    <string name="sheet_avg_per_order">Μ.Ο./Παραγγελία</string>
 </resources>
 
 

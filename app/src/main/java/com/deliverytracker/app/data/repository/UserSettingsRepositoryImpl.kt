@@ -1,10 +1,13 @@
 package com.deliverytracker.app.data.repository
 
+import android.content.Context
+import com.deliverytracker.app.R
 import com.deliverytracker.app.domain.model.Result
 import com.deliverytracker.app.domain.model.ThemeMode
 import com.deliverytracker.app.domain.model.UserSettings
 import com.deliverytracker.app.domain.repository.UserSettingsRepository
 import com.google.firebase.firestore.FirebaseFirestore
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -14,9 +17,11 @@ import javax.inject.Singleton
 
 /**
  * Firestore implementation του UserSettingsRepository.
+ * Χρησιμοποιεί context.getString() για proper i18n error messages.
  */
 @Singleton
 class UserSettingsRepositoryImpl @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val firestore: FirebaseFirestore
 ) : UserSettingsRepository {
     
@@ -52,7 +57,7 @@ class UserSettingsRepositoryImpl @Inject constructor(
                 .await()
             Result.Success(updatedSettings)
         } catch (e: Exception) {
-            Result.Error("Σφάλμα ενημέρωσης ρυθμίσεων: ${e.message}", e)
+            Result.Error(context.getString(R.string.error_settings_update, e.message ?: ""), e)
         }
     }
     
@@ -67,7 +72,47 @@ class UserSettingsRepositoryImpl @Inject constructor(
                 .await()
             Result.Success(defaultSettings)
         } catch (e: Exception) {
-            Result.Error("Σφάλμα δημιουργίας ρυθμίσεων: ${e.message}", e)
+            Result.Error(context.getString(R.string.error_settings_create, e.message ?: ""), e)
+        }
+    }
+    
+    /**
+     * Ενημερώνει μόνο το theme στο Firebase (χωρίς να περιμένει Save button).
+     * Χρησιμοποιείται για άμεση αλλαγή theme από το Settings.
+     */
+    override suspend fun updateThemeOnly(userId: String, theme: ThemeMode): Result<Unit> {
+        return try {
+            settingsCollection.document(userId)
+                .update(
+                    mapOf(
+                        "theme" to theme.name,
+                        "updatedAt" to System.currentTimeMillis()
+                    )
+                )
+                .await()
+            Result.Success(Unit)
+        } catch (e: Exception) {
+            Result.Error(context.getString(R.string.error_theme_save, e.message ?: ""), e)
+        }
+    }
+    
+    /**
+     * Ενημερώνει μόνο το dynamicColor στο Firebase (χωρίς Save button).
+     * Χρησιμοποιείται για άμεση ενεργοποίηση/απενεργοποίηση dynamic colors.
+     */
+    override suspend fun updateDynamicColorOnly(userId: String, enabled: Boolean): Result<Unit> {
+        return try {
+            settingsCollection.document(userId)
+                .update(
+                    mapOf(
+                        "dynamicColor" to enabled,
+                        "updatedAt" to System.currentTimeMillis()
+                    )
+                )
+                .await()
+            Result.Success(Unit)
+        } catch (e: Exception) {
+            Result.Error(context.getString(R.string.error_theme_save, e.message ?: ""), e)
         }
     }
     
@@ -91,6 +136,7 @@ class UserSettingsRepositoryImpl @Inject constructor(
                 weeklyGoal = getDouble("weeklyGoal"),
                 monthlyGoal = getDouble("monthlyGoal"),
                 yearlyGoal = getDouble("yearlyGoal"),
+                dynamicColor = getBoolean("dynamicColor") == true,
                 createdAt = getLong("createdAt") ?: System.currentTimeMillis(),
                 updatedAt = getLong("updatedAt") ?: System.currentTimeMillis()
             )
@@ -102,6 +148,7 @@ class UserSettingsRepositoryImpl @Inject constructor(
     private fun UserSettings.toMap(): Map<String, Any?> = mapOf(
         "userId" to userId,
         "theme" to theme.name,
+        "dynamicColor" to dynamicColor,
         "vatRate" to vatRate,
         "monthlyEfkaAmount" to monthlyEfkaAmount,
         "dailyGoal" to dailyGoal,

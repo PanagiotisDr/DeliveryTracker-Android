@@ -1,14 +1,16 @@
 package com.deliverytracker.app.presentation.screens.expenses
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.deliverytracker.app.R
 import com.deliverytracker.app.domain.model.Expense
 import com.deliverytracker.app.domain.model.ExpenseCategory
 import com.deliverytracker.app.domain.model.PaymentMethod
 import com.deliverytracker.app.domain.model.Result
+import com.deliverytracker.app.domain.repository.AuthRepository
 import com.deliverytracker.app.domain.repository.ExpenseRepository
-import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,11 +23,13 @@ import javax.inject.Inject
 
 /**
  * UI State για τη φόρμα εξόδου.
+ * Χρησιμοποιεί @StringRes για proper i18n.
  */
 data class ExpenseFormUiState(
     val isLoading: Boolean = false,
     val isSaved: Boolean = false,
-    val error: String? = null,
+    @StringRes val errorResId: Int? = null,  // Static validation errors
+    val errorMessage: String? = null,         // Dynamic errors
     
     // Form fields
     val dateText: String = "",
@@ -44,6 +48,7 @@ data class ExpenseFormUiState(
 @HiltViewModel
 class ExpenseFormViewModel @Inject constructor(
     private val expenseRepository: ExpenseRepository,
+    private val authRepository: AuthRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     
@@ -89,8 +94,9 @@ class ExpenseFormViewModel @Inject constructor(
                     }
                 }
                 is Result.Error -> {
+                    // Dynamic error
                     _uiState.update { 
-                        it.copy(isLoading = false, error = result.message)
+                        it.copy(isLoading = false, errorMessage = result.message)
                     }
                 }
                 is Result.Loading -> { /* Ignore */ }
@@ -146,15 +152,15 @@ class ExpenseFormViewModel @Inject constructor(
         viewModelScope.launch {
             val state = _uiState.value
             
-            // Validation
+            // Validation - χρήση @StringRes
             if (state.amount.isEmpty()) {
-                _uiState.update { it.copy(error = "Συμπλήρωσε το ποσό") }
+                _uiState.update { it.copy(errorResId = R.string.error_enter_amount) }
                 return@launch
             }
             
-            val userId = FirebaseAuth.getInstance().currentUser?.uid
+            val userId = authRepository.getCurrentUserId()
             if (userId == null) {
-                _uiState.update { it.copy(error = "Δεν είστε συνδεδεμένος") }
+                _uiState.update { it.copy(errorResId = R.string.error_not_logged_in) }
                 return@launch
             }
             
@@ -200,7 +206,8 @@ class ExpenseFormViewModel @Inject constructor(
                     _uiState.update { it.copy(isLoading = false, isSaved = true) }
                 }
                 is Result.Error -> {
-                    _uiState.update { it.copy(isLoading = false, error = result.message) }
+                    // Dynamic error
+                    _uiState.update { it.copy(isLoading = false, errorMessage = result.message) }
                 }
                 is Result.Loading -> { /* Ignore */ }
             }
@@ -208,6 +215,6 @@ class ExpenseFormViewModel @Inject constructor(
     }
     
     fun clearError() {
-        _uiState.update { it.copy(error = null) }
+        _uiState.update { it.copy(errorResId = null, errorMessage = null) }
     }
 }

@@ -42,9 +42,10 @@ fun ExportScreen(
     val dateFormat = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
     
     // Εμφάνιση μηνυμάτων
-    LaunchedEffect(uiState.successMessage) {
-        uiState.successMessage?.let {
-            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+    LaunchedEffect(uiState.successMessageResId) {
+        uiState.successMessageResId?.let { resId ->
+            val message = context.getString(resId, uiState.successMessageArg ?: "")
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
             viewModel.clearMessages()
         }
     }
@@ -63,7 +64,7 @@ fun ExportScreen(
                     Text(
                         text = stringResource(R.string.export_title),
                         fontWeight = FontWeight.SemiBold,
-                        color = DarkText.Primary
+                        color = MaterialTheme.colorScheme.onBackground
                     ) 
                 },
                 navigationIcon = {
@@ -71,16 +72,16 @@ fun ExportScreen(
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack, 
                             contentDescription = stringResource(R.string.back),
-                            tint = DarkText.Primary
+                            tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = DarkSurfaces.Background
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         },
-        containerColor = DarkSurfaces.Background
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
             Column(

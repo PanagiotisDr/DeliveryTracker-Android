@@ -1,7 +1,9 @@
 package com.deliverytracker.app.presentation.screens.export
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.deliverytracker.app.R
 import com.deliverytracker.app.domain.model.Result
 import com.deliverytracker.app.domain.repository.BackupRepository
 import com.deliverytracker.app.domain.repository.ExportRepository
@@ -16,6 +18,7 @@ import javax.inject.Inject
 
 /**
  * ViewModel για την οθόνη εξαγωγής δεδομένων.
+ * Χρησιμοποιεί @StringRes για proper i18n.
  */
 @HiltViewModel
 class ExportViewModel @Inject constructor(
@@ -31,14 +34,15 @@ class ExportViewModel @Inject constructor(
      */
     fun exportShiftsToCsv(startDate: Long, endDate: Long) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null, successMessage = null) }
+            _uiState.update { it.copy(isLoading = true, error = null, successMessageResId = null, successMessageArg = null) }
             
             when (val result = exportRepository.exportShiftsToCsv(startDate, endDate)) {
                 is Result.Success -> {
                     _uiState.update { 
                         it.copy(
                             isLoading = false, 
-                            successMessage = "Αρχείο αποθηκεύτηκε: ${result.data}",
+                            successMessageResId = R.string.msg_file_saved,
+                            successMessageArg = result.data,
                             lastExportPath = result.data
                         )
                     }
@@ -56,14 +60,15 @@ class ExportViewModel @Inject constructor(
      */
     fun exportExpensesToCsv(startDate: Long, endDate: Long) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null, successMessage = null) }
+            _uiState.update { it.copy(isLoading = true, error = null, successMessageResId = null, successMessageArg = null) }
             
             when (val result = exportRepository.exportExpensesToCsv(startDate, endDate)) {
                 is Result.Success -> {
                     _uiState.update { 
                         it.copy(
                             isLoading = false, 
-                            successMessage = "Αρχείο αποθηκεύτηκε: ${result.data}",
+                            successMessageResId = R.string.msg_file_saved,
+                            successMessageArg = result.data,
                             lastExportPath = result.data
                         )
                     }
@@ -81,14 +86,15 @@ class ExportViewModel @Inject constructor(
      */
     fun exportReport(startDate: Long, endDate: Long) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null, successMessage = null) }
+            _uiState.update { it.copy(isLoading = true, error = null, successMessageResId = null, successMessageArg = null) }
             
             when (val result = exportRepository.exportReportToPdf(startDate, endDate)) {
                 is Result.Success -> {
                     _uiState.update { 
                         it.copy(
                             isLoading = false, 
-                            successMessage = "Αναφορά αποθηκεύτηκε: ${result.data}",
+                            successMessageResId = R.string.msg_report_saved,
+                            successMessageArg = result.data,
                             lastExportPath = result.data
                         )
                     }
@@ -106,14 +112,15 @@ class ExportViewModel @Inject constructor(
      */
     fun createBackup() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null, successMessage = null) }
+            _uiState.update { it.copy(isLoading = true, error = null, successMessageResId = null, successMessageArg = null) }
             
             when (val result = backupRepository.createBackup()) {
                 is Result.Success -> {
                     _uiState.update { 
                         it.copy(
                             isLoading = false, 
-                            successMessage = "Backup δημιουργήθηκε: ${result.data}",
+                            successMessageResId = R.string.msg_file_saved,
+                            successMessageArg = result.data,
                             lastExportPath = result.data
                         )
                     }
@@ -127,16 +134,18 @@ class ExportViewModel @Inject constructor(
     }
     
     fun clearMessages() {
-        _uiState.update { it.copy(error = null, successMessage = null) }
+        _uiState.update { it.copy(error = null, successMessageResId = null, successMessageArg = null) }
     }
 }
 
 /**
  * UI State για την οθόνη εξαγωγής.
+ * Χρησιμοποιεί @StringRes για success messages.
  */
 data class ExportUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
-    val successMessage: String? = null,
+    @StringRes val successMessageResId: Int? = null,
+    val successMessageArg: String? = null,
     val lastExportPath: String? = null
 )

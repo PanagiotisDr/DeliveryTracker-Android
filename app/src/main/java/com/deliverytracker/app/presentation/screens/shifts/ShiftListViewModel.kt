@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.deliverytracker.app.domain.model.Result
 import com.deliverytracker.app.domain.model.Shift
+import com.deliverytracker.app.domain.repository.AuthRepository
 import com.deliverytracker.app.domain.repository.ShiftRepository
-import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -16,7 +16,8 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class ShiftListViewModel @Inject constructor(
-    private val shiftRepository: ShiftRepository
+    private val shiftRepository: ShiftRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(ShiftListUiState())
@@ -31,10 +32,10 @@ class ShiftListViewModel @Inject constructor(
      */
     private fun loadShifts() {
         viewModelScope.launch {
-            // Παίρνουμε το userId απευθείας από FirebaseAuth
-            val userId = FirebaseAuth.getInstance().currentUser?.uid
+            // Παίρνουμε το userId μέσω AuthRepository
+            val userId = authRepository.getCurrentUserId()
             if (userId == null) {
-                _uiState.update { it.copy(error = "Δεν είστε συνδεδεμένος") }
+                _uiState.update { it.copy(error = "error_not_logged_in") }
                 return@launch
             }
             
@@ -45,7 +46,7 @@ class ShiftListViewModel @Inject constructor(
                     _uiState.update { 
                         it.copy(
                             isLoading = false,
-                            error = "Σφάλμα φόρτωσης: ${e.message}"
+                            error = "error_loading"
                         )
                     }
                 }
@@ -73,7 +74,7 @@ class ShiftListViewModel @Inject constructor(
             _uiState.update { 
                 it.copy(
                     shifts = currentShifts.filter { shift -> shift.id != shiftId },
-                    successMessage = "Η βάρδια διαγράφηκε"
+                    successMessage = "msg_shift_deleted"
                 )
             }
             

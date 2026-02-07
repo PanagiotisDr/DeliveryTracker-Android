@@ -2,6 +2,7 @@ package com.deliverytracker.app.data.repository
 
 import android.content.Context
 import android.os.Environment
+import com.deliverytracker.app.R
 import com.deliverytracker.app.domain.model.Expense
 import com.deliverytracker.app.domain.model.Result
 import com.deliverytracker.app.domain.model.Shift
@@ -20,7 +21,7 @@ import javax.inject.Singleton
 
 /**
  * Υλοποίηση του ExportRepository.
- * Δημιουργεί CSV αρχεία με τα δεδομένα του χρήστη.
+ * Χρησιμοποιεί context.getString() για proper i18n.
  */
 @Singleton
 class ExportRepositoryImpl @Inject constructor(
@@ -38,13 +39,13 @@ class ExportRepositoryImpl @Inject constructor(
     override suspend fun exportShiftsToCsv(startDate: Long, endDate: Long): Result<String> {
         return try {
             val userId = FirebaseAuth.getInstance().currentUser?.uid
-                ?: return Result.Error("Δεν είστε συνδεδεμένος")
+                ?: return Result.Error(context.getString(R.string.error_not_logged_in))
             
             // Λήψη βαρδιών
             val shifts = shiftRepository.getShiftsByDateRange(userId, startDate, endDate).first()
             
             if (shifts.isEmpty()) {
-                return Result.Error("Δεν υπάρχουν βάρδιες για αυτή την περίοδο")
+                return Result.Error(context.getString(R.string.error_no_shifts_period))
             }
             
             // Δημιουργία φακέλου export
@@ -54,8 +55,9 @@ class ExportRepositoryImpl @Inject constructor(
             
             // Εγγραφή CSV
             FileWriter(file).use { writer ->
-                // Header
-                writer.append("Ημερομηνία,Ώρες,Λεπτά,Μικτά Έσοδα,Tips,Bonus,Καθαρά,Παραγγελίες,Χιλιόμετρα,Σημειώσεις\n")
+                // Header - localized
+                writer.append(context.getString(R.string.export_header_shifts))
+                writer.append("\n")
                 
                 // Data rows
                 shifts.forEach { shift ->
@@ -66,7 +68,7 @@ class ExportRepositoryImpl @Inject constructor(
             
             Result.Success(file.absolutePath)
         } catch (e: Exception) {
-            Result.Error("Σφάλμα εξαγωγής: ${e.message}")
+            Result.Error(context.getString(R.string.error_export, e.message ?: ""))
         }
     }
     
@@ -76,13 +78,13 @@ class ExportRepositoryImpl @Inject constructor(
     override suspend fun exportExpensesToCsv(startDate: Long, endDate: Long): Result<String> {
         return try {
             val userId = FirebaseAuth.getInstance().currentUser?.uid
-                ?: return Result.Error("Δεν είστε συνδεδεμένος")
+                ?: return Result.Error(context.getString(R.string.error_not_logged_in))
             
             // Λήψη εξόδων
             val expenses = expenseRepository.getExpensesByDateRange(userId, startDate, endDate).first()
             
             if (expenses.isEmpty()) {
-                return Result.Error("Δεν υπάρχουν έξοδα για αυτή την περίοδο")
+                return Result.Error(context.getString(R.string.error_no_expenses_period))
             }
             
             // Δημιουργία φακέλου export
@@ -92,8 +94,9 @@ class ExportRepositoryImpl @Inject constructor(
             
             // Εγγραφή CSV
             FileWriter(file).use { writer ->
-                // Header
-                writer.append("Ημερομηνία,Κατηγορία,Ποσό,Μέθοδος Πληρωμής,Σημειώσεις\n")
+                // Header - localized
+                writer.append(context.getString(R.string.export_header_expenses))
+                writer.append("\n")
                 
                 // Data rows
                 expenses.forEach { expense ->
@@ -104,18 +107,17 @@ class ExportRepositoryImpl @Inject constructor(
             
             Result.Success(file.absolutePath)
         } catch (e: Exception) {
-            Result.Error("Σφάλμα εξαγωγής: ${e.message}")
+            Result.Error(context.getString(R.string.error_export, e.message ?: ""))
         }
     }
     
     /**
-     * Εξαγωγή αναφοράς σε PDF.
-     * Απλοποιημένη υλοποίηση - δημιουργεί text report αντί για PDF.
+     * Εξαγωγή αναφοράς σε text report.
      */
     override suspend fun exportReportToPdf(startDate: Long, endDate: Long): Result<String> {
         return try {
             val userId = FirebaseAuth.getInstance().currentUser?.uid
-                ?: return Result.Error("Δεν είστε συνδεδεμένος")
+                ?: return Result.Error(context.getString(R.string.error_not_logged_in))
             
             // Λήψη δεδομένων
             val shifts = shiftRepository.getShiftsByDateRange(userId, startDate, endDate).first()
@@ -136,52 +138,61 @@ class ExportRepositoryImpl @Inject constructor(
             val fileName = "report_${fileNameDateFormat.format(Date())}.txt"
             val file = File(exportDir, fileName)
             
-            // Εγγραφή αναφοράς
+            // Εγγραφή αναφοράς - localized
             FileWriter(file).use { writer ->
                 writer.append("═══════════════════════════════════════\n")
-                writer.append("      ΑΝΑΦΟΡΑ DELIVERYTRACKER\n")
+                writer.append("      ${context.getString(R.string.report_footer)}\n")
                 writer.append("═══════════════════════════════════════\n\n")
                 
-                writer.append("Περίοδος: ${dateFormat.format(Date(startDate))} - ${dateFormat.format(Date(endDate))}\n\n")
+                writer.append(context.getString(
+                    R.string.report_period,
+                    dateFormat.format(Date(startDate)),
+                    dateFormat.format(Date(endDate))
+                ))
+                writer.append("\n\n")
                 
-                writer.append("📊 ΣΥΝΟΨΗ ΕΣΟΔΩΝ\n")
+                writer.append("📊 ${context.getString(R.string.report_summary)}\n")
                 writer.append("───────────────────────────────────────\n")
-                writer.append("Μικτά Έσοδα:      ${String.format("%.2f", totalGross)}€\n")
-                writer.append("Φιλοδωρήματα:     ${String.format("%.2f", totalTips)}€\n")
+                writer.append("${context.getString(R.string.report_gross_income)}      ${String.format("%.2f", totalGross)}€\n")
+                writer.append("${context.getString(R.string.report_tips)}     ${String.format("%.2f", totalTips)}€\n")
                 writer.append("Bonus:            ${String.format("%.2f", totalBonus)}€\n")
-                writer.append("Καθαρά Έσοδα:     ${String.format("%.2f", totalNet)}€\n\n")
+                writer.append("${context.getString(R.string.report_net_income)}     ${String.format("%.2f", totalNet)}€\n\n")
                 
-                writer.append("💸 ΈΞΟΔΑ\n")
+                writer.append("💸 ${context.getString(R.string.report_expenses_title)}\n")
                 writer.append("───────────────────────────────────────\n")
-                writer.append("Σύνολο Εξόδων:    ${String.format("%.2f", totalExpenses)}€\n\n")
+                writer.append("${context.getString(R.string.report_total_expenses)}    ${String.format("%.2f", totalExpenses)}€\n\n")
                 
-                writer.append("🎯 ΚΑΘΑΡΟ ΚΕΡΔΟΣ\n")
+                writer.append("🎯 ${context.getString(R.string.report_profit_title)}\n")
                 writer.append("───────────────────────────────────────\n")
-                writer.append("Κέρδος:           ${String.format("%.2f", totalNet - totalExpenses)}€\n\n")
+                writer.append("${context.getString(R.string.report_profit)}           ${String.format("%.2f", totalNet - totalExpenses)}€\n\n")
                 
-                writer.append("📈 ΣΤΑΤΙΣΤΙΚΑ\n")
+                writer.append("📈 ${context.getString(R.string.report_stats_title)}\n")
                 writer.append("───────────────────────────────────────\n")
-                writer.append("Βάρδιες:          ${shifts.size}\n")
-                writer.append("Παραγγελίες:      $totalOrders\n")
-                writer.append("Χιλιόμετρα:       ${String.format("%.1f", totalKm)} km\n")
-                writer.append("Ώρες:             ${String.format("%.1f", totalHours)} h\n\n")
+                writer.append("${context.getString(R.string.report_shifts_count)}          ${shifts.size}\n")
+                writer.append("${context.getString(R.string.report_orders_count)}      $totalOrders\n")
+                writer.append("${context.getString(R.string.report_km_count)}       ${String.format("%.1f", totalKm)} km\n")
+                writer.append("${context.getString(R.string.report_hours_count)}             ${String.format("%.1f", totalHours)} h\n\n")
                 
                 if (totalHours > 0) {
-                    writer.append("📊 ΜΕΣΟΙ ΟΡΟΙ\n")
+                    writer.append("📊 AVERAGES\n")
                     writer.append("───────────────────────────────────────\n")
-                    writer.append("€/ώρα:            ${String.format("%.2f", totalNet / totalHours)}€\n")
+                    writer.append("${context.getString(R.string.report_avg_per_hour)}            ${String.format("%.2f", totalNet / totalHours)}€\n")
                     if (totalOrders > 0) {
-                        writer.append("€/παραγγελία:     ${String.format("%.2f", totalNet / totalOrders)}€\n")
+                        writer.append("${context.getString(R.string.report_avg_per_order)}     ${String.format("%.2f", totalNet / totalOrders)}€\n")
                     }
                 }
                 
                 writer.append("\n═══════════════════════════════════════\n")
-                writer.append("Δημιουργήθηκε: ${SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date())}\n")
+                writer.append(context.getString(
+                    R.string.report_created_at,
+                    SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date())
+                ))
+                writer.append("\n")
             }
             
             Result.Success(file.absolutePath)
         } catch (e: Exception) {
-            Result.Error("Σφάλμα δημιουργίας αναφοράς: ${e.message}")
+            Result.Error(context.getString(R.string.error_report_create, e.message ?: ""))
         }
     }
     
@@ -216,11 +227,12 @@ class ExportRepositoryImpl @Inject constructor(
     
     /**
      * Δημιουργεί μια γραμμή CSV για έξοδο.
+     * Χρησιμοποιεί localized category name.
      */
     private fun buildExpenseCsvRow(expense: Expense): String {
         return listOf(
             dateFormat.format(Date(expense.date)),
-            expense.category.displayName,
+            context.getString(expense.category.displayNameResId),
             String.format("%.2f", expense.amount),
             expense.paymentMethod.name,
             "\"${expense.notes.replace("\"", "\"\"")}\""

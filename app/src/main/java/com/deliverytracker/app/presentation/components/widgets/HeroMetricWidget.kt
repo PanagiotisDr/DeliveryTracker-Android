@@ -3,6 +3,7 @@ package com.deliverytracker.app.presentation.components.widgets
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -52,12 +53,21 @@ fun HeroMetricWidget(
         label = "progress"
     )
     
+    val isDarkTheme = isSystemInDarkTheme()
+    
+    // Vibrant red gradient for dark theme, theme colors for light theme
+    val gradientColors = if (isDarkTheme) {
+        listOf(Color(0xFFD32F2F), Color(0xFFE53935))  // Deep vibrant red
+    } else {
+        listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.secondary)
+    }
+    
     Box(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(Spacing.cardRadius))
             .background(
-                brush = Brush.linearGradient(CC_GradientEarnings)
+                brush = Brush.linearGradient(gradientColors)
             )
             .padding(Spacing.cardPadding),
         contentAlignment = Alignment.Center
@@ -69,7 +79,7 @@ fun HeroMetricWidget(
             Text(
                 text = label.uppercase(),
                 style = MaterialTheme.typography.labelMedium,
-                color = Color.White.copy(alpha = 0.8f),
+                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
                 letterSpacing = 2.sp
             )
             
@@ -85,12 +95,12 @@ fun HeroMetricWidget(
                         fontSize = 56.sp,
                         fontWeight = FontWeight.Bold
                     ),
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
                 Text(
                     text = "€",
                     style = MaterialTheme.typography.headlineMedium,
-                    color = Color.White.copy(alpha = 0.9f),
+                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
             }
@@ -105,7 +115,7 @@ fun HeroMetricWidget(
                         .fillMaxWidth(0.8f)
                         .height(6.dp)
                         .clip(RoundedCornerShape(3.dp))
-                        .background(Color.White.copy(alpha = 0.3f))
+                        .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.3f))
                 ) {
                     // Progress fill
                     Box(
@@ -113,7 +123,7 @@ fun HeroMetricWidget(
                             .fillMaxWidth(animatedProgress)
                             .fillMaxHeight()
                             .clip(RoundedCornerShape(3.dp))
-                            .background(Color.White)
+                            .background(MaterialTheme.colorScheme.onPrimary)
                     )
                 }
                 
@@ -124,7 +134,7 @@ fun HeroMetricWidget(
                 Text(
                     text = "$percentage% από ${decimalFormat.format(goalValue)}€",
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.8f)
+                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
                 )
             }
         }
@@ -141,7 +151,7 @@ fun GlanceableWidget(
     value: String,
     label: String,
     emoji: String? = null,
-    valueColor: Color = CC_TextPrimary,
+    valueColor: Color = MaterialTheme.colorScheme.onSurface,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null
 ) {
@@ -150,7 +160,7 @@ fun GlanceableWidget(
     Box(
         modifier = modifier
             .clip(shape)
-            .background(CC_WidgetBg)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
             .then(
                 if (onClick != null) {
                     Modifier.clickable(onClick = onClick)
@@ -185,7 +195,7 @@ fun GlanceableWidget(
             Text(
                 text = label.uppercase(),
                 style = MaterialTheme.typography.labelSmall,
-                color = CC_TextSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 letterSpacing = 1.sp
             )
         }
@@ -210,7 +220,12 @@ fun QuickActionWidget(
         modifier = modifier
             .clip(shape)
             .background(
-                brush = Brush.linearGradient(CC_GradientNeutral)
+                brush = Brush.linearGradient(
+                    listOf(
+                        MaterialTheme.colorScheme.surfaceContainerHigh,
+                        MaterialTheme.colorScheme.surfaceContainerHighest
+                    )
+                )
             )
             .clickable(onClick = onClick)
             .padding(Spacing.widgetPadding),
@@ -224,7 +239,7 @@ fun QuickActionWidget(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(RoundedCornerShape(50))
-                    .background(CC_Primary.copy(alpha = 0.2f)),
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -239,7 +254,7 @@ fun QuickActionWidget(
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelMedium,
-                color = CC_TextPrimary,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Medium
             )
         }

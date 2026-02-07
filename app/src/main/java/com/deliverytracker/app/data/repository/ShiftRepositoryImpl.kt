@@ -1,10 +1,13 @@
 package com.deliverytracker.app.data.repository
 
+import android.content.Context
+import com.deliverytracker.app.R
 import com.deliverytracker.app.domain.model.Result
 import com.deliverytracker.app.domain.model.Shift
 import com.deliverytracker.app.domain.repository.ShiftRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -14,19 +17,29 @@ import javax.inject.Singleton
 
 /**
  * Firestore implementation του ShiftRepository.
+ * Χρησιμοποιεί context.getString() για proper i18n error messages.
  */
 @Singleton
 class ShiftRepositoryImpl @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val firestore: FirebaseFirestore
 ) : ShiftRepository {
     
     private val shiftsCollection = firestore.collection("shifts")
     
     override fun getShifts(userId: String, includeDeleted: Boolean): Flow<List<Shift>> = callbackFlow {
-        // Απλό query χωρίς composite index
-        // Το filtering για isDeleted γίνεται client-side
-        val query = shiftsCollection
-            .whereEqualTo("userId", userId)
+        // Server-side filtering με composite index
+        // Απαιτεί το firestore.indexes.json να έχει deployed
+        val query = if (includeDeleted) {
+            shiftsCollection
+                .whereEqualTo("userId", userId)
+                .orderBy("date", Query.Direction.DESCENDING)
+        } else {
+            shiftsCollection
+                .whereEqualTo("userId", userId)
+                .whereEqualTo("isDeleted", false)
+                .orderBy("date", Query.Direction.DESCENDING)
+        }
         
         val listener = query.addSnapshotListener { snapshot, error ->
             if (error != null) {
@@ -34,16 +47,11 @@ class ShiftRepositoryImpl @Inject constructor(
                 return@addSnapshotListener
             }
             
-            var shifts = snapshot?.documents?.mapNotNull { doc ->
+            val shifts = snapshot?.documents?.mapNotNull { doc ->
                 doc.toShift()
             } ?: emptyList()
             
-            // Client-side filtering και sorting
-            if (!includeDeleted) {
-                shifts = shifts.filter { !it.isDeleted }
-            }
-            shifts = shifts.sortedByDescending { it.date }
-            
+            // Πλέον δεν χρειάζεται client-side filtering/sorting
             trySend(shifts)
         }
         
@@ -57,10 +65,10 @@ class ShiftRepositoryImpl @Inject constructor(
             if (shift != null) {
                 Result.Success(shift)
             } else {
-                Result.Error("Δεν βρέθηκε η βάρδια")
+                Result.Error(context.getString(R.string.error_shift_not_found))
             }
         } catch (e: Exception) {
-            Result.Error("Σφάλμα φόρτωσης: ${e.message}", e)
+            Result.Error(context.getString(R.string.error_loading_data, e.message ?: ""), e)
         }
     }
     
@@ -75,7 +83,7 @@ class ShiftRepositoryImpl @Inject constructor(
             docRef.set(newShift.toMap()).await()
             Result.Success(newShift)
         } catch (e: Exception) {
-            Result.Error("Σφάλμα δημιουργίας: ${e.message}", e)
+            Result.Error(context.getString(R.string.error_creating, e.message ?: ""), e)
         }
     }
     
@@ -87,7 +95,7 @@ class ShiftRepositoryImpl @Inject constructor(
                 .await()
             Result.Success(updatedShift)
         } catch (e: Exception) {
-            Result.Error("Σφάλμα ενημέρωσης: ${e.message}", e)
+            Result.Error(context.getString(R.string.error_updating, e.message ?: ""), e)
         }
     }
     
@@ -101,7 +109,7 @@ class ShiftRepositoryImpl @Inject constructor(
                 .await()
             Result.Success(Unit)
         } catch (e: Exception) {
-            Result.Error("Σφάλμα διαγραφής: ${e.message}", e)
+            Result.Error(context.getString(R.string.error_deleting, e.message ?: ""), e)
         }
     }
     
@@ -115,7 +123,7 @@ class ShiftRepositoryImpl @Inject constructor(
                 .await()
             Result.Success(Unit)
         } catch (e: Exception) {
-            Result.Error("Σφάλμα επαναφοράς: ${e.message}", e)
+            Result.Error(context.getString(R.string.error_restoring, e.message ?: ""), e)
         }
     }
     
@@ -124,7 +132,7 @@ class ShiftRepositoryImpl @Inject constructor(
             shiftsCollection.document(shiftId).delete().await()
             Result.Success(Unit)
         } catch (e: Exception) {
-            Result.Error("Σφάλμα διαγραφής: ${e.message}", e)
+            Result.Error(context.getString(R.string.error_deleting, e.message ?: ""), e)
         }
     }
     

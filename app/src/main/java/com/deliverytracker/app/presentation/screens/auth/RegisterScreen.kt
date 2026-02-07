@@ -1,6 +1,7 @@
 package com.deliverytracker.app.presentation.screens.auth
 
 import androidx.compose.foundation.layout.*
+import com.deliverytracker.app.presentation.theme.Spacing
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -63,7 +64,7 @@ fun RegisterScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = Spacing.xl)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -193,8 +194,9 @@ fun RegisterScreen(
                          uiState.confirmPassword != uiState.password
             )
             
-            // Error Message
-            uiState.error?.let { error ->
+            // Error Message - Χρήση errorRes ή errorMessage
+            val errorText = uiState.errorRes?.let { stringResource(it) } ?: uiState.errorMessage
+            errorText?.let { error ->
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = error,

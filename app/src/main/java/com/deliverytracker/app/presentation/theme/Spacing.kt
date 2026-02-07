@@ -320,6 +320,52 @@ object Dimensions {
     
     /** Navigation rail width: 80dp */
     val navRailWidth: Dp = 80.dp
+    
+    // ────────────────────────────────────────────────────────────────
+    // TEXT FIELDS
+    // ────────────────────────────────────────────────────────────────
+    
+    /** Text field minimum height for multiline: 100dp */
+    val textFieldMinHeight: Dp = 100.dp
+    
+    // ────────────────────────────────────────────────────────────────
+    // SHIMMER PLACEHOLDERS
+    // ────────────────────────────────────────────────────────────────
+    
+    /** Shimmer box default width: 100dp */
+    val shimmerBoxWidth: Dp = 100.dp
+    
+    /** Shimmer box default height: 20dp */
+    val shimmerBoxHeight: Dp = 20.dp
+    
+    /** Shimmer text default width: 150dp */
+    val shimmerTextWidth: Dp = 150.dp
+    
+    /** Shimmer text default height: 16dp */
+    val shimmerTextHeight: Dp = 16.dp
+    
+    // ────────────────────────────────────────────────────────────────
+    // STAT BADGES & WIDGETS
+    // ────────────────────────────────────────────────────────────────
+    
+    /** Stat badge minimum width: 64dp */
+    val statBadgeMinWidth: Dp = 64.dp
+    
+    /** Stat badge maximum width: 80dp */
+    val statBadgeMaxWidth: Dp = 80.dp
+    
+    /** Widget minimum width: 60dp */
+    val widgetMinWidth: Dp = 60.dp
+    
+    /** Widget maximum width: 100dp */
+    val widgetMaxWidth: Dp = 100.dp
+    
+    // ────────────────────────────────────────────────────────────────
+    // ACCENTS
+    // ────────────────────────────────────────────────────────────────
+    
+    /** Accent border width: 4dp */
+    val accentWidth: Dp = 4.dp
 }
 
 // ══════════════════════════════════════════════════════════════════

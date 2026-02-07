@@ -17,11 +17,8 @@ composeBom = "2026.01.00"
 hilt = "2.59"
 hiltNavigationCompose = "1.3.0"
 
-# Firebase - Νέες εκδόσεις ΧΩΡΙΣ -ktx suffix (deprecated)
+# Firebase - Χρήση BOM για αυτόματη διαχείριση εκδόσεων
 firebaseBom = "34.8.0"
-firebaseAuth = "24.0.1"
-firebaseFirestore = "26.1.0"
-firebaseAnalytics = "23.0.0"
 googleServices = "4.4.4"
 
 # Charts
@@ -30,16 +27,20 @@ vico = "2.4.3"
 # Animations
 lottie = "6.7.1"
 
-# UI Effects
-accompanist = "0.36.0"
+# Σημείωση: Accompanist αφαιρέθηκε (deprecated - λειτουργικότητα native στο Compose)
 
 # DataStore
 datastore = "1.1.2"
 
-# Testing
-junit = "4.13.2"
+# Splash Screen
+splashScreen = "1.0.1"
+
+# Testing - JUnit 5 σύμφωνα με android_kotlin_2026 skill
+junit5 = "5.11.0"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
+mockk = "1.14.0"
+coroutinesTest = "1.10.0"
 
 [libraries]
 # AndroidX Core
@@ -63,11 +64,11 @@ hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
 hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 
-# Firebase - ΧΩΡΙΣ -ktx suffix (deprecated στις νέες εκδόσεις)
+# Firebase - Οι εκδόσεις καθορίζονται αυτόματα από το BOM
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
-firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
-firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
-firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics", version.ref = "firebaseAnalytics" }
+firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
+firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 
 # Charts
 vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
@@ -75,19 +76,23 @@ vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", ve
 # Animations
 lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottie" }
 
-# UI Effects
-accompanist-systemuicontroller = { group = "com.google.accompanist", name = "accompanist-systemuicontroller", version.ref = "accompanist" }
-accompanist-placeholder = { group = "com.google.accompanist", name = "accompanist-placeholder-material3", version.ref = "accompanist" }
+# Σημείωση: Accompanist αφαιρέθηκε (deprecated)
 
 # DataStore
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 
-# Testing
-junit = { group = "junit", name = "junit", version.ref = "junit" }
+# Splash Screen
+splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashScreen" }
+
+# Testing - JUnit 5 + Modern Tools
+junit5 = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit5" }
+junit5-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -95,4 +100,5 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }

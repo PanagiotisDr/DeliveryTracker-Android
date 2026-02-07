@@ -12,71 +12,54 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 /**
- * 🎨 DeliveryTracker Premium Theme
+ * 🎨 DeliveryTracker Premium Theme - Warm Edition
  * 
- * Material 3 theme configuration with:
- * - Dynamic color support (Android 12+)
- * - Dark-first design following Material guidelines
- * - Background #121212 (NOT pure black per M3 recommendations)
- * - Desaturated accent colors (tonal 200-300) for eye comfort
- * - Text at 87% white for reduced eye strain
- * - Custom color scheme with semantic colors
- * - Edge-to-edge support
+ * Material 3 theme με:
+ * - Deep Orange/Gold brand colors
+ * - Glassmorphism effects
+ * - Warm-tinted surfaces
+ * - Light + Dark mode
  * 
- * References:
- * - https://m3.material.io/styles/color
- * - https://uxplanet.org/8-tips-for-dark-theme-design
- * 
- * @author DeliveryTracker Team
- * @version 3.0.0 - Material 3 Compliant
+ * @version 4.0.0 - Warm Premium Redesign
  * @since 2026-02
  */
 
 // ══════════════════════════════════════════════════════════════════
-// COLOR SCHEMES
+// DARK COLOR SCHEME - Warm Premium
 // ══════════════════════════════════════════════════════════════════
 
-/**
- * Dark color scheme - Primary design target
- * 
- * Following Material 3 dark theme guidelines:
- * - Background #121212 (recommended, not pure black)
- * - Desaturated primary (tonal 200) for reduced vibration
- * - Text at 87% white for readability
- * - Elevation = lighter surfaces
- */
 private val DarkColorScheme = darkColorScheme(
-    // Primary colors (desaturated teal 200)
-    primary = BrandColors.Primary,              // #80DFD2 - soft teal
-    onPrimary = DarkText.OnPrimary,             // Black text on primary
-    primaryContainer = BrandColors.PrimarySubtle, // Dark teal container
-    onPrimaryContainer = BrandColors.Primary,
+    // Primary - Warm Amber
+    primary = BrandColors.Primary,              // #FFB74D
+    onPrimary = DarkText.OnPrimary,             // Black
+    primaryContainer = BrandColors.PrimarySubtle,
+    onPrimaryContainer = BrandColors.Orange200,
     
-    // Secondary colors (light blue 200)
-    secondary = BrandColors.Secondary,          // #81D4FA - soft blue
+    // Secondary - Gold/Amber
+    secondary = BrandColors.Secondary,          // #FFC107
     onSecondary = DarkText.OnPrimary,
-    secondaryContainer = Color(0xFF0D3347),     // Dark blue container
-    onSecondaryContainer = BrandColors.Secondary,
+    secondaryContainer = BrandColors.SecondarySubtle,
+    onSecondaryContainer = BrandColors.Gold200,
     
-    // Tertiary colors (purple 200)
-    tertiary = BrandColors.Tertiary,            // #CE93D8 - soft purple
+    // Tertiary - Green (profit)
+    tertiary = BrandColors.Tertiary,
     onTertiary = DarkText.OnPrimary,
-    tertiaryContainer = Color(0xFF2D1F33),      // Dark purple container
+    tertiaryContainer = Color(0xFF1B3D1B),
     onTertiaryContainer = BrandColors.Tertiary,
     
-    // Error colors (red 200)
-    error = SemanticColors.Error,               // #EF9A9A - soft red
+    // Error
+    error = SemanticColors.Error,
     onError = DarkText.OnPrimary,
-    errorContainer = SemanticColors.ErrorMuted, // Dark red container
+    errorContainer = SemanticColors.ErrorMuted,
     onErrorContainer = SemanticColors.Error,
     
-    // Background and surfaces (#121212 base)
-    background = DarkSurfaces.Background,       // #121212 - Material recommended
-    onBackground = DarkText.Primary,            // 87% white
-    surface = DarkSurfaces.Surface,             // #121212 - base
-    onSurface = DarkText.Primary,               // 87% white
+    // Background & Surfaces - Warm tinted
+    background = DarkSurfaces.Background,       // #141210
+    onBackground = DarkText.Primary,
+    surface = DarkSurfaces.Surface,
+    onSurface = DarkText.Primary,
     
-    // Surface containers (elevated = lighter)
+    // Surface containers
     surfaceContainerLowest = DarkSurfaces.Background,
     surfaceContainerLow = DarkSurfaces.SurfaceElevation1,
     surfaceContainer = DarkSurfaces.SurfaceElevation4,
@@ -85,60 +68,60 @@ private val DarkColorScheme = darkColorScheme(
     
     // Surface variants
     surfaceVariant = DarkSurfaces.SurfaceVariant,
-    onSurfaceVariant = DarkText.Secondary,      // 60% white
+    onSurfaceVariant = DarkText.Secondary,
     surfaceTint = DarkSurfaces.SurfaceTint,
     
-    // Inverse colors (for snackbars, etc)
+    // Inverse
     inverseSurface = LightSurfaces.Surface,
     inverseOnSurface = LightText.Primary,
     inversePrimary = BrandColors.PrimaryMuted,
     
     // Outlines
-    outline = DarkBorders.Default,              // #2E2E2E
-    outlineVariant = DarkBorders.Subtle,        // #232323
+    outline = DarkBorders.Default,
+    outlineVariant = DarkBorders.Subtle,
     
-    // Scrim (overlay)
-    scrim = EffectColors.Scrim                  // 60% dark
+    // Scrim
+    scrim = Color(0x99141210)
 )
 
-/**
- * Light color scheme - Alternative theme
- * Uses more saturated colors (tonal 500-600) for light backgrounds
- */
+// ══════════════════════════════════════════════════════════════════
+// LIGHT COLOR SCHEME - Warm Cream
+// ══════════════════════════════════════════════════════════════════
+
 private val LightColorScheme = lightColorScheme(
-    // Primary colors (saturated teal 500)
-    primary = BrandColors.PrimaryLight,         // #00BFA5 - vibrant teal
-    onPrimary = LightText.OnPrimary,            // White text
-    primaryContainer = Color(0xFFB2F5EA),       // Light teal container
-    onPrimaryContainer = Color(0xFF00201D),     // Dark teal text
+    // Primary - Warm Amber (darker for contrast)
+    primary = BrandColors.PrimaryLight,         // #F57C00
+    onPrimary = LightText.OnPrimary,
+    primaryContainer = BrandColors.Orange100,
+    onPrimaryContainer = BrandColors.Orange900,
     
-    // Secondary colors (blue 600)
-    secondary = BrandColors.SecondaryMuted,     // #0277BD
+    // Secondary - Gold/Amber
+    secondary = BrandColors.SecondaryMuted,     // #FF8F00
     onSecondary = LightText.OnPrimary,
-    secondaryContainer = Color(0xFFB3E5FC),     // Light blue container
-    onSecondaryContainer = Color(0xFF001F2A),
+    secondaryContainer = BrandColors.Gold100,
+    onSecondaryContainer = BrandColors.Gold900,
     
-    // Tertiary colors (purple 500)
-    tertiary = Color(0xFF7B5CB0),
-    onTertiary = LightText.OnPrimary,
-    tertiaryContainer = Color(0xFFE8DEF8),
-    onTertiaryContainer = Color(0xFF1D1D2C),
+    // Tertiary - Green
+    tertiary = BrandColors.TertiaryLight,
+    onTertiary = Color.White,
+    tertiaryContainer = Color(0xFFC8E6C9),
+    onTertiaryContainer = Color(0xFF1B3D1B),
     
-    // Error colors (red 500)
-    error = SemanticColors.ErrorVariant,        // #EF5350
+    // Error
+    error = SemanticColors.ErrorVariant,
     onError = LightText.OnPrimary,
     errorContainer = Color(0xFFFFDAD6),
     onErrorContainer = Color(0xFF410002),
     
-    // Background and surfaces (near white)
-    background = LightSurfaces.Background,      // #FAFAFA
-    onBackground = LightText.Primary,           // Near black
-    surface = LightSurfaces.Surface,            // #FFFFFF
+    // Background & Surfaces - Warm cream
+    background = LightSurfaces.Background,      // #FFFBF5
+    onBackground = LightText.Primary,
+    surface = LightSurfaces.Surface,
     onSurface = LightText.Primary,
     
     // Surface containers
     surfaceContainerLowest = Color(0xFFFFFFFF),
-    surfaceContainerLow = Color(0xFFF7F7F7),
+    surfaceContainerLow = Color(0xFFFFFCF8),
     surfaceContainer = LightSurfaces.SurfaceContainer,
     surfaceContainerHigh = LightSurfaces.SurfaceContainerHigh,
     surfaceContainerHighest = LightSurfaces.SurfaceContainerHighest,
@@ -148,26 +131,23 @@ private val LightColorScheme = lightColorScheme(
     onSurfaceVariant = LightText.Secondary,
     surfaceTint = LightSurfaces.SurfaceTint,
     
-    // Inverse colors
+    // Inverse
     inverseSurface = DarkSurfaces.Surface,
     inverseOnSurface = DarkText.Primary,
-    inversePrimary = BrandColors.Primary,
+    inversePrimary = BrandColors.Orange200,
     
     // Outlines
     outline = LightBorders.Default,
     outlineVariant = LightBorders.Subtle,
     
     // Scrim
-    scrim = EffectColors.Scrim
+    scrim = Color(0x99141210)
 )
 
 // ══════════════════════════════════════════════════════════════════
 // EXTENDED COLORS
 // ══════════════════════════════════════════════════════════════════
 
-/**
- * Extended color set for semantic colors not in Material 3
- */
 data class ExtendedColors(
     val success: Color,
     val onSuccess: Color,
@@ -180,7 +160,14 @@ data class ExtendedColors(
     val info: Color,
     val onInfo: Color,
     val infoContainer: Color,
-    val onInfoContainer: Color
+    val onInfoContainer: Color,
+    // Glassmorphism
+    val glassBackground: Color,
+    val glassBorder: Color,
+    val glassHighlight: Color,
+    // Earnings (gold)
+    val earnings: Color,
+    val earningsGlow: Color
 )
 
 private val DarkExtendedColors = ExtendedColors(
@@ -195,7 +182,14 @@ private val DarkExtendedColors = ExtendedColors(
     info = SemanticColors.Info,
     onInfo = SemanticColors.OnInfo,
     infoContainer = SemanticColors.InfoMuted,
-    onInfoContainer = SemanticColors.Info
+    onInfoContainer = SemanticColors.Info,
+    // Glassmorphism
+    glassBackground = Color(0x1AFFFFFF),      // 10% white
+    glassBorder = Color(0x33FFFFFF),          // 20% white
+    glassHighlight = Color(0x0DFFFFFF),       // 5% white
+    // Earnings
+    earnings = BrandColors.Secondary,
+    earningsGlow = Color(0x4DFFC107)          // 30% gold
 )
 
 private val LightExtendedColors = ExtendedColors(
@@ -210,29 +204,26 @@ private val LightExtendedColors = ExtendedColors(
     info = SemanticColors.InfoVariant,
     onInfo = Color.White,
     infoContainer = Color(0xFFDBEAFE),
-    onInfoContainer = Color(0xFF0C1929)
+    onInfoContainer = Color(0xFF0C1929),
+    // Glassmorphism (light mode)
+    glassBackground = Color(0x80FFFFFF),       // 50% white
+    glassBorder = Color(0x26000000),            // 15% black
+    glassHighlight = Color(0x0D000000),
+    // Earnings
+    earnings = BrandColors.SecondaryMuted,
+    earningsGlow = Color(0x26FFC107)
 )
 
-/**
- * CompositionLocal for extended colors
- */
 val LocalExtendedColors = staticCompositionLocalOf { DarkExtendedColors }
 
 // ══════════════════════════════════════════════════════════════════
 // THEME COMPOSABLE
 // ══════════════════════════════════════════════════════════════════
 
-/**
- * Main theme composable for DeliveryTracker
- * 
- * @param darkTheme Whether to use dark theme
- * @param dynamicColor Whether to use Material You dynamic colors (Android 12+)
- * @param content Content to apply theme to
- */
 @Composable
 fun DeliveryTrackerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false, // Disabled by default to preserve brand colors
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -247,17 +238,17 @@ fun DeliveryTrackerTheme(
     
     val extendedColors = if (darkTheme) DarkExtendedColors else LightExtendedColors
     
-    // Configure status bar and navigation bar colors
+    // Status bar & navigation bar
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
             
-            // Edge-to-edge: transparent bars
+            // Edge-to-edge
             window.statusBarColor = Color.Transparent.toArgb()
             window.navigationBarColor = Color.Transparent.toArgb()
             
-            // Configure system bar icons
+            // Icon colors based on theme
             val windowInsetsController = WindowCompat.getInsetsController(window, view)
             windowInsetsController.isAppearanceLightStatusBars = !darkTheme
             windowInsetsController.isAppearanceLightNavigationBars = !darkTheme
@@ -283,39 +274,38 @@ fun DeliveryTrackerTheme(
 // EXTENSION PROPERTIES
 // ══════════════════════════════════════════════════════════════════
 
-/**
- * Access extended colors from MaterialTheme
- * 
- * Usage:
- * ```
- * val success = MaterialTheme.extendedColors.success
- * ```
- */
 val MaterialTheme.extendedColors: ExtendedColors
     @Composable
     @ReadOnlyComposable
     get() = LocalExtendedColors.current
 
-/**
- * Quick access to semantic success color
- */
 val ColorScheme.success: Color
     @Composable
     @ReadOnlyComposable
     get() = LocalExtendedColors.current.success
 
-/**
- * Quick access to semantic warning color
- */
 val ColorScheme.warning: Color
     @Composable
     @ReadOnlyComposable
     get() = LocalExtendedColors.current.warning
 
-/**
- * Quick access to semantic info color
- */
 val ColorScheme.info: Color
     @Composable
     @ReadOnlyComposable
     get() = LocalExtendedColors.current.info
+
+val ColorScheme.earnings: Color
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalExtendedColors.current.earnings
+
+// Glassmorphism helpers
+val ColorScheme.glassBackground: Color
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalExtendedColors.current.glassBackground
+
+val ColorScheme.glassBorder: Color
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalExtendedColors.current.glassBorder
